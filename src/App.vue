@@ -1,13 +1,13 @@
-<script>
-export default {
-}
-</script>
 <template>
-<h1>Hello, Vue.js!</h1>
+    <div id="app">
+        <div>
+            <router-view />
+        </div>
+    </div>
 </template>
-<style>
+<!-- <style>
 .page {
-max-width: 400px;
-margin: auto;
+    max-width: 400px;
+    margin: auto;
 }
-</style>
+</style> -->
