@@ -96,7 +96,7 @@
       font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
       padding: 32px;
       background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
-      min-height: 100vh;
+      min-height: 50vh;
       display: flex;
       flex-direction: column;
       align-items: center;

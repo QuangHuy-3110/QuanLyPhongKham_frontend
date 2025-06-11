@@ -1,16 +1,24 @@
 <template>
     <!-- navigation -->
-    <Navbar />
+    <Navbar 
+    @change:nav_value="changeNav_value"
+    v-if="nav_value !== 'dangki' && nav_value !== 'dangnhap'"
+    />
 
-    <div class="modal fade" id="staticBackdropmk" data-bs-backdrop="true" data-bs-keyboard="false" tabindex="-1"
+    <!-- <div class="modal fade" id="staticBackdropmk" data-bs-backdrop="true" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabelmk" aria-hidden="true">
         <div class="modal-dialog">
         </div>
-    </div>
+    </div> -->
 
-    <MainSite />
+    <MainSite style="margin-top: 20px;"
+        :nav_value="nav_value"
+        v-if="nav_value !== 'dangki' && nav_value !== 'dangnhap'"
+    />
 
-    <FooterSite />
+    <FooterSite style="margin-top: 50px;"
+    v-if="nav_value !== 'dangki' && nav_value !== 'dangnhap'"/>
+    <Register v-if="nav_value === 'dangki'"/>
 
 </template>
 
@@ -18,17 +26,18 @@
 import Navbar from './patient/nav.vue';
 import MainSite from './patient/main.vue';
 import FooterSite from './patient/footer.vue';
-
+import Register from '../views/register.vue';
 export default {
     components: {
         Navbar,
         MainSite,
-        FooterSite
+        FooterSite,
+        Register,
     },
 
     data() {
         return {
-            
+            nav_value: ''
         }
     },
 
@@ -41,17 +50,18 @@ export default {
     },
 
     methods: {
-        
+        changeNav_value (name){
+            this.nav_value = name
+        }
+
     }
 }
 
 </script>
 
 <style scoped>
-@import "@/assets/footer.css";
-    .page {
-        text-align: left;
-        max-width: 750px;
-    }
+/* .page {
+    text-align: left;
+    max-width: 750px;
+} */
 </style>
-    
