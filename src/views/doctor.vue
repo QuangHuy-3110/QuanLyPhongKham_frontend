@@ -1,7 +1,7 @@
 <template>
     <!-- navigation -->
     <Navbar 
-    @change:nav_value="changeNav_value"
+        @change:nav_value="changeNav_value"
     />
 
     <!-- <div class="modal fade" id="staticBackdropmk" data-bs-backdrop="true" data-bs-keyboard="false" tabindex="-1"
