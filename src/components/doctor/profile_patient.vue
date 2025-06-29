@@ -1,126 +1,184 @@
 <template>
-<div class="container-xl px-4 mt-4">
-    <hr class="mt-0 mb-4">
-    <div class="row">
+    <div class="container-xl px-4 mt-4">
+      <hr class="mt-0 mb-4">
+      <div class="row">
         <div class="col-xl-4">
-            <!-- Profile picture card-->
-            <div class="card mb-4 mb-xl-0">
-                <div class="card-header">Profile Picture</div>
-                <div class="card-body text-center">
-                    <!-- Profile picture image-->
-                    <img class="img-account-profile rounded-circle mb-2" src="http://bootdey.com/img/Content/avatar/avatar1.png" alt="">
-                    <!-- Profile picture help block-->
-                    <div class="small font-italic text-muted mb-4">JPG or PNG no larger than 5 MB</div>
-                    <!-- Profile picture upload button-->
-                    <button class="btn btn-primary" type="button">Upload new image</button>
-                </div>
+          <!-- Profile picture card-->
+          <div class="card mb-4 mb-xl-0">
+            <div class="card-header">Profile Picture</div>
+            <div class="card-body text-center">
+              <img class="img-account-profile rounded-circle mb-2" src="http://bootdey.com/img/Content/avatar/avatar1.png" alt="">
+              <div class="small font-italic text-muted mb-4">JPG or PNG no larger than 5 MB</div>
+              <button class="btn btn-primary" type="button">Upload new image</button>
             </div>
+          </div>
         </div>
         <div class="col-xl-8">
-            <!-- Account details card-->
-            <div class="card mb-4">
-                <div class="card-header">Account Details</div>
-                <div class="card-body">
-                    <form>
-                        <!-- Form Group (username)-->
-                        <div class="mb-3">
-                            <label class="small mb-1" for="inputUsername">Username (how your name will appear to other users on the site)</label>
-                            <input class="form-control" id="inputUsername" type="text" placeholder="Enter your username" value="username">
-                        </div>
-                        <!-- Form Row-->
-                        <div class="row gx-3 mb-3">
-                            <!-- Form Group (first name)-->
-                            <div class="col-md-6">
-                                <label class="small mb-1" for="inputFirstName">First name</label>
-                                <input class="form-control" id="inputFirstName" type="text" placeholder="Enter your first name" value="Valerie">
-                            </div>
-                            <!-- Form Group (last name)-->
-                            <div class="col-md-6">
-                                <label class="small mb-1" for="inputLastName">Last name</label>
-                                <input class="form-control" id="inputLastName" type="text" placeholder="Enter your last name" value="Luna">
-                            </div>
-                        </div>
-                        <!-- Form Row        -->
-                        <div class="row gx-3 mb-3">
-                            <!-- Form Group (organization name)-->
-                            <div class="col-md-6">
-                                <label class="small mb-1" for="inputOrgName">Organization name</label>
-                                <input class="form-control" id="inputOrgName" type="text" placeholder="Enter your organization name" value="Start Bootstrap">
-                            </div>
-                            <!-- Form Group (location)-->
-                            <div class="col-md-6">
-                                <label class="small mb-1" for="inputLocation">Location</label>
-                                <input class="form-control" id="inputLocation" type="text" placeholder="Enter your location" value="San Francisco, CA">
-                            </div>
-                        </div>
-                        <!-- Form Group (email address)-->
-                        <div class="mb-3">
-                            <label class="small mb-1" for="inputEmailAddress">Email address</label>
-                            <input class="form-control" id="inputEmailAddress" type="email" placeholder="Enter your email address" value="name@example.com">
-                        </div>
-                        <!-- Form Row-->
-                        <div class="row gx-3 mb-3">
-                            <!-- Form Group (phone number)-->
-                            <div class="col-md-6">
-                                <label class="small mb-1" for="inputPhone">Phone number</label>
-                                <input class="form-control" id="inputPhone" type="tel" placeholder="Enter your phone number" value="555-123-4567">
-                            </div>
-                            <!-- Form Group (birthday)-->
-                            <div class="col-md-6">
-                                <label class="small mb-1" for="inputBirthday">Birthday</label>
-                                <input class="form-control" id="inputBirthday" type="text" name="birthday" placeholder="Enter your birthday" value="06/10/1988">
-                            </div>
-                        </div>
-                        <!-- Save changes button-->
-                        <button class="btn btn-primary" type="button">Save changes</button>
-                        <button class="btn btn-warning mx-3" type="button" @click="examination">Khám bệnh</button>
-                    </form>
+          <!-- Account details card-->
+          <div class="card mb-4">
+            <div class="card-header">Account Details</div>
+            <div class="card-body">
+              <form @submit.prevent="create_patient">
+                <div class="row gx-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="small mb-1" for="Name">Họ tên bệnh nhân:</label>
+                    <input class="form-control" id="Name" type="text" placeholder="Họ và tên" v-model="patient.hotenBN" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="small mb-1" for="cccd">Số CCCD:</label>
+                    <input class="form-control" id="cccd" type="text" placeholder="CCCD" v-model="patient.cccdBN" required>
+                  </div>
                 </div>
+                <div class="row gx-3 mb-3">
+                  <div class="col-md-6">
+                    <label class="small mb-1" for="born">Ngày sinh:</label>
+                    <input class="form-control" id="born" type="date" v-model="patient.ngaysinhBN" required>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="small mb-1" for="phone">Số điện thoại:</label>
+                    <input class="form-control" id="phone" type="text" placeholder="09*/03*..." v-model="patient.sdtBN" required>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="small mb-1" for="bhyt">Số BHYT:</label>
+                  <input class="form-control" id="bhyt" type="text" placeholder="Số BHYT" v-model="patient.soBHYT">
+                </div>
+                <div class="mb-3">
+                  <label class="small mb-1" for="Address">Địa chỉ:</label>
+                  <input class="form-control" id="Address" placeholder="Địa chỉ" v-model="patient.diachiBN" required>
+                </div>
+                <div class="mb-3">
+                  <label class="small mb-1" for="Email">Email:</label>
+                  <input class="form-control" id="Email" type="email" placeholder="name@example.com" v-model="patient.emailBN">
+                </div>
+                <div class="row gx-3 mb-3">
+                  <div class="col-md-2">
+                    <label class="small mb-1" for="height">Chiều cao (cm):</label>
+                    <input class="form-control" id="height" type="number" placeholder="cm" v-model="patient.chieucao">
+                  </div>
+                  <div class="col-md-2">
+                    <label class="small mb-1" for="weight">Cân nặng (kg):</label>
+                    <input class="form-control" id="weight" type="number" placeholder="kg" v-model="patient.cannang">
+                  </div>
+                  <div class="col-md-2">
+                    <label class="small mb-1" for="type">Nhóm máu:</label>
+                    <input class="form-control" id="type" type="text" placeholder="" v-model="patient.nhommau">
+                  </div>
+                </div>
+                <!-- <button class="btn btn-primary" type="button" @click="create_patient">Save changes</button> -->
+                <button class="btn btn-warning mx-3" type="button" :disabled="!isFormValid" @click="create_patient">Lưu và Khám bệnh</button>
+              </form>
             </div>
+          </div>
         </div>
+      </div>
     </div>
-</div>
-</template>
-
-<script>
-    export default {
-        emits : ['examination:patient'],
-        methods: {
-            examination (){
-                this.$emit('examination:patient', 'examination')
-            }
+  </template>
+  
+  <script>
+  import patientService from '../../services/patient.service';
+  
+  export default {
+    emits: ['examination:patient', 'push:patient'],
+    data() {
+      return {
+        status: '',
+        patient: {
+          emailBN: '',
+          cccdBN: '',
+          soBHYT: '',
+          hotenBN: '',
+          sdtBN: '',
+          ngaysinhBN: '',
+          diachiBN: '',
+          chieucao: null,
+          cannang: null,
+          nhommau: '',
+        },
+      };
+    },
+    computed: {
+      isFormValid() {
+        return (
+          this.patient.hotenBN &&
+          this.patient.cccdBN &&
+          this.patient.ngaysinhBN &&
+          this.patient.sdtBN &&
+          this.patient.diachiBN
+        );
+      },
+    },
+    methods: {
+      examination() {
+        if (!this.isFormValid) {
+          alert('Vui lòng điền đầy đủ các trường bắt buộc (Họ tên, CCCD, Ngày sinh, Số điện thoại, Địa chỉ)!');
+          return;
         }
-    }
-
-</script>
-
-<style scoped>
-body{margin-top:20px;
-background-color:#f2f6fc;
-color:#69707a;
-}
-.img-account-profile {
+        this.$emit('examination:patient', 'examination');
+        this.$emit('push:patient', this.patient);
+      },
+      async create_patient() {
+        try {
+          if (!this.isFormValid) {
+            alert('Vui lòng điền đầy đủ các trường bắt buộc (Họ tên, CCCD, Ngày sinh, Số điện thoại, Địa chỉ)!');
+            return;
+          }
+          await patientService.create(this.patient);
+          alert('Thêm bệnh nhân thành công!');
+          this.examination()
+          this.resetForm();
+        } catch (error) {
+          alert('Thêm bệnh nhân không thành công!');
+          console.log('Lỗi khi thêm bệnh nhân:', error);
+        }
+      },
+      resetForm() {
+        this.patient = {
+          emailBN: '',
+          cccdBN: '',
+          soBHYT: '',
+          hotenBN: '',
+          sdtBN: '',
+          ngaysinhBN: '',
+          diachiBN: '',
+          chieucao: null,
+          cannang: null,
+          nhommau: '',
+        };
+      },
+    },
+  };
+  </script>
+  
+  <style scoped>
+  body {
+    margin-top: 20px;
+    background-color: #f2f6fc;
+    color: #69707a;
+  }
+  .img-account-profile {
     height: 10rem;
-}
-.rounded-circle {
+  }
+  .rounded-circle {
     border-radius: 50% !important;
-}
-.card {
+  }
+  .card {
     box-shadow: 0 0.15rem 1.75rem 0 rgb(33 40 50 / 15%);
-}
-.card .card-header {
+  }
+  .card .card-header {
     font-weight: 500;
-}
-.card-header:first-child {
+  }
+  .card-header:first-child {
     border-radius: 0.35rem 0.35rem 0 0;
-}
-.card-header {
+  }
+  .card-header {
     padding: 1rem 1.35rem;
     margin-bottom: 0;
     background-color: rgba(33, 40, 50, 0.03);
     border-bottom: 1px solid rgba(33, 40, 50, 0.125);
-}
-.form-control, .dataTable-input {
+  }
+  .form-control,
+  .dataTable-input {
     display: block;
     width: 100%;
     padding: 0.875rem 1.125rem;
@@ -136,22 +194,10 @@ color:#69707a;
     appearance: none;
     border-radius: 0.35rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
-
-.nav-borders .nav-link.active {
-    color: #0061f2;
-    border-bottom-color: #0061f2;
-}
-.nav-borders .nav-link {
-    color: #69707a;
-    border-bottom-width: 0.125rem;
-    border-bottom-style: solid;
-    border-bottom-color: transparent;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    padding-left: 0;
-    padding-right: 0;
-    margin-left: 1rem;
-    margin-right: 1rem;
-}
-</style>
+  }
+  .btn-warning:disabled {
+    background-color: #e0a800;
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+  </style>

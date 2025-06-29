@@ -1,7 +1,8 @@
 <template>
     <main class="container bg-light">
-      <Home v-if="nav_value === 'trangchu'" />
-        {{ console.log(working_time) }}
+      <Home v-if="nav_value === 'trangchu'" 
+    />
+
       <Calendar v-if="nav_value === 'lichkham'" 
         :array="{ list: working_time }"
         :columns="working_timeColumns"
@@ -12,7 +13,7 @@
         :columns="working_timeColumns"/>
   
       <Filter
-        v-if="nav_value === 'benhnhan' && show !== 'add_patient'"
+        v-if="nav_value === 'benhnhan' && show !== 'add_patient'&& activeIndex === -1"
         @add:patient="add_patient"
       />
   
@@ -22,15 +23,58 @@
       />
   
       <TableForm
-        v-if="nav_value === 'benhnhan' && show !== 'add_patient'"
+        v-if="nav_value === 'benhnhan' && show !== 'add_patient' && activeIndex === -1"
         :array="{ list: list_patient }"
         :columns="patientColumns"
+        v-model:activeIndex="activeIndex"
       />
-  
-      <TableForm v-if="nav_value === 'lichhen'" 
+      
+      <Examination
+      v-if="(activeIndex !== -1 && nav_value === 'benhnhan')"
+      @close:examination = "close_examination"
+      :patient = "list_patient[activeIndex]"
+      :doctor = "doctor"
+      />
+
+      <TableForm v-if="nav_value === 'lichhen' && check===''" 
         :array="{ list: list_appointment }"
         :columns="appointmentColumns"
+        v-model:activeIndex="activeIndex"
+        data-bs-toggle="modal" data-bs-target="#exampleModal"
       />
+
+    <div v-if="activeIndex !== -1 && nav_value === 'lichhen'">
+      <!-- Modal -->
+      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Chi tiết lịch hẹn</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p><b>Họ và tên bệnh nhân:</b> {{ list_appointment[activeIndex].hotenBN }}</p>
+              <p><b>Ngày hẹn:</b> {{ list_appointment[activeIndex].ngaythangnam }}</p>
+              <p><b>Khung giờ:</b> {{ list_appointment[activeIndex].khunggio }}</p>
+              <p><b>Trạng thái:</b> {{ list_appointment[activeIndex].trangthai }}</p>
+              <p><b>Mô tả bệnh:</b> {{ list_appointment[activeIndex].mota }}</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+              <button type="button" class="btn btn-primary" @click="check_profile(list_appointment[activeIndex].maBN)" data-bs-dismiss="modal">Xem hồ sơ bệnh nhân</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <Examination
+      v-if="(check==='see' && nav_value === 'lichhen')"
+      @close:examination = "close_examination"
+      :patient = "patient"
+      :doctor = "doctor"
+      />
+
     </main>
   </template>
   
@@ -41,6 +85,7 @@
   import Home from '../../components/doctor/home.vue';
   import Create_profile from '../../components/doctor/create_profile.vue';
   import Moth_calendar from '../../components/element/moth_calendar.vue';
+  import Examination from '../../components/doctor/examination.vue';
 
   import AppointmentService from '@/services/appointment.service'
   import PatientService from '@/services/patient.service';
@@ -48,7 +93,7 @@
   
   export default {
     props: {
-      nav_value: { type: String, default: '' },
+      nav_value: { type: String, default: 'trangchu' },
     },
     components: {
       Home,
@@ -57,10 +102,17 @@
       TableForm,
       Create_profile,
       Moth_calendar,
+      Examination,
     },
     data() {
       return {
         show: '',
+        activeIndex: -1,
+        doctor: {
+          maBS: 'BS0001'
+        },
+        patient: {},
+        check: '',
         list_patient: [],
         patientColumns: [
           { key: 'cccdBN', header: 'CCCD' },
@@ -92,11 +144,18 @@
     watch: {
       nav_value: {
         handler() {
-          this.show = '';
+          this.show = ''
+          this.activeIndex = -1;
         },
       },
     },
     methods: {
+
+        check_profile(maBN){
+          this.check = 'see'
+          this.patient = this.list_patient.find(item => item.maBN === maBN);
+        },
+
         async get_working_time() {
             try {
             this.working_time = await WorkingTime.getAll();
@@ -134,8 +193,17 @@
         add_patient(status) {
             this.show = status;
         },
-        close_patient() {
+
+        async close_patient() {
+            await this.get_listPatient()
             this.show = '';
+            this.activeIndex = -1
+        },
+
+        close_examination() {
+            this.check='';
+            this.show = '';
+            this.activeIndex = -1
         },
     },
     mounted() {

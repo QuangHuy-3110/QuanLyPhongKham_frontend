@@ -13,6 +13,7 @@
           v-for="(row, index) in array && array.list ? array.list : []"
           :key="index"
           class="bg-white border-b dark:bg-gray-800 dark:border-gray-600"
+          @click="updateActiveIndex(index)"
         >
           <td v-for="col in columns" :key="col.key" class="px-4 py-4">
             {{ row[col.key] || '' }}
@@ -46,6 +47,16 @@ export default {
       },
     },
   },
+
+  emits: ["update:activeIndex"],
+
+  methods: {
+    // Cập nhật index của item được chọn
+    updateActiveIndex(index) {
+        this.$emit("update:activeIndex", index);
+      },
+  }
+
 };
 </script>
 

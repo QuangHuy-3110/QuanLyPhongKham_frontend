@@ -4,12 +4,6 @@
         @change:nav_value="changeNav_value"
     />
 
-    <!-- <div class="modal fade" id="staticBackdropmk" data-bs-backdrop="true" data-bs-keyboard="false" tabindex="-1"
-        aria-labelledby="staticBackdropLabelmk" aria-hidden="true">
-        <div class="modal-dialog">
-        </div>
-    </div> -->
-
     <MainSite style="margin-top: 20px;"
         :nav_value="nav_value"
     />
