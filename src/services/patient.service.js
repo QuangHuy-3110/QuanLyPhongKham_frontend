@@ -25,6 +25,10 @@ class PatientService {
         return (await this.api.get(`?cccdBN=${cccd}`)).data;
     }
 
+    async get_acname(acname) {
+        return (await this.api.get(`?tendangnhapBN=${acname}`)).data;
+    }
+
     async update(id, data) {
         return (await this.api.put(`/${id}`, data)).data;
     }

@@ -1,9 +1,6 @@
 <template>
     <!-- navigation -->
-    <Navbar 
-    @change:nav_value="changeNav_value"
-    v-if="nav_value !== 'dangki' && nav_value !== 'dangnhap'"
-    />
+    <Navbar/>
 
     <!-- <div class="modal fade" id="staticBackdropmk" data-bs-backdrop="true" data-bs-keyboard="false" tabindex="-1"
         aria-labelledby="staticBackdropLabelmk" aria-hidden="true">
@@ -11,14 +8,9 @@
         </div>
     </div> -->
 
-    <MainSite style="margin-top: 20px;"
-        :nav_value="nav_value"
-        v-if="nav_value !== 'dangki' && nav_value !== 'dangnhap'"
-    />
+    <MainSite style="margin-top: 20px;"/>
 
-    <FooterSite style="margin-top: 50px;"
-    v-if="nav_value !== 'dangki' && nav_value !== 'dangnhap'"/>
-    <Register v-if="nav_value === 'dangki'"/>
+    <FooterSite style="margin-top: 50px;"/>
 
 </template>
 
@@ -26,18 +18,16 @@
 import Navbar from './patient/nav.vue';
 import MainSite from './patient/main.vue';
 import FooterSite from './patient/footer.vue';
-import Register from '../views/register.vue';
 export default {
     components: {
         Navbar,
         MainSite,
         FooterSite,
-        Register,
     },
 
     data() {
         return {
-            nav_value: ''
+            
         }
     },
 

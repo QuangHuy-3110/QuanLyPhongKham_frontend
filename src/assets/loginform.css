@@ -4,7 +4,7 @@ html {
     background-color: #56baed;
 }
 
-body {
+#body {
     font-family: "Poppins", sans-serif;
     height: 100vh;
 }
@@ -292,6 +292,6 @@ input[type=text]:placeholder {
     width: 60%;
 }
 
-body {
+#body {
     box-shadow: 0 0 10px 10px rgba(0, 0, 0, 0.1);
 }

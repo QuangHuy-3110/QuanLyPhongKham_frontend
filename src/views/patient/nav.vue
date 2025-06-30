@@ -57,8 +57,8 @@
                         </a>
                     </li>
 
-                    <button class="btn btn-primary" @click="changeNav_value('dangnhap')">Đăng nhập</button>
-                    <button class="btn btn-secondary" @click="changeNav_value('dangki')">Đăng ký</button>                    
+                    <button class="btn btn-primary">Đăng nhập</button>
+                    <button class="btn btn-secondary">Đăng ký</button>                    
 
                     <!-- Dropdown -->
                     <li class="nav-item dropdown">
@@ -96,12 +96,7 @@ export default {
             activeNav: 'trangchu' // Mặc định chọn "Trang chủ"
         };
     },
-    emits: ["change:nav_value"],
     methods: {
-        changeNav_value(name) {
-            this.activeNav = name; // Cập nhật trạng thái active
-            this.$emit("change:nav_value", name);
-        }
     }
 }
 </script>

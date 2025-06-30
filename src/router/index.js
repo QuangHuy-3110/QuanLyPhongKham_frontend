@@ -4,15 +4,23 @@ import { createWebHistory, createRouter } from "vue-router";
 import Doctor from "@/views/doctor.vue";
 import Patient from "@/views/patient.vue";
 import Admin from "@/views/admin.vue";
+import Register from "@/views/register.vue"
+import Login from "@/views/Login.vue"
 
 import NotFound from "@/views/NotFound.vue";
 
 const routes = [
-  // {
-  //   path: "/login",
-  //   name: "loginform",
-  //   component: Login,
-  // },
+  {
+    path: "/login",
+    name: "loginform",
+    component: Login,
+  },
+
+  {
+    path: "/register",
+    name: "registerform",
+    component: Register,
+  },
 
   {
     path: "/doctor/",
