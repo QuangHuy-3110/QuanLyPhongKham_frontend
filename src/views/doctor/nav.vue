@@ -118,6 +118,10 @@ export default {
             this.activeNav = name; // Cập nhật trạng thái active
             this.$emit("change:nav_value", name);
         }
+    },
+
+    mounted(){
+        this.changeNav_value('trangchu')
     }
 }
 </script>

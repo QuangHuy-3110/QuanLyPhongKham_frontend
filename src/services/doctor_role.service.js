@@ -1,7 +1,7 @@
 import createApiClient from "./api.service";
 
 class DoctorRoleService {
-    constructor(baseUrl = "/api/doctor-role") {
+    constructor(baseUrl = "/api/doctor-roles") {
         this.api = createApiClient(baseUrl);
     }
 
@@ -26,7 +26,7 @@ class DoctorRoleService {
     }
 
     async get_specialties(maCK) {
-        return (await this.api.get(`?maCK=${date}`)).data;
+        return (await this.api.get(`?maCK=${maCK}`)).data;
     }
 
     async update(id1, id2, data) {

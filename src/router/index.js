@@ -1,5 +1,5 @@
 import { createWebHistory, createRouter } from "vue-router";
-// import { useAuthStore } from '@/stores/authStore';
+import { useAuthStore } from '@/stores/authStore';
 
 import Doctor from "@/views/doctor.vue";
 import Patient from "@/views/patient.vue";

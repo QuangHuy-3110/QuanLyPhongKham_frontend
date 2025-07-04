@@ -46,6 +46,11 @@ export default {
         return cols.every((col) => 'key' in col && 'header' in col);
       },
     },
+
+    patient: {
+      type: Object,
+      default: {},
+    },
   },
 
   emits: ["update:activeIndex"],

@@ -8,6 +8,7 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import "bootstrap-icons/font/bootstrap-icons.css";
 import router from "./router";
 
+
 const app = createApp(App);
 const pinia = createPinia();
 

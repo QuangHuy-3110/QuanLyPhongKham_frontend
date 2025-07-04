@@ -24,55 +24,87 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <!-- Left links -->
                 <ul class="navbar-nav d-flex justify-content-evenly w-100 mb-2 mb-lg-0">
+
                     <li class="nav-item">
                         <a class="nav-link d-flex flex-column align-items-center text-center"
                            :class="{ 'active': activeNav === 'trangchu' }" href="#"
-                           @click="changeNav_value('trangchu')">
+                           @click.prevent="changeNav_value('trangchu')">
                             <i class="fa-solid fa-home my-2 fs-5"></i>
                             <span class="small">Trang chủ</span>
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" v-if="isAuthenticated">
                         <a class="nav-link d-flex flex-column align-items-center text-center"
                            :class="{ 'active': activeNav === 'lichkham' }" href="#"
-                           @click="changeNav_value('lichkham')">
+                           @click.prevent="changeNav_value('lichkham')">
                             <i class="fa-solid fa-paper-plane my-2 fs-5"></i>
                             <span class="small">Đặt lịch khám</span>
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" v-if="isAuthenticated">
                         <a class="nav-link d-flex flex-column align-items-center text-center"
                            :class="{ 'active': activeNav === 'hsbenhan' }" href="#"
-                           @click="changeNav_value('hsbenhan')">
+                           @click.prevent="changeNav_value('hsbenhan')">
                             <i class="fa-solid fa-book my-2 fs-5"></i>
                             <span class="small">Hồ sơ bệnh án</span>
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item" v-if="isAuthenticated">
                         <a class="nav-link d-flex flex-column align-items-center text-center"
                            :class="{ 'active': activeNav === 'lichhen' }" href="#"
-                           @click="changeNav_value('lichhen')">
+                           @click.prevent="changeNav_value('lichhen')">
                             <i class="fa-solid fa-clock my-2 fs-5"></i>
                             <span class="small">Lịch hẹn</span>
                         </a>
                     </li>
-
-                    <button class="btn btn-primary">Đăng nhập</button>
-                    <button class="btn btn-secondary">Đăng ký</button>                    
-
-                    <!-- Dropdown -->
-                    <li class="nav-item dropdown">
+                    <router-link
+                        v-if="!isAuthenticated"
+                        :to="{ name: 'loginform' }"
+                        class="btn btn-primary btn-lg d-flex align-items-center gap-2"
+                    >
+                        Đăng nhập
+                    </router-link>
+                    <router-link
+                        v-if="!isAuthenticated"
+                        :to="{ name: 'registerform' }"
+                        class="btn btn-secondary btn-lg d-flex align-items-center gap-2"
+                    >
+                        Đăng ký
+                    </router-link>
+                    <!-- <li class="nav-item dropdown" v-if="isAuthenticated">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
                            id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="https://cdn-icons-png.flaticon.com/512/748/748493.png" class="rounded-circle"
-                                 height="50" alt="" loading="lazy" />
+                                 height="50" alt="User avatar" loading="lazy" />
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                             <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
                                    data-bs-target="#staticBackdropmk">Đổi mật khẩu</a></li>
-                            <li><a class="dropdown-item" href="#">Đăng xuất</a></li>
+                            <li><a class="dropdown-item" href="#" @click.prevent="logout">Đăng xuất</a></li>
                         </ul>
-                    </li>
+                    </li> -->
+                    <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#staticBackdropmk" v-if="isAuthenticated">Đổi mật khẩu</button>
+                    <button class="btn btn-warning" @click.prevent="logout" v-if="isAuthenticated">Đăng xuất</button>
+
+                    <div class="modal fade" id="staticBackdropmk" data-bs-backdrop="true" data-bs-keyboard="false" tabindex="-1"
+                        aria-labelledby="staticBackdropLabelmk" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="staticBackdropLabelmk">Đổi mật khẩu</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <!-- Form đổi mật khẩu sẽ được thêm ở đây -->
+                                    <p>Chức năng đổi mật khẩu đang được phát triển.</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                    <button type="button" class="btn btn-primary">Lưu thay đổi</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </ul>
                 <!-- Left links -->
             </div>
@@ -80,15 +112,16 @@
         </div>
         <!-- Container wrapper -->
     </nav>
-
     <!-- Navbar -->
 </template>
 
 <script>
-
 export default {
-    components: {
-
+    props: {
+        isAuthenticated: {
+            type: Boolean,
+            required: true,
+        }
     },
 
     data() {
@@ -96,7 +129,24 @@ export default {
             activeNav: 'trangchu' // Mặc định chọn "Trang chủ"
         };
     },
+
+    emits: ["change:nav_value", "logout:success"],
+
     methods: {
+        changeNav_value(name) {
+            this.activeNav = name;
+            this.$emit("change:nav_value", name);
+        },
+
+        logout() {
+            this.activeNav = 'trangchu';
+            this.$emit('change:nav_value', 'trangchu');
+            this.$emit('logout:success'); // Thông báo trạng thái đăng nhập thay đổi
+        }
+    },
+
+    created() {
+        this.changeNav_value('trangchu');
     }
 }
 </script>

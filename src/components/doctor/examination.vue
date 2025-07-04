@@ -33,7 +33,7 @@
     <div class="row">
       <div class="col-md-6 scrollable-column">
         <h3 class="text-center mx-3">Danh sách bệnh án</h3>
-        <button class="btn btn-success mb-3" type="button" @click="create_record">
+        <button class="btn btn-success mb-3" type="button" @click="create_record" v-if="role === 'doctor'">
           <i class="fa-solid fa-plus"></i> Thêm hồ sơ mới
         </button>
         <div class="card mb-3" style="width: 100%;" v-for="(record, index) in list_record" :key="index" @click="get_examination(record.maHS)">
@@ -41,7 +41,7 @@
             <h5 class="card-title">{{ record.maHS }}</h5>
             <h6 class="card-subtitle mb-2 text-muted">Ngày lập hồ sơ: {{ record.ngaylapHS }}</h6>
             <p class="card-text">Chuẩn đoán: {{ getFirstExaminationDiagnosis(record.maHS) || 'Chưa có lần khám' }}</p>
-            <a href="#" class="card-link" @click.prevent="delete_record(record.maHS)">Xóa hồ sơ</a>
+            <a href="#" class="card-link" @click.prevent="delete_record(record.maHS)" v-if="role === 'doctor'">Xóa hồ sơ</a>
           </div>
         </div>
       </div>
@@ -49,7 +49,7 @@
         <div class="vertical-divider mx-3"></div>
         <div class="scrollable-column" style="width: 100%;">
           <h3 class="text-center mx-3">Danh sách lần khám</h3>
-          <button class="btn btn-success mb-3" type="button" :disabled="!record.maHS" data-bs-toggle="modal" data-bs-target="#exam_form">
+          <button class="btn btn-success mb-3" type="button" :disabled="!record.maHS" data-bs-toggle="modal" data-bs-target="#exam_form" v-if="role === 'doctor'">
             <i class="fa-solid fa-plus"></i> Thêm lần khám
           </button>
           <div class="card mb-3" style="width: 100%;" v-for="(row, index) in list_examination || []" :key="index">
@@ -66,7 +66,8 @@
               <p class="card-text">{{ row.lieutrinhdieutri }}</p>
               <h6 class="card-subtitle mb-2">Ngày tái khám: {{ row.ngaytaikham }}</h6>
               <a href="#" class="card-link" @click.prevent="openDrugModal('see', index)">Xem toa thuốc</a>
-              <a href="#" class="card-link" @click.prevent="openDrugModal('add', index)" :class="{ 'disabled': row.hasPrescription }" :disabled="row.hasPrescription">Thêm toa thuốc</a>
+              <a href="#" class="card-link" @click.prevent="openDrugModal('add', index)" :class="{ 'disabled': row.hasPrescription }" 
+              :disabled="row.hasPrescription" v-if="role === 'doctor'">Thêm toa thuốc</a>
             </div>
           </div>
         </div>
@@ -79,7 +80,7 @@
     <div class="modal-dialog modal-xl">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Thêm lần khám bệnh mới</h1>
+          <h1 class="modal-title fs-5" id="exampleModalLabel" v-if="role === 'doctor'">Thêm lần khám bệnh mới</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -168,7 +169,8 @@ import { Modal } from 'bootstrap';
 export default {
   props: {
     patient: { type: Object, required: true },
-    doctor: { type: Object, required: true },
+    doctor: { type: Object},
+    role: { type: String, default: '' }
   },
   emits: ['close:examination'],
   components: {
@@ -199,7 +201,6 @@ export default {
       },
       today: new Date(),
       drugModal: null,
-      // Lưu trữ chuẩn đoán lần đầu tiên cho từng hồ sơ
       firstDiagnoses: {}, // Object để lưu trữ chuẩn đoán lần đầu tiên theo maHS
     };
   },
@@ -255,7 +256,6 @@ export default {
     async get_record() {
       try {
         this.list_record = await recordService.get_patient(this.patient.maBN);
-        // Lấy chuẩn đoán lần đầu tiên cho từng hồ sơ
         for (let record of this.list_record) {
           await this.fetchFirstDiagnosis(record.maHS);
         }
@@ -263,36 +263,35 @@ export default {
         console.log('Lỗi khi lấy hồ sơ khám bệnh:', error);
       }
     },
+
     async fetchFirstDiagnosis(maHS) {
       try {
         const examinations = await examinationSevice.get_profile(maHS);
         if (examinations && examinations.length > 0) {
-          // Sắp xếp theo stt_lankham để lấy lần khám đầu tiên
           const firstExam = examinations.sort((a, b) => a.stt_lankham - b.stt_lankham)[0];
           this.firstDiagnoses[maHS] = firstExam.chuandoan || '';
         } else {
-          this.firstDiagnoses[maHS] = ''; // Trống nếu không có lần khám
+          this.firstDiagnoses[maHS] = '';
         }
       } catch (error) {
         console.log(`Lỗi khi lấy chuẩn đoán lần đầu tiên cho hồ sơ ${maHS}:`, error);
-        this.firstDiagnoses[maHS] = ''; // Trống nếu có lỗi
+        this.firstDiagnoses[maHS] = '';
       }
     },
+
     getFirstExaminationDiagnosis(maHS) {
       return this.firstDiagnoses[maHS] || 'Chưa có lần khám';
     },
+
     async get_examination(maHS) {
       try {
         this.record.maHS = maHS;
         this.record.date = new Date().toISOString().split('T')[0];
         this.list_examination = await examinationSevice.get_profile(maHS);
-        
-        // Kiểm tra toa thuốc cho từng lần khám
         for (let exam of this.list_examination) {
           const prescriptions = await prescriptionService.get_exam(exam.maLanKham);
-          exam.hasPrescription = prescriptions && prescriptions.length > 0; // Thêm thuộc tính hasPrescription
+          exam.hasPrescription = prescriptions && prescriptions.length > 0;
         }
-        // Cập nhật chuẩn đoán lần đầu tiên cho hồ sơ hiện tại
         await this.fetchFirstDiagnosis(maHS);
       } catch (error) {
         console.log('Lỗi khi lấy danh sách lần khám:', error);
@@ -320,8 +319,6 @@ export default {
         await this.get_record();
         this.record.maHS = '';
         this.list_examination = [];
-        // Xóa chuẩn đoán lần đầu tiên của hồ sơ đã xóa
-        // delete this.firstDiagnoses[id];
       } catch (error) {
         alert('Xóa hồ sơ không thành công!');
         console.log('Lỗi khi xóa hồ sơ bệnh án:', error);
