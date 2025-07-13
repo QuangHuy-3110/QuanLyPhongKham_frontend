@@ -3,42 +3,24 @@
         <Home v-if="nav_value === 'trangchu'" />
 
         <Book_form v-if="nav_value === 'lichkham' "
-        :patient = "patient"/>
+        :patient = "patient"
+        @appointmentBooked="get_list_appointment"/>
 
         <Examination v-if="nav_value === 'hsbenhan' "
-        :patient = "patient"/>
+        :patient = "patient"
+        @update:patient="this.$emit('update:patient1', $event)"
+        />
         
         <TableForm v-if="nav_value === 'lichhen'" 
         :array="{ list: list_appointment }"
         :columns="appointmentColumns"
+        :columns_full="appointmentColumns"
         :patient="patient"
+        :name="'lichhen'"
+        :role="'patient'"
         v-model:activeIndex="activeIndex"
         data-bs-toggle="modal" data-bs-target="#exampleModal"
       />
-
-    <div v-if="activeIndex !== -1 && nav_value === 'lichhen'">
-      <!-- Modal -->
-      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Chi tiết lịch hẹn</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <p><b>Họ và tên bệnh nhân:</b> {{ patient.hotenBN }}</p>
-              <p><b>Ngày hẹn:</b> {{ list_appointment[activeIndex].ngaythangnam }}</p>
-              <p><b>Khung giờ:</b> {{ list_appointment[activeIndex].khunggio }}</p>
-              <p><b>Trạng thái:</b> {{ list_appointment[activeIndex].trangthai }}</p>
-              <p><b>Mô tả bệnh:</b> {{ list_appointment[activeIndex].mota }}</p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
     </main>
 </template>
@@ -49,13 +31,14 @@
     import Examination from '../../components/doctor/examination.vue';
     import TableForm from '../../components/element/table.vue';
     import appointmentService from '../../services/appointment.service';
+    import WebSocketService from '../../services/ws.service';
 
     export default{
         props : {
             nav_value: { type: String, default: "" },
             patient: { type:Object, required: true}
         },
-
+        emits: ['update:patient1'],
         components: {
             Book_form,
             Examination,
@@ -66,11 +49,11 @@
         data (){
             return {
                 activeIndex: -1,
-
+                wsService: new WebSocketService(),
                 list_appointment: [],
                 appointmentColumns: [
                     { key: 'maBN', header: 'Mã bệnh nhân' },
-                    { key: 'hotenBN', header: 'Họ tên bệnh nhân' },
+                    { key: 'maBS', header: 'Mã bác sĩ' },
                     { key: 'ngaythangnam', header: 'Ngày đặt lịch' },
                     { key: 'khunggio', header: 'Khung giờ hẹn' },
                     { key: 'mota', header: 'Mô tả' },  
@@ -79,15 +62,32 @@
         },
 
         watch: {
+          list_appointment: {
+            handler(newList){
+            },
+            immediate: true, // Chạy ngay lập tức nếu doctor đã có sẵn
+            deep: true,
+          },
 
+          patient: {
+            handler(newpatient) {
+              if (newpatient && newpatient.maBN) {
+                this.wsService.connect();
+                this.wsService.ws.onopen = () => {
+                  this.wsService.send({ type: 'init_patient', patientId: newpatient.maBN });
+                  this.get_list_appointment();
+                };
+              }
+            },
+            immediate: true, // Chạy ngay lập tức nếu doctor đã có sẵn
+            deep: true, // Theo dõi các thay đổi trong thuộc tính lồng nhau của doctor
+          },
         },
 
         methods: {
-
             async get_list_appointment() {
                 try {
                     this.list_appointment = await appointmentService.get_patient(this.patient.maBN);
-                    console.log(this.list_appointment)
                 } catch (error) {
                     console.log('Lỗi khi lấy danh sách lịch hẹn!', error);
                 }
@@ -95,8 +95,12 @@
         },
 
         mounted(){
-            
-            this.get_list_appointment()            
+          // this.wsService.connect();
+          this.wsService.onMessage((message) => {
+            if (message.type === 'appointment_cancelled') {
+              this.get_list_appointment();
+            }
+          });           
         }
 
     }

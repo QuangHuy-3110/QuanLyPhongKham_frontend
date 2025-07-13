@@ -1,168 +1,167 @@
 <template>
   <section class="page" style="background-image: url('https://mdbootstrap.com/img/Photos/Others/sidenav2.jpg');background-size: cover;">
-<div class="container py-5 h-100">
-  <div class="row d-flex justify-content-center align-items-center h-100">
-      <p class="mb-0 fw-bold fs-1 text-center"
-          style="font-family: 'Poppins', sans-serif; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
+    <div class="container py-5 h-100">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <p class="mb-0 fw-bold fs-1 text-center"
+           style="font-family: 'Poppins', sans-serif; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
           Đăng ký
-      </p>
-      <p class="mb-0 fw-bold fs-5 text-center"
-          style="font-family: 'Poppins', sans-serif; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
+        </p>
+        <p class="mb-0 fw-bold fs-5 text-center"
+           style="font-family: 'Poppins', sans-serif; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
           "Hoàn thành biểu mẫu để đăng ký tài khoản"
-      </p>
-    <div class="col-10">
-      <div class="card card-registration card-registration-2" style="border-radius: 15px;">
-        <div class="card-body p-0">        
-          <div class="row g-0">                
-            <div class="col-lg-6">            
-              <div class="p-5">                    
-                <h3 class="fw-normal mb-5" style="color: #1f4978cb;"><strong>Thông tin tài khoản</strong></h3>
+        </p>
+        <div class="col-10">
+          <div class="card card-registration card-registration-2" style="border-radius: 15px;">
+            <div class="card-body p-0">        
+              <div class="row g-0">                
+                <div class="col-lg-6">            
+                  <div class="p-5">                    
+                    <h3 class="fw-normal mb-5" style="color: #1f4978cb;"><strong>Thông tin tài khoản</strong></h3>
 
-                <div class="mb-4 pb-2">
-                  <label class="form-label" for="form3Examplev2">Tên đăng nhập</label>
-                  <small v-if="errors.tendangnhapBN" class="text-danger">{{ errors.tendangnhapBN }}</small>
-                  <input type="text" id="form3Examplev2" class="form-control form-control-lg" 
-                  v-model="user.tendangnhapBN" @input="validateUsername"/>
-                </div>
-
-                <div class="mb-4 pb-2">
-                  <label class="form-label" for="form3Examplev3">Email</label>
-                  <small v-if="errors.emailBN" class="text-danger">{{ errors.emailBN }}</small>
-                  <input type="text" id="form3Examplev3" class="form-control form-control-lg" 
-                  v-model="user.emailBN" @input="validateEmail"/>
-                </div>
-
-                <div class="mb-4 pb-2">
-                  <label class="form-label" for="form3Examplev4">CCCD</label>
-                  <small v-if="errors.cccdBN" class="text-danger">{{ errors.cccdBN }}</small>
-                  <input type="text" id="form3Examplev4" class="form-control form-control-lg" 
-                  v-model="user.cccdBN" @input="validateCCCD"/>
-                </div>
-
-                <div class="mb-4 pb-3">
-                  <label class="form-label" for="form3Examplev5">Tạo mật khẩu</label>
-                  <small v-if="errors.matkhauBN" class="text-danger">{{ errors.matkhauBN }}</small>
-                  <input type="password" id="form3Examplev5" class="form-control form-control-lg" 
-                  v-model="user.matkhauBN" @input="validatePassword"/>
-                </div>
-
-                <div class="mb-4 pb-2">
-                  <label class="form-label" for="form3Examplev6">Nhập lại mật khẩu</label>
-                  <small v-if="errors.confirmMatkhauBN" class="text-danger">{{ errors.confirmMatkhauBN }}</small>
-                  <input type="password" id="form3Examplev6" class="form-control form-control-lg" 
-                  v-model="confirmMatkhauBN" @input="validateConfirmPassword"/>
-                </div>
-
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" v-model="hasVisited" id="checkDefault">
-                  <label class="form-check-label" for="checkDefault">
-                    <a class="underlineHover">Tôi đã từng khám ở đây!</a>
-                  </label>
-                </div>
-
-              </div>
-            </div>
-            <div class="col-lg-6 bg-indigo text-white">
-              <div class="p-5">
-                <h3 class="fw-normal mb-5"><strong>Thông tin cá nhân</strong></h3>
-                <div class="mb-4 pb-2">
-                  <div data-mdb-input-init class="form-outline form-white">
-                      <label class="form-label" for="form3Examplea2">Họ và tên</label>
-                      <small v-if="errors.hotenBN" class="text-danger">{{ errors.hotenBN }}</small>
-                      <input type="text" id="form3Examplea2" class="form-control form-control-lg" :disabled="hasVisited" 
-                      v-model="user.hotenBN" @input="validateName"/>            
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-6 mb-4 pb-2">
-                    <div data-mdb-input-init class="form-outline form-white">
-                        <label class="form-label" for="form3Examplea4">Ngày sinh</label>
-                        <small v-if="errors.ngaysinhBN" class="text-danger">{{ errors.ngaysinhBN }}</small>
-                        <input type="date" id="form3Examplea4" class="form-control form-control-lg" :disabled="hasVisited" 
-                        v-model="user.ngaysinhBN" @input="validateDate"/>            
+                    <div class="mb-4 pb-2">
+                      <label class="form-label" for="form3Examplev2">Tên đăng nhập</label>
+                      <small v-if="errors.tendangnhapBN" class="text-danger">{{ errors.tendangnhapBN }}</small>
+                      <input type="text" id="form3Examplev2" class="form-control form-control-lg" 
+                             v-model="user.tendangnhapBN" @input="validateUsername"/>
                     </div>
-                  </div>
 
-                  <div class="col-md-6 mb-4 pb-2">
-                    <div data-mdb-input-init class="form-outline form-white">
-                        <label class="form-label" for="form3Examplea4">Số BHYT</label>
-                        <small v-if="errors.soBHYT" class="text-danger">{{ errors.soBHYT }}</small>
-                        <input type="text" id="form3Examplea4" class="form-control form-control-lg" :disabled="hasVisited" 
-                        v-model="user.soBHYT" @input="validateBHYT"/>            
+                    <div class="mb-4 pb-2">
+                      <label class="form-label" for="form3Examplev3">Email</label>
+                      <small v-if="errors.emailBN" class="text-danger">{{ errors.emailBN }}</small>
+                      <input type="text" id="form3Examplev3" class="form-control form-control-lg" 
+                             v-model="user.emailBN" @input="validateEmail"/>
+                    </div>
+
+                    <div class="mb-4 pb-2">
+                      <label class="form-label" for="form3Examplev4">CCCD</label>
+                      <small v-if="errors.cccdBN" class="text-danger">{{ errors.cccdBN }}</small>
+                      <input type="text" id="form3Examplev4" class="form-control form-control-lg" 
+                             v-model="user.cccdBN" @input="validateCCCD"/>
+                    </div>
+
+                    <div class="mb-4 pb-3">
+                      <label class="form-label" for="form3Examplev5">Tạo mật khẩu</label>
+                      <small v-if="errors.matkhauBN" class="text-danger">{{ errors.matkhauBN }}</small>
+                      <input type="password" id="form3Examplev5" class="form-control form-control-lg" 
+                             v-model="user.matkhauBN" @input="validatePassword"/>
+                    </div>
+
+                    <div class="mb-4 pb-2">
+                      <label class="form-label" for="form3Examplev6">Nhập lại mật khẩu</label>
+                      <small v-if="errors.confirmMatkhauBN" class="text-danger">{{ errors.confirmMatkhauBN }}</small>
+                      <input type="password" id="form3Examplev6" class="form-control form-control-lg" 
+                             v-model="confirmMatkhauBN" @input="validateConfirmPassword"/>
+                    </div>
+
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" v-model="hasVisited" id="checkDefault">
+                      <label class="form-check-label" for="checkDefault">
+                        <a class="underlineHover">Tôi đã từng khám ở đây!</a>
+                      </label>
                     </div>
                   </div>
                 </div>
+                <div class="col-lg-6 bg-indigo text-white">
+                  <div class="p-5">
+                    <h3 class="fw-normal mb-5"><strong>Thông tin cá nhân</strong></h3>
+                    <div class="mb-4 pb-2">
+                      <div data-mdb-input-init class="form-outline form-white">
+                        <label class="form-label" for="form3Examplea2">Họ và tên</label>
+                        <small v-if="errors.hotenBN" class="text-danger">{{ errors.hotenBN }}</small>
+                        <input type="text" id="form3Examplea2" class="form-control form-control-lg" :disabled="hasVisited" 
+                               v-model="user.hotenBN" @input="validateName"/>            
+                      </div>
+                    </div>
 
-                <div class="mb-4 pb-2">
-                  <div data-mdb-input-init class="form-outline form-white">
-                      <label class="form-label" for="form3Examplea5">Địa chỉ</label>
-                      <small v-if="errors.diachiBN" class="text-danger">{{ errors.diachiBN }}</small>
-                    <input type="text" id="form3Examplea5" class="form-control form-control-lg" :disabled="hasVisited" 
-                    v-model="user.diachiBN" @input="validateAddress"/>
+                    <div class="row">
+                      <div class="col-md-6 mb-4 pb-2">
+                        <div data-mdb-input-init class="form-outline form-white">
+                          <label class="form-label" for="form3Examplea4">Ngày sinh</label>
+                          <small v-if="errors.ngaysinhBN" class="text-danger">{{ errors.ngaysinhBN }}</small>
+                          <input type="date" id="form3Examplea4" class="form-control form-control-lg" :disabled="hasVisited" 
+                                 v-model="user.ngaysinhBN" @input="validateDate"/>            
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 mb-4 pb-2">
+                        <div data-mdb-input-init class="form-outline form-white">
+                          <label class="form-label" for="form3Examplea4">Số BHYT</label>
+                          <small v-if="errors.soBHYT" class="text-danger">{{ errors.soBHYT }}</small>
+                          <input type="text" id="form3Examplea4" class="form-control form-control-lg" :disabled="hasVisited" 
+                                 v-model="user.soBHYT" @input="validateBHYT"/>            
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mb-4 pb-2">
+                      <div data-mdb-input-init class="form-outline form-white">
+                        <label class="form-label" for="form3Examplea5">Địa chỉ</label>
+                        <small v-if="errors.diachiBN" class="text-danger">{{ errors.diachiBN }}</small>
+                        <input type="text" id="form3Examplea5" class="form-control form-control-lg" :disabled="hasVisited" 
+                               v-model="user.diachiBN" @input="validateAddress"/>
+                      </div>
+                    </div>
+
+                    <div class="mb-4 pb-2">
+                      <div data-mdb-input-init class="form-outline form-white">
+                        <label class="form-label" for="form3Examplea6">Số điện thoại</label>
+                        <small v-if="errors.sdtBN" class="text-danger">{{ errors.sdtBN }}</small>
+                        <input type="text" id="form3Examplea6" class="form-control form-control-lg" :disabled="hasVisited" 
+                               v-model="user.sdtBN" @input="validatePhone"/>                      
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-md-4 mb-4 pb-2">
+                        <div data-mdb-input-init class="form-outline form-white">
+                          <label class="form-label" for="form3Examplea7">Chiều cao</label>
+                          <small v-if="errors.chieucao" class="text-danger">{{ errors.chieucao }}</small>
+                          <input type="text" id="form3Examplea7" class="form-control form-control-lg" :disabled="hasVisited" 
+                                 v-model="user.chieucao" @input="validateHeight"/>                        
+                        </div>
+                      </div>
+                      <div class="col-md-4 mb-4 pb-2">
+                        <div data-mdb-input-init class="form-outline form-white">
+                          <label class="form-label" for="form3Examplea8">Cân nặng</label>
+                          <small v-if="errors.cannang" class="text-danger">{{ errors.cannang }}</small>
+                          <input type="text" id="form3Examplea8" class="form-control form-control-lg" :disabled="hasVisited" 
+                                 v-model="user.cannang" @input="validateWeight"/>                        
+                        </div>
+                      </div>
+                      <div class="col-md-4 mb-4 pb-2">
+                        <div data-mdb-input-init class="form-outline form-white">
+                          <label class="form-label" for="form3Examplea9">Nhóm máu</label>
+                          <small v-if="errors.nhommau" class="text-danger">{{ errors.nhommau }}</small>
+                          <select id="form3Examplea9" class="form-control form-control-lg" :disabled="hasVisited" 
+                                  v-model="user.nhommau" @change="validateBloodGroup">
+                            <option value="" disabled selected>Chọn nhóm máu</option>
+                            <option v-for="blood in bloodGroups" :key="blood" :value="blood">{{ blood }}</option>
+                          </select>                        
+                        </div>
+                      </div>
+                    </div>
+
+                    <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-light btn-lg me-3"
+                            data-mdb-ripple-color="dark" @click="create_user" :disabled="!isFormValid">Đăng kí</button>
+                    <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-warning btn-lg"
+                            data-mdb-ripple-color="dark" @click="tologin">Đi đến đăng nhập</button>
                   </div>
                 </div>
-
-                <div class="mb-4 pb-2">
-                  <div data-mdb-input-init class="form-outline form-white">
-                      <label class="form-label" for="form3Examplea6">Số điện thoại</label>
-                      <small v-if="errors.sdtBN" class="text-danger">{{ errors.sdtBN }}</small>
-                    <input type="text" id="form3Examplea6" class="form-control form-control-lg" :disabled="hasVisited" 
-                    v-model="user.sdtBN" @input="validatePhone"/>                      
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-md-4 mb-4 pb-2">
-                    <div data-mdb-input-init class="form-outline form-white">
-                      <label class="form-label" for="form3Examplea7">Chiều cao</label>
-                      <small v-if="errors.chieucao" class="text-danger">{{ errors.chieucao }}</small>
-                      <input type="text" id="form3Examplea7" class="form-control form-control-lg" :disabled="hasVisited" 
-                      v-model="user.chieucao" @input="validateHeight"/>                        
-                    </div>
-                  </div>
-                  <div class="col-md-4 mb-4 pb-2">
-                    <div data-mdb-input-init class="form-outline form-white">
-                      <label class="form-label" for="form3Examplea8">Cân nặng</label>
-                      <small v-if="errors.cannang" class="text-danger">{{ errors.cannang }}</small>
-                      <input type="text" id="form3Examplea8" class="form-control form-control-lg" :disabled="hasVisited" 
-                      v-model="user.cannang" @input="validateWeight"/>                        
-                    </div>
-                  </div>
-                  <div class="col-md-4 mb-4 pb-2">
-                    <div data-mdb-input-init class="form-outline form-white">
-                      <label class="form-label" for="form3Examplea9">Nhóm máu</label>
-                      <small v-if="errors.nhommau" class="text-danger">{{ errors.nhommau }}</small>
-                      <select id="form3Examplea9" class="form-control form-control-lg" :disabled="hasVisited" 
-                      v-model="user.nhommau" @change="validateBloodGroup">
-                        <option value="" disabled selected>Chọn nhóm máu</option>
-                        <option v-for="blood in bloodGroups" :key="blood" :value="blood">{{ blood }}</option>
-                      </select>                        
-                    </div>
-                  </div>
-                </div>
-
-                <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-light btn-lg me-3"
-                  data-mdb-ripple-color="dark" @click="create_user" :disabled="!isFormValid">Đăng kí</button>
-                <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-warning btn-lg"
-                  data-mdb-ripple-color="dark" @click="tologin">Đi đến đăng nhập</button>
-
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</div>
-</section>
+  </section>
 </template>
 
 <script>
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
-import patientService from '../services/patient.service'
+import patientService from '../services/patient.service';
 import bcrypt from 'bcryptjs';
+
 export default {    
   data() {
     return {
@@ -205,25 +204,37 @@ export default {
 
   computed: {
     isFormValid() {
-      return Object.values(this.errors).every(error => !error) && 
-             Object.values(this.user).every(value => value !== '' && value !== null) &&
-             this.confirmMatkhauBN !== '';
+      // Common required fields: tendangnhapBN, cccdBN, emailBN, matkhauBN, confirmMatkhauBN
+      const accountFields = ['tendangnhapBN', 'cccdBN', 'emailBN', 'matkhauBN'];
+      const accountFieldsValid = accountFields.every(field => this.user[field] !== '' && this.user[field] !== null);
+      const noErrors = Object.values(this.errors).every(error => !error);
+      const confirmPasswordValid = this.confirmMatkhauBN !== '' && this.errors.confirmMatkhauBN === '';
+
+      if (this.hasVisited) {
+        // When hasVisited is true, only account fields are required
+        return accountFieldsValid && noErrors && confirmPasswordValid;
+      } else {
+        // When hasVisited is false, all fields in user are required
+        return accountFieldsValid && 
+               Object.values(this.user).every(value => value !== '' && value !== null) && 
+               noErrors && 
+               confirmPasswordValid;
+      }
     }
   },
 
   methods: {
-    tologin(){
+    tologin() {
       this.$router.push({
-          name: "loginform",
-          query: this.$route.query,
-          hash: this.$route.hash,
+        name: "loginform",
+        query: this.$route.query,
+        hash: this.$route.hash,
       });
     },
 
     async hashPassword(password) {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
-        return hashedPassword;
+      const salt = await bcrypt.genSalt(10);
+      return await bcrypt.hash(password, salt);
     },
 
     convertToUTCPlus7(utcDateString) {
@@ -310,33 +321,33 @@ export default {
       this.errors.nhommau = blood && !this.bloodGroups.includes(blood) ? 'Vui lòng chọn nhóm máu hợp lệ' : '';
     },
 
-    async create_user(){
+    async create_user() {
       try {
-        let list = await patientService.get_cccd(this.user.cccdBN)
-        let check = list[0]
-        let tendangnhapBN = await patientService.get_acname(this.user.tendangnhapBN)
-        if(tendangnhapBN.length !== 0){
-          alert("Tên đăng nhập đã tồn tại!")   
-          this.clear_value()     
-          return;  
+        let list = await patientService.get_cccd(this.user.cccdBN);
+        let check = list[0];
+        let tendangnhapBN = await patientService.get_acname(this.user.tendangnhapBN);
+        if (tendangnhapBN.length !== 0) {
+          alert("Tên đăng nhập đã tồn tại!");
+          this.clear_value();
+          return;
         }
 
-        if(list.length !== 0 && check.tendangnhapBN){
-          alert("Bạn đã tạo tài khoản rồi!")   
-          this.clear_value()     
-          return;  
+        if (list.length !== 0 && check.tendangnhapBN) {
+          alert("Bạn đã tạo tài khoản rồi!");
+          this.clear_value();
+          return;
         }
 
-        if(list.length !== 0 && this.hasVisited === false){
-          alert(`Từng đến đây khám rồi. Vui lòng chọn vào ô "Tôi đã từng khám ở đây!"`)    
-          this.clear_value()     
-          return;     
+        if (list.length !== 0 && !this.hasVisited) {
+          alert(`Từng đến đây khám rồi. Vui lòng chọn vào ô "Tôi đã từng khám ở đây!"`);
+          this.clear_value();
+          return;
         }
 
-        if(list.length === 0 && this.hasVisited === true){
-          alert(`Bạn chưa có tài khoản và chưa từng đến khám ở đây. Vui lòng bỏ chọn ô "Tôi đã từng khám ở đây!"`)    
-          this.clear_value()     
-          return;     
+        if (list.length === 0 && this.hasVisited) {
+          alert(`Bạn chưa có tài khoản và chưa từng đến khám ở đây. Vui lòng bỏ chọn ô "Tôi đã từng khám ở đây!"`);
+          this.clear_value();
+          return;
         }
 
         if (!this.isFormValid) {
@@ -344,16 +355,20 @@ export default {
           return;
         }
 
-        if(list.length === 0){
-          this.user.matkhauBN = await this.hashPassword(this.user.matkhauBN);
-          await patientService.create(this.user);
+        if (list.length === 0) {
+          const userData = {
+            ...this.user,
+            ngaysinhBN: this.parseDateForBackend(this.user.ngaysinhBN),
+            matkhauBN: await this.hashPassword(this.user.matkhauBN),
+          };
+          await patientService.create(userData);
           alert(`Tài khoản được tạo thành công!`);
           this.clear_value();
           this.tologin();
           return;
         }
 
-        if(list.length !== 0){
+        if (list.length !== 0) {
           let temp = {
             hotenBN: check.hotenBN,
             cccdBN: check.cccdBN,
@@ -364,7 +379,7 @@ export default {
             cannang: check.cannang,
             nhommau: check.nhommau,
             tendangnhapBN: this.user.tendangnhapBN,
-            emailBN: check.emailBN,
+            emailBN: this.user.emailBN,
             matkhauBN: await this.hashPassword(this.user.matkhauBN),
             soBHYT: this.user.soBHYT
           };
@@ -374,14 +389,13 @@ export default {
           this.tologin();
           return;
         }
-
-      } catch (error){
+      } catch (error) {
         alert("Đăng ký không thành công");
         console.log("Có lỗi khi đăng ký bệnh nhân:", error);
       }
     },
 
-    clear_value(){
+    clear_value() {
       this.user = {
         hotenBN: '',
         cccdBN: '',
@@ -397,6 +411,7 @@ export default {
         soBHYT: ''
       };
       this.confirmMatkhauBN = '';
+      this.hasVisited = false;
       this.errors = {
         hotenBN: '',
         cccdBN: '',
@@ -412,6 +427,16 @@ export default {
         confirmMatkhauBN: '',
         soBHYT: ''
       };
+    },
+
+    parseDateForBackend(date) {
+      if (!date) return null;
+      const d = new Date(date);
+      if (isNaN(d)) return date;
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     }
   },
 };
@@ -420,13 +445,13 @@ export default {
 <style scoped>
   @import "@/assets/register.css";
   .page {
-      text-align: center;
-      max-width: 1200px;
-      margin: 0 auto;
+    text-align: center;
+    max-width: 1200px;
+    margin: 0 auto;
   }
   .text-danger {
-      font-size: 0.8rem;
-      display: block;
-      margin-bottom: 5px;
+    font-size: 0.8rem;
+    display: block;
+    margin-bottom: 5px;
   }
 </style>

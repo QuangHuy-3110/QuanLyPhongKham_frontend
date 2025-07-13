@@ -6,7 +6,7 @@
           <div class="w-md-75 w-lg-50 text-center mx-md-auto mb-5 mb-md-9">
             <p class="mb-0 fw-bold fs-2 text-muted mt-4"
                 style="font-family: 'Poppins', sans-serif; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);">
-                Đặt khám chuyên khoa
+                Đặt lịch khám bệnh
             </p>
             <hr>
           </div>
@@ -92,6 +92,7 @@
                   <Calendar class="form-control form-control-lg"
                     :array="{ list: working_time }"
                     :columns="working_timeColumns"
+                    @getdate="getdate"
                     v-if="selectedDoctor && working_time.length > 0"
                   />
                   <p class="text-center" v-else-if="selectedDoctor">Bác sĩ này hiện không có lịch làm việc.</p>
@@ -102,11 +103,14 @@
                   <div class="row g-3">
                     <div class="col-4">
                       <label for="ngayHen" class="form-label">Chọn ngày</label>
-                      <input type="date" class="form-control" id="ngayHen" name="ngayHen" required v-model="ngayHen">
+                      <input type="date" class="form-control" id="ngayHen" name="ngayHen" disabled required v-model="ngayHen">
                     </div>
                     <div class="col-4">
                       <label for="gioHen" class="form-label">Chọn giờ</label>
-                      <input type="time" class="form-control" id="gioHen" name="gioHen" required v-model="gioHen">
+                      <select class="form-control" id="gioHen" name="gioHen" required v-model="gioHen">
+                        <option value="" disabled>Chọn khung giờ</option>
+                        <option v-for="(time, index) in availableTimes" :key="index" :value="time">{{ time }}</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -141,11 +145,15 @@ import WorkingTime from '@/services/working_time.service';
 import specialtiesService from '../../services/specialties.service';
 import doctor_roleService from '../../services/doctor_role.service';
 import doctorService from '../../services/doctor.service';
+import appointmentService from '../../services/appointment.service';
+import WebSocketService from '../../services/ws.service';
 
 export default {
   components: {
     Calendar,
   },
+
+  emits: ['appointmentBooked'],
 
   props: {
     patient: { type: Object, required: true },
@@ -153,7 +161,7 @@ export default {
 
   data() {
     return {
-      
+      wsService: new WebSocketService(),
       doctor_role: [],
       doctors: [],
       specialties: [],
@@ -169,6 +177,8 @@ export default {
       gioHen: null,
       moTaBenh: null,
       errorMessage: null,
+      minTime: '13:00', // Giới hạn giờ bắt đầu
+      maxTime: '14:00', // Giới hạn giờ kết thúc
     };
   },
 
@@ -180,10 +190,35 @@ export default {
              this.ngayHen &&
              this.gioHen &&
              this.moTaBenh;
+    },
+    // Tạo danh sách các khung giờ từ minTime đến maxTime, cách nhau 30 phút
+    availableTimes() {
+      const times = [];
+      const [minHours, minMinutes] = this.minTime.split(':').map(Number);
+      const [maxHours, maxMinutes] = this.maxTime.split(':').map(Number);
+      let currentHours = minHours;
+      let currentMinutes = minMinutes;
+
+      while (currentHours < maxHours || (currentHours === maxHours && currentMinutes <= maxMinutes)) {
+        const timeStr = `${currentHours.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`;
+        times.push(timeStr);
+        currentMinutes += 30;
+        if (currentMinutes >= 60) {
+          currentMinutes -= 60;
+          currentHours += 1;
+        }
+      }
+      return times;
     }
   },
 
   methods: {
+    getdate(day, min, max) {
+      this.ngayHen = day; // Lưu ngày được chọn
+      this.minTime = min; // Lưu giờ bắt đầu
+      this.maxTime = max; // Lưu giờ kết thúc
+      this.gioHen = null; // Đặt lại giờ khi chọn ngày mới
+    },
 
     async get_specialties() {
       try {
@@ -207,6 +242,8 @@ export default {
           this.doctors = await Promise.all(doctorPromises);
           this.selectedDoctor = null; // Xóa bác sĩ đã chọn khi thay đổi chuyên khoa
           this.working_time = []; // Xóa lịch làm việc khi thay đổi chuyên khoa
+          this.ngayHen = null; // Đặt lại ngày hẹn
+          this.gioHen = null; // Đặt lại giờ hẹn
         }
       } catch (error) {
         console.error('Lỗi khi lấy danh sách bác sĩ!', error);
@@ -215,6 +252,8 @@ export default {
 
     async selectDoctor(doctor) {
       this.selectedDoctor = doctor; // Lưu bác sĩ được chọn
+      this.ngayHen = null; // Đặt lại ngày hẹn
+      this.gioHen = null; // Đặt lại giờ hẹn
       try {
         this.working_time = await WorkingTime.get_doctor(doctor.maBS); // Lấy lịch làm việc của bác sĩ
       } catch (error) {
@@ -223,12 +262,19 @@ export default {
       }
     },
 
-    bookAppointment() {
+    async bookAppointment() {
       // Kiểm tra lại điều kiện hợp lệ
       if (!this.isFormValid) {
         this.errorMessage = 'Vui lòng điền đầy đủ thông tin: chuyên khoa, bác sĩ, ngày, giờ và mô tả bệnh trạng.';
         return;
       }
+
+      // Kiểm tra xem giờ chọn có nằm trong khoảng minTime và maxTime không
+      const selectedTime = this.gioHen;
+      // if (selectedTime < this.minTime || selectedTime > this.maxTime) {
+      //   this.errorMessage = `Giờ chọn không hợp lệ. Vui lòng chọn giờ trong khoảng từ ${this.minTime} đến ${this.maxTime}.`;
+      //   return;
+      // }
 
       this.errorMessage = null; // Xóa thông báo lỗi nếu hợp lệ
 
@@ -243,14 +289,37 @@ export default {
         maCK: this.selectedSpecialty,
       };
 
-      // In thông tin ra console
-      console.log('Thông tin đặt lịch:', appointmentData);
+      try {
+        await appointmentService.create(appointmentData);
+        // Gửi lịch hẹn qua WebSocket
+        this.wsService.send({
+          type: 'new_appointment',
+          data: appointmentData,
+        });
+        this.$emit('appointmentBooked', appointmentData); // Phát sự kiện để thông báo đặt lịch thành công
+        this.message = 'Lịch hẹn đã được gửi!';        
+        alert("Đặt lịch thành công!");
+      } catch (error) {
+        alert("Đặt lịch không thành công!");
+        console.log("Đặt lịch không thành công: ", error);
+      }
     }
   },
 
   mounted() {
     this.get_specialties();
-  }
+    this.wsService.connect(); // Kết nối WebSocket
+    // Xử lý tin nhắn từ server (ví dụ: xác nhận từ server)
+    this.wsService.onMessage((message) => {
+      if (message.type === 'response') {
+        this.message = message.data;
+      }
+    });
+  },
+
+  beforeDestroy() {
+    this.wsService.disconnect(); // Đóng WebSocket khi component bị hủy
+  },
 };
 </script>
 

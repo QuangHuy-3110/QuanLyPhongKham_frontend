@@ -39,40 +39,21 @@
       :patient="list_patient[activeIndex]"
       :doctor="doctor"
       :role="role"
+      @update:patient="get_listPatient"
     />
 
     <TableForm
       v-if="nav_value === 'lichhen' && check === ''"
       :array="{ list: list_appointment }"
       :columns="appointmentColumns"
+      :columns_full="appointmentColumns"
+      :name="'lichhen'"
+      :role="role"
+      @check-profile="check_profile"
       v-model:activeIndex="activeIndex"
       data-bs-toggle="modal"
       data-bs-target="#exampleModal"
     />
-
-    <div v-if="activeIndex !== -1 && nav_value === 'lichhen'">
-      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Chi tiết lịch hẹn</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <p><b>Họ và tên bệnh nhân:</b> {{ list_appointment[activeIndex].hotenBN }}</p>
-              <p><b>Ngày hẹn:</b> {{ list_appointment[activeIndex].ngaythangnam }}</p>
-              <p><b>Khung giờ:</b> {{ list_appointment[activeIndex].khunggio }}</p>
-              <p><b>Trạng thái:</b> {{ list_appointment[activeIndex].trangthai }}</p>
-              <p><b>Mô tả bệnh:</b> {{ list_appointment[activeIndex].mota }}</p>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-              <button type="button" class="btn btn-primary" @click="check_profile(list_appointment[activeIndex].maBN)" data-bs-dismiss="modal">Xem hồ sơ bệnh nhân</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <Examination
       v-if="check === 'see' && nav_value === 'lichhen'"
@@ -80,6 +61,7 @@
       :patient="patient"
       :doctor="doctor"
       :role="role"
+      @update:patient="get_listPatient"
     />
   </main>
 </template>
@@ -96,9 +78,12 @@ import AppointmentService from '@/services/appointment.service';
 import PatientService from '@/services/patient.service';
 import WorkingTime from '@/services/working_time.service';
 
+import WebSocketService from '@/services/ws.service';
+
 export default {
   props: {
     nav_value: { type: String, default: 'trangchu' },
+    doctor: { type: Object, required: true },
   },
   components: {
     Home,
@@ -111,13 +96,13 @@ export default {
   },
   data() {
     return {
+      wsService: new WebSocketService(), // Khởi tạo WebSocketService
+      wsMessages: [],
       show: '',
       activeIndex: -1,
-      doctor: {
-        maBS: 'BS0001'
-      },
       role: 'doctor',
       patient: {},
+      patient_new: {},
       check: '',
       list_patient: [],
       original_list_patient: [], // Lưu danh sách bệnh nhân gốc
@@ -144,6 +129,7 @@ export default {
       ]
     };
   },
+
   watch: {
     nav_value: {
       handler() {
@@ -151,16 +137,43 @@ export default {
         this.activeIndex = -1;
       },
     },
+
+    list_appointment: {
+      handler(newList){
+      },
+      immediate: true, // Chạy ngay lập tức nếu doctor đã có sẵn
+      deep: true,
+    },
+
+    doctor: {
+      handler(newDoctor) {
+        if (newDoctor && newDoctor.maBS) {
+          this.get_listPatient();
+          this.wsService.connect();
+          this.wsService.ws.onopen = () => {
+            this.wsService.send({ type: 'init', doctorId: newDoctor.maBS });
+            this.get_working_time();
+            this.get_list_appointment();
+          };
+        }
+      },
+      immediate: true, // Chạy ngay lập tức nếu doctor đã có sẵn
+      deep: true, // Theo dõi các thay đổi trong thuộc tính lồng nhau của doctor
+    },
   },
+
   methods: {
+
     check_profile(maBN) {
       this.check = 'see';
       this.patient = this.list_patient.find(item => item.maBN === maBN);
+      console.log('Checking profile for patient:', this.patient);
     },
 
     async get_working_time() {
       try {
-        this.working_time = await WorkingTime.getAll();
+        this.working_time = await WorkingTime.get_doctor(this.doctor.maBS);
+        console.log("bacs six:", this.doctor)
       } catch (error) {
         console.log('Lỗi khi lấy lịch làm việc!', error);
       }
@@ -177,7 +190,7 @@ export default {
 
     async get_list_appointment() {
       try {
-        this.list_appointment = await AppointmentService.getAll();
+        this.list_appointment = await AppointmentService.get_doctor(this.doctor.maBS);
         this.list_appointment = this.list_appointment.map(appointment => {
           const patient = this.list_patient.find(p => p.maBN === appointment.maBN);
           return {
@@ -225,10 +238,22 @@ export default {
       this.list_patient = [...this.original_list_patient]; // Khôi phục danh sách gốc
     }
   },
+
   mounted() {
-    this.get_working_time();
     this.get_listPatient();
-    this.get_list_appointment();
+    // Xử lý tin nhắn từ WebSocket
+    // this.wsService.connect();
+    this.wsService.onMessage((message) => {
+      if (message.type === 'appointment_update') {
+        this.get_list_appointment();
+      }else if (message.type === 'appointment_cancelled') {
+        this.get_list_appointment();
+      }
+    });
+  },
+
+  beforeDestroy() {
+    this.wsService.disconnect(); // Đóng WebSocket khi component bị hủy
   },
 };
 </script>

@@ -4,11 +4,13 @@
         @change:nav_value="changeNav_value"
         :isAuthenticated="isAuthenticated"
         @logout:success="logout"
+        :patient="patient"
     />
 
     <MainSite style="margin-top: 20px;"
         :nav_value="nav_value"
         :patient="patient"
+        @update:patient1="get_patient"
     />
 
     <FooterSite style="margin-top: 50px;"/>
@@ -24,7 +26,6 @@ import patientService from '../services/patient.service';
 
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "vue-router";
-
 export default {
     components: {
         Navbar,
@@ -39,7 +40,12 @@ export default {
             authStore: useAuthStore(),
             nav_value: 'trangchu',
             isAuthenticated: false, // Biến kiểm tra trạng thái đăng nhập
-            role: ""
+            role: "",
+            userInfo: {
+                tenDangNhap: '',
+                fullName: '',
+            },
+            authStore: useAuthStore(),
         }
     },
 
@@ -48,25 +54,59 @@ export default {
     computed: {},
 
     methods: {
+        get_patient(patient) {
+            this.patient = patient;
+        },
+        
         changeNav_value(name) {
             this.nav_value = name;
         },
 
         async getUser(){
-            this.patient = await patientService.get(sessionStorage.getItem("userId"));
-            if (!this.patient) {
-                this.$router.replace({ name: "loginform" });
+           try {
+                const user = this.authStore.user;
+                if (!user || !user.id) {
+                    this.errorMessage = 'Không tìm thấy thông tin người dùng';
+                    return;
+                }
+
+                if (user.role === 'benhnhan') {
+                    this.role = 'patient';
+                    const patient = await patientService.get(user.id);
+                    this.patient = patient;
+                    this.isAuthenticated = true; // Đặt trạng thái đăng nhập là true
+                    if (patient && patient.length > 0) {
+                        this.userInfo = {
+                            tenDangNhap: patient.tenBN || user.id,
+                            fullName: patient.hotenBN || 'Không xác định',
+                        };
+                    } else {
+                        this.errorMessage = 'Không tìm thấy thông tin bệnh nhân';
+                    }
+                } else if (user.role === 'doctor' || user.role === 'admin') {
+                    const doctor = await doctorService.get(user.id);
+                    console.log('Doctor data:', doctor); // Debug
+                if (doctor) {
+                    this.userInfo = {
+                        tenDangNhap: doctor.tenDangNhap || user.id,
+                        fullName: doctor.tenBS || 'Không xác định',
+                    };
+                } else {
+                    this.errorMessage = 'Không tìm thấy thông tin bác sĩ';
+                }
+                } else {
+                    this.errorMessage = 'Vai trò người dùng không hợp lệ';
+                }
+            } catch (error) {
+                console.error('Lỗi khi tải thông tin người dùng:', error);
+                this.errorMessage = 'Không thể tải thông tin người dùng';
             }
-            this.nav_value = 'trangchu';
-            this.isAuthenticated = true
-            this.role = this.$route.name === "patient" ? "patient" : "doctor";
         },
 
         logout(){
             this.patient = {}
-            this.authStore.logout();
-            this.isAuthenticated = false
-            this.router.replace({ name: "patient" });
+            this.authStore.clearUser();
+            this.$router.push({ name: 'loginform' });
         },
 
     },

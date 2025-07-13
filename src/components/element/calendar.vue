@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="container">
     <div class="header">{{ weekLabel }}</div>
@@ -25,7 +24,7 @@
           <div class="session-title">Buổi sáng</div>
           <div class="session-content">
             <template v-if="getAppointments(day.date, 'morning').length">
-              <div v-for="appt in getAppointments(day.date, 'morning')" :key="appt.maBS" class="appointment">
+              <div v-for="appt in getAppointments(day.date, 'morning')" :key="appt.maBS" class="appointment" @click="getdate(day, appt.giobatdau, appt.gioketthuc)">
                 {{ appt.giobatdau }} - {{ appt.gioketthuc }}
               </div>
             </template>
@@ -35,8 +34,8 @@
         <div class="session" :class="{ 'has-value': getAppointments(day.date, 'afternoon').length > 0 }">
           <div class="session-title">Buổi chiều</div>
           <div class="session-content">
-            <template v-if="getAppointments(day.date, 'afternoon').length">
-              <div v-for="appt in getAppointments(day.date, 'afternoon')" :key="appt.maBS" class="appointment">
+            <template v-if="getAppointments(day.date, 'afternoon').length" >
+              <div v-for="appt in getAppointments(day.date, 'afternoon')" :key="appt.maBS" class="appointment" @click="getdate(day, appt.giobatdau, appt.gioketthuc)">
                 {{ appt.giobatdau }} - {{ appt.gioketthuc }}
               </div>
             </template>
@@ -50,6 +49,7 @@
 
 <script>
 export default {
+  emits: ['getdate'],
   props: {
     array: {
       type: Object,
@@ -72,14 +72,23 @@ export default {
       currentDate: new Date(),
       days: [],
       weekLabel: '',
-      dayNames: ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'],
+      dayNames: ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'],
     };
   },
   methods: {
-    getSunday(date) {
+    getdate(day, min, max) {
+      const d = new Date(day.date);
+      d.setDate(d.getDate() + 1); // Cộng thêm 1 ngày để hiển thị đúng giá trị
+      const formattedDate = d.toISOString().split('T')[0]; // Định dạng YYYY-MM-DD
+      // console.log('Selected date:', formattedDate, min, max);
+      this.$emit('getdate', formattedDate, min, max);
+    },
+
+    getMonday(date) {
       const d = new Date(date);
       const day = d.getDay();
-      d.setDate(d.getDate() - day);
+      const diff = day === 0 ? -6 : 1 - day; // Nếu là Chủ Nhật (0), lùi 6 ngày; nếu không, lùi về Thứ Hai
+      d.setDate(d.getDate() + diff);
       d.setHours(0, 0, 0, 0);
       return d;
     },
@@ -110,21 +119,21 @@ export default {
       });
     },
     renderWeek() {
-      const startSunday = this.getSunday(this.currentDate);
+      const startMonday = this.getMonday(this.currentDate);
       this.days = [];
 
       for (let i = 0; i < 7; i++) {
-        const day = new Date(startSunday);
-        day.setDate(startSunday.getDate() + i);
+        const day = new Date(startMonday);
+        day.setDate(startMonday.getDate() + i);
         this.days.push({
           date: day,
           label: `${this.dayNames[i]} (${this.formatDate(day)})`,
         });
       }
 
-      const endSaturday = new Date(startSunday);
-      endSaturday.setDate(startSunday.getDate() + 6);
-      this.weekLabel = `Tuần từ ${this.formatDate(startSunday)} đến ${this.formatDate(endSaturday)}`;
+      const endSunday = new Date(startMonday);
+      endSunday.setDate(startMonday.getDate() + 6);
+      this.weekLabel = `Tuần từ ${this.formatDate(startMonday)} đến ${this.formatDate(endSunday)}`;
     },
     prevWeek() {
       this.currentDate.setDate(this.currentDate.getDate() - 7);
@@ -143,49 +152,43 @@ export default {
 
 <style scoped>
 .container {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  padding: 32px;
-  background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 100%);
-  min-height: 50vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
 .header {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 20px;
-  letter-spacing: -0.02em;
+  color: #333;
+  margin-bottom: 1.5rem;
   text-align: center;
 }
 
 .controls {
   display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 button {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #2563eb;
+  gap: 0.5rem;
+  background-color: #007bff;
   color: white;
-  padding: 12px 24px;
+  padding: 0.75rem 1.5rem;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 0.5rem;
+  font-size: 1rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 button:hover {
-  background: #1e40af;
+  background-color: #0056b3;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 button:active {
@@ -193,8 +196,8 @@ button:active {
 }
 
 .icon {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   fill: none;
   stroke: white;
   stroke-width: 2;
@@ -205,93 +208,79 @@ button:active {
 .week-calendar {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  max-width: 1280px;
-  width: 100%;
-  background: #ffffff;
-  border-radius: 16px;
+  gap: 2px;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
 }
 
 .day {
-  border-right: 1px solid #e5e7eb;
-  border-bottom: 1px solid #e5e7eb;
+  border: 1px solid #dee2e6;
   display: flex;
   flex-direction: column;
-  min-height: 160px; /* Tăng chiều cao để hiển thị tốt hơn */
-}
-
-.day:last-child {
-  border-right: none;
+  min-height: 150px;
 }
 
 .day-header {
-  padding: 12px;
-  background: #f9fafb;
+  padding: 0.75rem;
+  background-color: #e9ecef;
   font-weight: 600;
-  font-size: 14px;
-  color: #111827;
-  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+  color: #333;
   text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .session {
   flex: 1;
-  padding: 12px;
-  border-bottom: 1px solid #d1d5db;
+  padding: 0.75rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  transition: background 0.3s ease;
+  background-color: #f8f9fa;
 }
 
 .session.has-value {
-  background: #fefcbf; /* Màu vàng nhạt cho buổi có dữ liệu */
-}
-
-.session:last-child {
-  border-bottom: none;
+  background-color: #d1e7dd;
 }
 
 .session-title {
   font-weight: 600;
-  font-size: 14px;
-  color: #1f2937;
-  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 0.5rem;
   text-align: center;
 }
 
 .session-content {
-  font-size: 14px;
-  color: #3b82f6;
-  background: #eff6ff;
-  padding: 8px 12px;
-  border-radius: 6px;
+  font-size: 0.85rem;
+  color: #333;
+  background-color: #fff;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
   text-align: center;
   width: 90%;
   word-wrap: break-word;
 }
 
 .appointment {
-  margin: 4px 0;
+  margin: 0.25rem 0;
   text-align: center;
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 16px;
+    margin: 1rem;
   }
 
   .header {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
 
   .controls {
-    gap: 8px;
+    gap: 0.5rem;
   }
 
   .week-calendar {
@@ -299,37 +288,31 @@ button:active {
   }
 
   .day {
-    border-right: none;
-    border-bottom: 1px solid #e5e7eb;
+    border: 1px solid #dee2e6;
     min-height: 120px;
   }
 
-  .day:last-child {
-    border-bottom: none;
-  }
-
   button {
-    padding: 10px 16px;
-    font-size: 14px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
   }
 
   .icon {
-    width: 16px;
-    height: 16px;
+    width: 1rem;
+    height: 1rem;
   }
 
   .day-header {
-    font-size: 12px;
+    font-size: 0.8rem;
   }
 
   .session-title {
-    font-size: 12px;
+    font-size: 0.8rem;
   }
 
   .session-content {
-    font-size: 12px;
-    padding: 6px 10px;
+    font-size: 0.75rem;
+    padding: 0.375rem;
   }
 }
 </style>
-```

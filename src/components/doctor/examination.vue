@@ -5,22 +5,23 @@
   </div>
   <hr>
   <div class="container">
+    <button class="btn btn-primary" style="float: right" data-bs-toggle="modal" data-bs-target="#editPatientModal">
+      <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
+    </button>
     <div class="d-flex align-items-center gap-4">
-      <div>
-        <img class="img-account-profile rounded-circle img-fluid" style="width: 100px; height: 100px; object-fit: cover;" src="http://bootdey.com/img/Content/avatar/avatar1.png" alt="Avatar">
-      </div>
       <div>
         <p class="d-flex gap-5 my-3">
           <span><b>Họ và tên:</b> {{ patient.hotenBN }}</span>
           <span><b>CCCD:</b> {{ patient.cccdBN }}</span>
           <span><b>SĐT:</b> {{ patient.sdtBN }}</span>
         </p>
-        <p class="d-flex gap-5 my-3">
+        <p class="d-flex gap-5 my-4">
           <span><b>Địa chỉ:</b> {{ patient.diachiBN }}</span>
           <span><b>Email:</b> {{ patient.emailBN }}</span>
+          <span><b>Số bảo hiểm y tế:</b> {{ patient.soBHYT }}</span>
         </p>
         <p class="d-flex gap-5 my-3">
-          <span><b>Ngày sinh:</b> {{ patient.ngaysinhBN }}</span>
+          <span><b>Ngày sinh:</b> {{ formatDate(patient.ngaysinhBN) }}</span>
           <span><b>Chiều cao:</b> {{ patient.chieucao }}</span>
           <span><b>Cân nặng:</b> {{ patient.cannang }}</span>
           <span><b>Nhóm máu:</b> {{ patient.nhommau }}</span>
@@ -39,7 +40,7 @@
         <div class="card mb-3" style="width: 100%;" v-for="(record, index) in list_record" :key="index" @click="get_examination(record.maHS)">
           <div class="card-body">
             <h5 class="card-title">{{ record.maHS }}</h5>
-            <h6 class="card-subtitle mb-2 text-muted">Ngày lập hồ sơ: {{ record.ngaylapHS }}</h6>
+            <h6 class="card-subtitle mb-2 text-muted">Ngày lập hồ sơ: {{ formatDate(record.ngaylapHS) }}</h6>
             <p class="card-text">Chuẩn đoán: {{ getFirstExaminationDiagnosis(record.maHS) || 'Chưa có lần khám' }}</p>
             <a href="#" class="card-link" @click.prevent="delete_record(record.maHS)" v-if="role === 'doctor'">Xóa hồ sơ</a>
           </div>
@@ -56,7 +57,7 @@
             <div class="card-body">
               <h5 class="card-title">Lần khám {{ row.stt_lankham }}</h5>
               <h6 class="card-subtitle mb-2 text-muted">Bác sĩ khám: {{ row.maBS }}</h6>
-              <h6 class="card-subtitle mb-2 text-muted">Ngày khám: {{ row.ngaythangnamkham }}</h6>
+              <h6 class="card-subtitle mb-2 text-muted">Ngày khám: {{ formatDate(row.ngaythangnamkham) }}</h6>
               <p class="card-text">Triệu chứng: {{ row.trieuchung }}</p>
               <h6 class="card-subtitle mb-2">Thủ tục khám:</h6>
               <p class="card-text">{{ row.thutuckham }}</p>
@@ -64,7 +65,7 @@
               <p class="card-text">{{ row.chuandoan }}</p>
               <h6 class="card-subtitle mb-2">Liệu trình điều trị:</h6>
               <p class="card-text">{{ row.lieutrinhdieutri }}</p>
-              <h6 class="card-subtitle mb-2">Ngày tái khám: {{ row.ngaytaikham }}</h6>
+              <h6 class="card-subtitle mb-2">Ngày tái khám: {{ formatDate(row.ngaytaikham) }}</h6>
               <a href="#" class="card-link" @click.prevent="openDrugModal('see', index)">Xem toa thuốc</a>
               <a href="#" class="card-link" @click.prevent="openDrugModal('add', index)" :class="{ 'disabled': row.hasPrescription }" 
               :disabled="row.hasPrescription" v-if="role === 'doctor'">Thêm toa thuốc</a>
@@ -133,6 +134,78 @@
     </div>
   </div>
 
+  <!-- Modal Edit Patient -->
+  <div class="modal fade" id="editPatientModal" tabindex="-1" aria-labelledby="editPatientModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="editPatientModalLabel">Chỉnh sửa thông tin bệnh nhân</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form class="row g-3" @submit.prevent="submit_editPatient">
+            <div class="col-md-6">
+              <label for="hotenBN" class="form-label">Họ và tên</label>
+              <input type="text" class="form-control" id="hotenBN" name="hotenBN" v-model="editForm.hotenBN" placeholder="Nhập họ và tên" required>
+            </div>
+            <div class="col-md-6">
+              <label for="cccdBN" class="form-label">CCCD</label>
+              <input type="text" class="form-control" id="cccdBN" name="cccdBN" v-model="editForm.cccdBN" placeholder="Nhập số CCCD" required>
+            </div>
+            <div class="col-md-6">
+              <label for="sdtBN" class="form-label">SĐT</label>
+              <input type="tel" class="form-control" id="sdtBN" name="sdtBN" v-model="editForm.sdtBN" placeholder="Nhập số điện thoại" required>
+            </div>
+            <div class="col-md-6">
+              <label for="emailBN" class="form-label">Email</label>
+              <input type="email" class="form-control" id="emailBN" name="emailBN" v-model="editForm.emailBN" placeholder="Nhập email">
+            </div>
+            <div class="col-md-12">
+              <label for="diachiBN" class="form-label">Địa chỉ</label>
+              <input type="text" class="form-control" id="diachiBN" name="diachiBN" v-model="editForm.diachiBN" placeholder="Nhập địa chỉ" required>
+            </div>
+            <div class="col-md-3">
+              <label for="ngaysinhBN" class="form-label">Ngày sinh</label>
+              <input type="date" class="form-control" id="ngaysinhBN" name="ngaysinhBN" v-model="editForm.ngaysinhBN" required>
+            </div>
+            <div class="col-md-3">
+              <label for="chieucao" class="form-label">Chiều cao (cm)</label>
+              <input type="number" class="form-control" id="chieucao" name="chieucao" v-model.number="editForm.chieucao" placeholder="Nhập chiều cao" min="0" required>
+            </div>
+            <div class="col-md-3">
+              <label for="cannang" class="form-label">Cân nặng (kg)</label>
+              <input type="number" class="form-control" id="cannang" name="cannang" v-model.number="editForm.cannang" placeholder="Nhập cân nặng" min="0" required>
+            </div>
+            <div class="col-md-3">
+              <label for="nhommau" class="form-label">Nhóm máu</label>
+              <select class="form-control" id="nhommau" name="nhommau" v-model="editForm.nhommau" required>
+                <option value="" disabled>Chọn nhóm máu</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="soBHYT" class="form-label">Số bảo hiểm y tế</label>
+              <input type="text" class="form-control" id="soBHYT" name="soBHYT" v-model="editForm.soBHYT" placeholder="Nhập số bảo hiểm y tế">
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-primary">Lưu thông tin</button>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal xem toa thuốc và tạo toa thuốc -->
   <div class="modal fade modal-lg" id="drug" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="drugLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -161,6 +234,7 @@
 <script>
 import recordService from '../../services/record.service';
 import examinationSevice from '../../services/examination.sevice';
+import patientService from '../../services/patient.service';
 import Table_drug from '../element/table_drug.vue';
 import Add_drug from './add_drug.vue';
 import prescriptionService from '../../services/prescription.service';
@@ -169,10 +243,10 @@ import { Modal } from 'bootstrap';
 export default {
   props: {
     patient: { type: Object, required: true },
-    doctor: { type: Object},
+    doctor: { type: Object },
     role: { type: String, default: '' }
   },
-  emits: ['close:examination'],
+  emits: ['close:examination', 'update:patient'],
   components: {
     Table_drug,
     Add_drug,
@@ -192,15 +266,28 @@ export default {
         maHoSo: '',
         maBacSi: '',
         soThuTu: null,
-        ngayKham: new Date().toISOString().split('T')[0],
+        ngayKham: new Date().toLocaleDateString('vi-VN'),
         trieuChung: '',
         thuTucKham: '',
         chuanDoan: '',
         lieutrinh: '',
         ngayTaiKham: '',
       },
+      editForm: {
+        maBN: '',
+        hotenBN: '',
+        cccdBN: '',
+        sdtBN: '',
+        emailBN: '',
+        diachiBN: '',
+        ngaysinhBN: '',
+        chieucao: null,
+        cannang: null,
+        nhommau: '',
+      },
       today: new Date(),
       drugModal: null,
+      editPatientModal: null,
       firstDiagnoses: {}, // Object để lưu trữ chuẩn đoán lần đầu tiên theo maHS
     };
   },
@@ -226,17 +313,39 @@ export default {
         } else {
           this.form.maHoSo = '';
           this.form.maBacSi = '';
-          this.form.ngayKham = new Date().toISOString().split('T')[0];
+          this.form.ngayKham = new Date().toLocaleDateString('vi-VN');
         }
       },
       immediate: true,
+    },
+    patient: {
+      handler(newPatient) {
+        this.editForm = {
+          ...newPatient,
+          ngaysinhBN: this.formatDateForInput(newPatient.ngaysinhBN)
+        };
+      },
+      immediate: true,
+      deep: true,
     },
   },
   mounted() {
     this.get_record();
     this.drugModal = new Modal(document.getElementById('drug'));
+    this.editPatientModal = new Modal(document.getElementById('editPatientModal'));
   },
   methods: {
+    formatDate(date) {
+      if (!date) return '';
+      const d = new Date(date);
+      return d.toLocaleDateString('vi-VN');
+    },
+    formatDateForInput(date) {
+      if (!date) return '';
+      const d = new Date(date);
+      d.setDate(d.getDate() + 1); // Cộng thêm 1 ngày để hiển thị đúng giá trị
+      return d.toISOString().split('T')[0]; // Định dạng YYYY-MM-DD cho input type="date"
+    },
     async openDrugModal(status, index) {
       try {
         this.status = status;
@@ -263,7 +372,6 @@ export default {
         console.log('Lỗi khi lấy hồ sơ khám bệnh:', error);
       }
     },
-
     async fetchFirstDiagnosis(maHS) {
       try {
         const examinations = await examinationSevice.get_profile(maHS);
@@ -278,15 +386,13 @@ export default {
         this.firstDiagnoses[maHS] = '';
       }
     },
-
     getFirstExaminationDiagnosis(maHS) {
       return this.firstDiagnoses[maHS] || 'Chưa có lần khám';
     },
-
     async get_examination(maHS) {
       try {
         this.record.maHS = maHS;
-        this.record.date = new Date().toISOString().split('T')[0];
+        this.record.date = new Date().toLocaleDateString('vi-VN');
         this.list_examination = await examinationSevice.get_profile(maHS);
         for (let exam of this.list_examination) {
           const prescriptions = await prescriptionService.get_exam(exam.maLanKham);
@@ -299,7 +405,7 @@ export default {
     },
     async create_record() {
       try {
-        let date = new Date().toISOString().split('T')[0];
+        let date = new Date().toLocaleDateString('vi-VN');
         let exam = {
           maBN: this.patient.maBN,
           ngaylapHS: date,
@@ -347,12 +453,23 @@ export default {
         console.log('Lỗi khi thêm lần khám:', error);
       }
     },
+    async submit_editPatient() {
+      try {
+        await patientService.update(this.editForm.maBN, this.editForm);
+        alert('Cập nhật thông tin bệnh nhân thành công!');
+        this.$emit('update:patient', this.editForm);
+        // this.editPatientModal.hide();
+      } catch (error) {
+        alert('Cập nhật thông tin bệnh nhân không thành công!');
+        console.log('Lỗi khi cập nhật thông tin bệnh nhân:', error);
+      }
+    },
     resetForm() {
       this.form = {
         maHoSo: this.record.maHS,
         maBacSi: this.doctor.maBS,
         soThuTu: null,
-        ngayKham: new Date().toISOString().split('T')[0],
+        ngayKham: new Date().toLocaleDateString('vi-VN'),
         trieuChung: '',
         thuTucKham: '',
         chuanDoan: '',
@@ -409,6 +526,16 @@ textarea.form-control {
 .btn-success:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
+}
+.btn-secondary {
+  background-color: #6c757d;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 6px;
+}
+.btn-secondary:hover {
+  background-color: #5a6268;
 }
 .row {
   margin-bottom: 1rem;

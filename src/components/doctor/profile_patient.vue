@@ -1,80 +1,70 @@
 <template>
-    <div class="container-xl px-4 mt-4">
-      <hr class="mt-0 mb-4">
-      <div class="row">
-        <div class="col-xl-4">
-          <!-- Profile picture card-->
-          <div class="card mb-4 mb-xl-0">
-            <div class="card-header">Profile Picture</div>
-            <div class="card-body text-center">
-              <img class="img-account-profile rounded-circle mb-2" src="http://bootdey.com/img/Content/avatar/avatar1.png" alt="">
-              <div class="small font-italic text-muted mb-4">JPG or PNG no larger than 5 MB</div>
-              <button class="btn btn-primary" type="button">Upload new image</button>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-8">
-          <!-- Account details card-->
-          <div class="card mb-4">
-            <div class="card-header">Account Details</div>
-            <div class="card-body">
-              <form @submit.prevent="create_patient">
-                <div class="row gx-3 mb-3">
-                  <div class="col-md-6">
-                    <label class="small mb-1" for="Name">Họ tên bệnh nhân:</label>
-                    <input class="form-control" id="Name" type="text" placeholder="Họ và tên" v-model="patient.hotenBN" required>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="small mb-1" for="cccd">Số CCCD:</label>
-                    <input class="form-control" id="cccd" type="text" placeholder="CCCD" v-model="patient.cccdBN" required>
-                  </div>
-                </div>
-                <div class="row gx-3 mb-3">
-                  <div class="col-md-6">
-                    <label class="small mb-1" for="born">Ngày sinh:</label>
-                    <input class="form-control" id="born" type="date" v-model="patient.ngaysinhBN" required>
-                  </div>
-                  <div class="col-md-6">
-                    <label class="small mb-1" for="phone">Số điện thoại:</label>
-                    <input class="form-control" id="phone" type="text" placeholder="09*/03*..." v-model="patient.sdtBN" required>
-                  </div>
+  <div class="container-xl px-4 mt-4">
+    <hr class="mt-0 mb-4">
+    <div class="row">
+      <div class="col-xl-8 mx-auto">
+        <!-- Account details card-->
+        <div class="card mb-4">
+          <div class="card-header">Account Details</div>
+          <div class="card-body d-flex flex-column align-items-center">
+            <form @submit.prevent="create_patient" class="w-100">
+              <div class="row gx-3 mb-3">
+                <div class="col-md-6">
+                  <label class="small mb-1" for="Name">Họ tên bệnh nhân:</label>
+                  <input class="form-control" id="Name" type="text" placeholder="Họ và tên" v-model="patient.hotenBN" required>
                 </div>
                 <div class="col-md-6">
-                  <label class="small mb-1" for="bhyt">Số BHYT:</label>
-                  <input class="form-control" id="bhyt" type="text" placeholder="Số BHYT" v-model="patient.soBHYT">
+                  <label class="small mb-1" for="cccd">Số CCCD:</label>
+                  <input class="form-control" id="cccd" type="text" placeholder="CCCD" v-model="patient.cccdBN" required>
                 </div>
-                <div class="mb-3">
-                  <label class="small mb-1" for="Address">Địa chỉ:</label>
-                  <input class="form-control" id="Address" placeholder="Địa chỉ" v-model="patient.diachiBN" required>
+              </div>
+              <div class="row gx-3 mb-3">
+                <div class="col-md-6">
+                  <label class="small mb-1" for="born">Ngày sinh:</label>
+                  <input class="form-control" id="born" type="date" v-model="patient.ngaysinhBN" required>
                 </div>
-                <div class="mb-3">
-                  <label class="small mb-1" for="Email">Email:</label>
-                  <input class="form-control" id="Email" type="email" placeholder="name@example.com" v-model="patient.emailBN">
+                <div class="col-md-6">
+                  <label class="small mb-1" for="phone">Số điện thoại:</label>
+                  <input class="form-control" id="phone" type="text" placeholder="09*/03*..." v-model="patient.sdtBN" required>
                 </div>
-                <div class="row gx-3 mb-3">
-                  <div class="col-md-2">
-                    <label class="small mb-1" for="height">Chiều cao (cm):</label>
-                    <input class="form-control" id="height" type="number" placeholder="cm" v-model="patient.chieucao">
-                  </div>
-                  <div class="col-md-2">
-                    <label class="small mb-1" for="weight">Cân nặng (kg):</label>
-                    <input class="form-control" id="weight" type="number" placeholder="kg" v-model="patient.cannang">
-                  </div>
-                  <div class="col-md-2">
-                    <label class="small mb-1" for="type">Nhóm máu:</label>
-                    <input class="form-control" id="type" type="text" placeholder="" v-model="patient.nhommau">
-                  </div>
+              </div>
+              <div class="mb-3">
+                <label class="small mb-1" for="bhyt">Số BHYT:</label>
+                <input class="form-control" id="bhyt" type="text" placeholder="Số BHYT" v-model="patient.soBHYT">
+              </div>
+              <div class="mb-3">
+                <label class="small mb-1" for="Address">Địa chỉ:</label>
+                <input class="form-control" id="Address" placeholder="Địa chỉ" v-model="patient.diachiBN" required>
+              </div>
+              <div class="mb-3">
+                <label class="small mb-1" for="Email">Email:</label>
+                <input class="form-control" id="Email" type="email" placeholder="name@example.com" v-model="patient.emailBN">
+              </div>
+              <div class="row gx-3 mb-3">
+                <div class="col-md-4">
+                  <label class="small mb-1" for="height">Chiều cao (cm):</label>
+                  <input class="form-control" id="height" type="number" placeholder="cm" v-model="patient.chieucao">
                 </div>
-                <!-- <button class="btn btn-primary" type="button" @click="create_patient">Save changes</button> -->
-                <button class="btn btn-warning mx-3" type="button" :disabled="!isFormValid" @click="create_patient">Lưu và Khám bệnh</button>
-              </form>
-            </div>
+                <div class="col-md-4">
+                  <label class="small mb-1" for="weight">Cân nặng (kg):</label>
+                  <input class="form-control" id="weight" type="number" placeholder="kg" v-model="patient.cannang">
+                </div>
+                <div class="col-md-4">
+                  <label class="small mb-1" for="type">Nhóm máu:</label>
+                  <input class="form-control" id="type" type="text" placeholder="" v-model="patient.nhommau">
+                </div>
+              </div>
+              <div class="text-center">
+                <button class="btn btn-warning" type="button" :disabled="!isFormValid" @click="create_patient">Lưu và Khám bệnh</button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
     </div>
-  </template>
-  
+  </div>
+</template>
+
   <script>
   import patientService from '../../services/patient.service';
   

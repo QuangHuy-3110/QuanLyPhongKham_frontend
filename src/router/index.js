@@ -4,9 +4,8 @@ import { useAuthStore } from '@/stores/authStore';
 import Doctor from "@/views/doctor.vue";
 import Patient from "@/views/patient.vue";
 import Admin from "@/views/admin.vue";
-import Register from "@/views/register.vue"
-import Login from "@/views/Login.vue"
-
+import Register from "@/views/register.vue";
+import Login from "@/views/Login.vue";
 import NotFound from "@/views/NotFound.vue";
 
 const routes = [
@@ -15,40 +14,34 @@ const routes = [
     name: "loginform",
     component: Login,
   },
-
   {
     path: "/register",
     name: "registerform",
     component: Register,
   },
-
   {
     path: "/doctor/",
     name: "doctor",
     component: Doctor,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, role: 'doctor' },
   },
-
   {
     path: "/admin/",
     name: "admin",
     component: Admin,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, role: 'admin' },
   },
-
   {
     path: "/",
     name: "patient",
     component: Patient,
-    // meta: { requiresAuth: true },
+    // meta: { requiresAuth: true, role: 'benhnhan' },
   },
-  
   {
     path: "/:pathMatch(.*)*",
     name: "notfound",
     component: NotFound,
   },
-
 ];
 
 const router = createRouter({
@@ -56,15 +49,21 @@ const router = createRouter({
   routes,
 });
 
-// router.beforeEach((to, from, next) => {
-//   const authStore = useAuthStore();
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore();
   
-//   if (to.meta.requiresAuth && !authStore.user) {
-//     // Nếu trang yêu cầu đăng nhập nhưng người dùng chưa đăng nhập, chuyển hướng về trang login
-//     next({ name: 'patient' });
-//   } else {
-//     next(); // Nếu không có yêu cầu đăng nhập hoặc người dùng đã đăng nhập, tiếp tục
-//   }
-// });
+  if (to.meta.requiresAuth) {
+    if (!authStore.user) {
+      next({ name: 'loginform' }); // Chuyển hướng về login nếu chưa đăng nhập
+    } else if (to.meta.role && authStore.user.role !== to.meta.role) {
+      // Chuyển hướng nếu vai trò không khớp
+      next({ name: authStore.user.role === 'benhnhan' ? 'patient' : authStore.user.role });
+    } else {
+      next(); // Cho phép truy cập nếu đã đăng nhập và vai trò khớp
+    }
+  } else {
+    next(); // Cho phép truy cập các trang không yêu cầu xác thực
+  }
+});
 
 export default router;
