@@ -29,7 +29,7 @@
     <TableForm
       v-if="nav_value === 'benhnhan' && show !== 'add_patient' && activeIndex === -1"
       :array="{ list: list_patient }"
-      :columns="patientColumns"
+      :columns="patientColumns" 
       v-model:activeIndex="activeIndex"
     />
 
@@ -53,6 +53,7 @@
       v-model:activeIndex="activeIndex"
       data-bs-toggle="modal"
       data-bs-target="#exampleModal"
+      @update:appointment="get_list_appointment"
     />
 
     <Examination
@@ -60,7 +61,7 @@
       @close:examination="close_examination"
       :patient="patient"
       :doctor="doctor"
-      :role="role"
+      :role="role_fake"
       @update:patient="get_listPatient"
     />
   </main>
@@ -97,6 +98,7 @@ export default {
   data() {
     return {
       wsService: new WebSocketService(), // Khởi tạo WebSocketService
+      role_fake: 'doctor',
       wsMessages: [],
       show: '',
       activeIndex: -1,
@@ -120,6 +122,7 @@ export default {
         { key: 'ngaythangnam', header: 'Ngày đặt lịch' },
         { key: 'khunggio', header: 'Khung giờ hẹn' },
         { key: 'mota', header: 'Mô tả' },
+        { key: 'trangthai', header: 'Trạng thái' },
       ],
       working_time: [],
       working_timeColumns: [
@@ -164,8 +167,9 @@ export default {
 
   methods: {
 
-    check_profile(maBN) {
+    check_profile(maBN, role) {
       this.check = 'see';
+      this.role_fake = role;
       this.patient = this.list_patient.find(item => item.maBN === maBN);
       console.log('Checking profile for patient:', this.patient);
     },

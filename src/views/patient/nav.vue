@@ -27,7 +27,7 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <!-- Left links -->
         <ul class="navbar-nav d-flex justify-content-evenly w-100 mb-2 mb-lg-0">
-          <li class="nav-item">
+          <li class="nav-item" v-if="isAuthenticated">
             <a class="nav-link d-flex flex-column align-items-center text-center"
                :class="{ 'active': activeNav === 'trangchu' }" href="#"
                @click.prevent="changeNav_value('trangchu')">
@@ -59,18 +59,18 @@
               <span class="small">Lịch hẹn</span>
             </a>
           </li>
-          <router-link
-              v-if="!isAuthenticated"
-              :to="{ name: 'loginform' }"
-              class="btn btn-primary btn-lg d-flex align-items-center gap-2">
-            Đăng nhập
-          </router-link>
-          <router-link
-              v-if="!isAuthenticated"
-              :to="{ name: 'registerform' }"
-              class="btn btn-secondary btn-lg d-flex align-items-center gap-2">
-            Đăng ký
-          </router-link>
+          <div v-if="!isAuthenticated" class="ms-auto d-flex gap-3">
+            <router-link
+                :to="{ name: 'loginform' }"
+                class="btn btn-primary btn-lg d-flex align-items-center gap-2">
+              Đăng nhập
+            </router-link>
+            <router-link
+                :to="{ name: 'registerform' }"
+                class="btn btn-secondary btn-lg d-flex align-items-center gap-2">
+              Đăng ký
+            </router-link>
+          </div>
           <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#staticBackdropmk"
                   v-if="isAuthenticated" @click="openModal">Đổi mật khẩu</button>
           <button class="btn btn-warning" @click.prevent="logout" v-if="isAuthenticated">Đăng xuất</button>
@@ -126,8 +126,8 @@
           </div>
         </ul>
       </div>
-      </div>
-    </nav>
+    </div>
+  </nav>
 </template>
 
 <script>

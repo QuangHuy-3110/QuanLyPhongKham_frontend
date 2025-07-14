@@ -30,6 +30,10 @@
                                    @click="changeNav_value('xemlichBS')">
                                     <i class="bi bi-calendar-check me-2"></i> <span class="fs-6 text-dark">Xem lịch làm việc</span>
                                 </a>
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                   @click="changeNav_value('xemBS_Xoa')">
+                                    <i class="fa-solid fa-trash-can-arrow-up me-2"></i><span class="fs-6 text-dark">Xem bác sĩ đã xóa</span>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -49,6 +53,10 @@
                                 <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
                                    @click="changeNav_value('xemBN')">
                                     <i class="bi bi-list-ul me-2"></i> <span class="fs-6 text-dark">Xem danh sách bệnh nhân</span>
+                                </a>
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                   @click="changeNav_value('xemBN_Xoa')">
+                                    <i class="fa-solid fa-trash-can-arrow-up me-2"></i> <span class="fs-6 text-dark">Xem bệnh nhân đã xóa</span>
                                 </a>
                             </div>
                         </div>
@@ -77,6 +85,10 @@
                                 <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
                                    @click="changeNav_value('xemThuocmin')">
                                     <i class="bi bi-exclamation-triangle me-2"></i> <span class="fs-6 text-dark">Xem danh sách thuốc gần hết</span>
+                                </a>
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                   @click="changeNav_value('xemThuoc_Xoa')">
+                                    <i class="fa-solid fa-trash-can-arrow-up me-2"></i> <span class="fs-6 text-dark">Xem thuốc đã xóa</span>
                                 </a>
                             </div>
                         </div>
@@ -121,6 +133,10 @@
                                 <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
                                    @click="changeNav_value('xemBAn')">
                                     <i class="bi bi-list-ul me-2"></i> <span class="fs-6 text-dark">Xem hồ sơ bệnh án</span>
+                                </a>
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                   @click="changeNav_value('xemBAn_Xoa')">
+                                    <i class="fa-solid fa-trash-can-arrow-up me-2"></i> <span class="fs-6 text-dark">Xem hồ sơ bệnh án đã xóa</span>
                                 </a>
                             </div>
                         </div>

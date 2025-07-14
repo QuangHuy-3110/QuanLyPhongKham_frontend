@@ -13,7 +13,7 @@
         </button>
         <div class="card-body">
         <h4 class="card-title fw-bold pb-3">THÔNG TIN BỆNH NHÂN</h4>
-        <div class="row pb-3">
+        <div class="row pb-2">
             <div class="col-md-6">
                 <p><strong>Mã bệnh nhân:</strong> {{ patient.maBN }}</p>
                 <p><strong>CCCD:</strong> {{ patient.cccdBN }}</p>
@@ -42,7 +42,22 @@
                 <p><strong>Nhóm máu:</strong> {{ patient.nhommau }}</p>
             </div>
         </div>
-        
+        <div style="float: right;">
+            <button type="button" class="btn btn-danger" title="Xóa"
+              v-if="name === 'Danh sách hồ sơ bệnh án'"
+              @click="deleteRecord(record)">
+            >
+              <i class="fa-solid fa-trash"></i>
+            </button>
+
+            <button type="button" class="btn btn-success m-2"
+              v-if="name === 'Danh sách hồ sơ bệnh án đã xóa'"
+              @click="restore(record)"
+            >
+                <i class="fa-solid fa-reply"></i>
+                Khôi phục
+              </button>
+        </div>
         </div>
     </div>
   
@@ -74,7 +89,11 @@
                   >
                     Xem chi tiết
                   </button>
-                  <button type="button" class="btn btn-danger m-2"><i class="fa-solid fa-trash"></i></button>
+                  <button type="button" class="btn btn-danger m-2"
+                  @click="deleteExam(exam)"
+                  >
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
                 </div>
               </div>
             </div>
@@ -107,7 +126,11 @@
                 </tbody>
 
               </table>
-              <button type="button" class="btn btn-danger m-2" style="float: right"><i class="fa-solid fa-trash"></i></button>
+              <button type="button" class="btn btn-danger m-2" style="float: right"
+                @click="deletePre(selectedExamination)"
+              >
+                <i class="fa-solid fa-trash"></i>
+              </button>
             </div>
           </div>
           <div v-else class="text-muted">
@@ -153,11 +176,14 @@
   <script>
 
   import examinationService from '../../services/examination.sevice'
+  import recordService from '../../services/record.service';
+  import prescriptionService from '../../services/prescription.service';
 
   export default {
     emits: ['update:activeIndex'],
 
     props: {
+        name: {type: String, required: true},
         patient: {type:Object, required: true},
         record: {type:Object, required: true},
         prescriptions: {type: Array, required: true}
@@ -190,6 +216,85 @@
 
         async selectExamination(exam) {
             this.selectedExamination = exam;
+        },
+
+        async restore(record) {
+            try {
+              record = this.formatEditRow(record);
+              record.xoa = 0; // Đặt trường xóa về 0
+              await recordService.update(record.maHS, record);
+              this.$emit('update:array'); // Cập nhật danh sách hồ sơ
+              alert("Khôi phục thành công hồ sơ!");
+              this.close_tab(); // Đóng tab hiện tại
+            } catch (error) {
+                console.error("Lỗi khi khôi phục hồ sơ:", error);
+            }
+        },
+
+        async deletePre(exam) {
+            try {
+              let prescriptions = this.prescriptions.filter(p => p.maLanKham === exam.maLanKham);
+              for (let prescription of prescriptions) {
+                await prescriptionService.delete(prescription.maLanKham, prescription.maThuoc);
+              }
+            
+              this.$emit('update:prescriptions'); // Cập nhật danh sách hồ sơ
+              alert("Xóa thành công toa thuốc!");
+              this.selectedExamination = null; // Reset selected examination
+            } catch (error) {
+                console.error("Lỗi khi xóa hồ sơ:", error);
+            }
+        },
+
+        async deleteExam(exam) {
+            try{
+              let prescriptions = this.prescriptions.filter(p => p.maLanKham === exam.maLanKham);
+              for (let prescription of prescriptions) {
+                await prescriptionService.delete(prescription.maLanKham, prescription.maThuoc);
+              }
+              await examinationService.delete(exam.maLanKham);
+              alert("Xóa thành công lần khám!");
+              this.examinations = this.examinations.filter(e => e.maLanKham !== exam.maLanKham);
+            }catch (error) {
+              console.error("Lỗi khi xóa lần khám:", error);
+              alert("Lỗi khi xóa lần khám!");
+            }
+        },
+
+        isDateField(key, value) {
+          return typeof value === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z/.test(value);
+        },
+
+        formatEditRow(row) {
+          const formattedRow = { ...row };
+          Object.keys(formattedRow).forEach((key) => {
+            if (this.isDateField(key, formattedRow[key])) {
+              const date = new Date(formattedRow[key]);
+              if (!isNaN(date)) {
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                formattedRow[key] = `${year}-${month}-${day}`;
+              }
+            }
+          });
+          return formattedRow;
+        },
+
+        async deleteRecord(hoso) {
+            try {
+              hoso = this.formatEditRow(hoso);
+              hoso.xoa = 1
+              await recordService.update(hoso.maHS, hoso);
+              // // this.examinations.splice(index, 1);
+              this.selectedExamination = null; // Reset selected examination
+              this.$emit('update:array'); // Close the tab
+              console.log("Xóa thành công hồ sơ:", hoso.maHS);
+              alert("Xóa thành công hồ sơ!");
+              this.close_tab();
+            } catch (error) {
+                console.error("Lỗi khi xóa lần khám:", error);
+            }
         },
 
         openDetailModal(exam) {

@@ -1,35 +1,61 @@
 <template>
   <div class="modal-header">
-    <h5 class="modal-title">Thông tin bệnh nhân</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="close_tab"></button>
+    <h4 class="card-title fw-bold p-4 text-center">THÔNG TIN BỆNH NHÂN</h4>
+
+    <button type="button" class="btn-close me-3" 
+      style="width: 20px; height: 20px; font-size: 1.5rem;"
+      data-bs-dismiss="modal" aria-label="Close" @click="close_tab">
+    </button>
+
   </div>
   <hr>
-  <div class="container">
-    <button class="btn btn-primary" style="float: right" data-bs-toggle="modal" data-bs-target="#editPatientModal">
-      <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
-    </button>
-    <div class="d-flex align-items-center gap-4">
-      <div>
-        <p class="d-flex gap-5 my-3">
-          <span><b>Họ và tên:</b> {{ patient.hotenBN }}</span>
-          <span><b>CCCD:</b> {{ patient.cccdBN }}</span>
-          <span><b>SĐT:</b> {{ patient.sdtBN }}</span>
-        </p>
-        <p class="d-flex gap-5 my-4">
-          <span><b>Địa chỉ:</b> {{ patient.diachiBN }}</span>
-          <span><b>Email:</b> {{ patient.emailBN }}</span>
-          <span><b>Số bảo hiểm y tế:</b> {{ patient.soBHYT }}</span>
-        </p>
-        <p class="d-flex gap-5 my-3">
-          <span><b>Ngày sinh:</b> {{ formatDate(patient.ngaysinhBN) }}</span>
-          <span><b>Chiều cao:</b> {{ patient.chieucao }}</span>
-          <span><b>Cân nặng:</b> {{ patient.cannang }}</span>
-          <span><b>Nhóm máu:</b> {{ patient.nhommau }}</span>
-        </p>
+  <div class="card position-relative">
+    <div class="card-body">
+    <div>
+      <button class="btn btn-light" style="float: right" data-bs-toggle="modal" data-bs-target="#editPatientModal">
+        <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
+      </button>
+    </div>
+    
+      <div class="row pb-1">
+        <div class="col-md-4">
+          <p class="mb-4"><strong>Mã bệnh nhân:</strong> {{ patient.maBN }}</p>
+          <p class="mb-4"><strong>Số BHYT:</strong> {{ patient.soBHYT }}</p>
+          <p class="mb-4"><strong>Số điện thoại:</strong> {{ patient.sdtBN }}</p>
+        </div>
+
+        <div class="col-md-4">
+          <p class="mb-4"><strong>Tên Bệnh Nhân:</strong> {{ patient.hotenBN }}</p>
+          <p class="mb-4"><strong>Ngày Sinh:</strong> {{ formatDate(patient.ngaysinhBN) }}</p>
+          <p><strong>Email:</strong> {{ patient.emailBN }}</p>
+        </div>
+
+        <div class="col-md-4">
+          <p class="mb-4"><strong>CCCD:</strong> {{ patient.cccdBN }}</p>
+          <p><strong>Địa Chỉ:</strong> {{ patient.diachiBN }}</p>
+        </div>
       </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <p><strong>Chiều cao:</strong> {{ patient.chieucao }} cm</p>
+            </div>
+
+            <div class="col-md-4">
+                <p><strong>Cân nặng:</strong> {{ patient.cannang }} kg</p>
+            </div>
+
+            <div class="col-md-4">
+                <p><strong>Nhóm máu:</strong> {{ patient.nhommau }}</p>
+            </div>
+        </div>
+      <!-- </div> -->
+    <!-- </div> -->
     </div>
   </div>
+
   <hr>
+
   <div class="container">
     <div class="row">
       <div class="col-md-6 scrollable-column">

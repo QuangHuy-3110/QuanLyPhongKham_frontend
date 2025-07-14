@@ -51,7 +51,7 @@
             <th v-for="col in columns" :key="col.key" scope="col" class="px-4 py-3 min-w-[100px]">
               {{ col.header }}
             </th>
-            <th scope="col" class="px-4 py-3 w-[80px] text-center"></th>
+            <!-- <th scope="col" class="px-4 py-3 w-[80px] text-center"></th> -->
           </tr>
         </thead>
         <tbody id="tbody">
@@ -64,7 +64,7 @@
             <td v-for="col in columns" :key="col.key" class="px-4 py-4">
               {{ formatValue(row[col.key], col.key) }}
             </td>
-            <td class="px-4 py-4 text-center">
+            <!-- <td class="px-4 py-4 text-center">
               <button
                 type="button"
                 class="btn btn-danger btn-sm"
@@ -75,7 +75,7 @@
               >
                 <i class="fa-solid fa-trash"></i>
               </button>
-            </td>
+            </td> -->
           </tr>
           <tr v-if="!filteredList || filteredList.length === 0">
             <td :colspan="columns.length + 1" class="px-4 py-4 text-center">Không có dữ liệu</td>

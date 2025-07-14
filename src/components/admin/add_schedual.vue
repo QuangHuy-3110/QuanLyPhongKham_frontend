@@ -117,6 +117,7 @@
 <script>
 import workingTimeService from '../../services/working_time.service'
 export default {
+  emits: ['formSubmitted'],
   props :{
     doctors: {type: Array, required: true}
   },
@@ -250,6 +251,7 @@ export default {
         }
         console.log('===========================');
         alert('Lưu lịch làm việc thành công!');
+        this.$emit('formSubmitted');
         this.resetForm();
       } else {
         form.classList.add('was-validated');

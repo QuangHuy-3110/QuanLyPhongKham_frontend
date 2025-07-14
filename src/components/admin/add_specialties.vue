@@ -59,6 +59,7 @@
         }
       };
     },
+    emits: ['formSubmitted'],
     methods: {
       async submitForm() {
         const form = document.getElementById('specialtyForm');
@@ -75,6 +76,7 @@
             tenCK: ''
           };
           form.classList.remove('was-validated');
+          this.$emit('formSubmitted'); // Emit sự kiện formSubmitted sau khi thêm thành công
         } else {
           form.classList.add('was-validated');
         }

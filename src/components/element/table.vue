@@ -69,8 +69,9 @@
             </div>
           </div>
           <div class="modal-footer">
+            <button v-if="role !== 'patient'" type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="check_profile(filteredList[activeIndex], 'patient')">Xem hồ sơ bệnh nhân</button>
+            <button v-if="role !== 'patient' && filteredList[activeIndex] && isToday(filteredList[activeIndex].ngaythangnam)" type="button" class="btn btn-warning" data-bs-dismiss="modal" @click="check_profile(filteredList[activeIndex], 'doctor')">Khám bệnh</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-            <button v-if="role !== 'patient'" type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="check_profile(filteredList[activeIndex].maBN)">Xem hồ sơ bệnh nhân</button>
           </div>
         </div>
       </div>
@@ -79,6 +80,7 @@
 </template>
 
 <script>
+import AppointmentService from '@/services/appointment.service';
 export default {
   props: {
     array: {
@@ -119,7 +121,7 @@ export default {
       default: {},
     },
   },
-  emits: ["update:activeIndex", "check-profile"],
+  emits: ["update:activeIndex", "check-profile", "update:appointment"],
   data() {
     return {
       filterDate: new Date().toISOString().split('T')[0], // Ngày hiện tại (YYYY-MM-DD)
@@ -141,10 +143,42 @@ export default {
     }
   },
   methods: {
-    check_profile(maBN) {
-      this.$emit('check-profile', maBN);
+    async check_profile(appointment, role) {
+      if (role === 'doctor') {
+        try{
+          if(!confirm('Bạn có chắc chắn muốn khám bệnh cho bệnh nhân này?')) return;
+          appointment = this.formatEditRow(appointment);
+          appointment.trangthai = 'DaKham';
+          await AppointmentService.update(appointment.mahen, appointment);
+          this.$emit('update:appointment')
+        }catch (error) {
+          console.error("Error updating appointment status:", error);
+        }
+      } 
+      this.$emit('check-profile', appointment.maBN, role);
       // console.log('Checking profile for patient:', maBN);
     },
+
+    isDateField(key, value) {
+          return typeof value === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z/.test(value);
+        },
+
+    formatEditRow(row) {
+      const formattedRow = { ...row };
+      Object.keys(formattedRow).forEach((key) => {
+        if (this.isDateField(key, formattedRow[key])) {
+          const date = new Date(formattedRow[key]);
+          if (!isNaN(date)) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            formattedRow[key] = `${year}-${month}-${day}`;
+          }
+        }
+      });
+      return formattedRow;
+    },
+
     formatDate(date) {
       if (!date) return '';
       const d = new Date(date);
@@ -156,6 +190,12 @@ export default {
     },
     resetFilterDate() {
       this.filterDate = new Date().toISOString().split('T')[0];
+    },
+    isToday(date) {
+      if (!date) return false;
+      const today = new Date().toISOString().split('T')[0];
+      const appointmentDate = new Date(date).toISOString().split('T')[0];
+      return appointmentDate === today;
     }
   }
 };

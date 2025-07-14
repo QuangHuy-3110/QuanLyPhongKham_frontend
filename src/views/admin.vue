@@ -11,18 +11,29 @@
                 @change:nav_value="changeNav_value"/>
 
                 <!-- Thêm bác sĩ -->
-                <Add_doctor style="max-width: 1100px;" v-if="nav_value === 'themBS'"/>
+                <Add_doctor style="max-width: 1100px;" v-if="nav_value === 'themBS'"
+                @formSubmitted="get_doctors"/>
 
                 <!-- Xem danh sách bác sĩ -->
                 <See_Table style="max-width: 1200px;" v-if="nav_value === 'xemBS'"
                 :name="'Xem danh sách bác sĩ'"
                 :array="{list: doctors}"
                 :columns="doctorColumns"
-                :columns_full="doctorColumns_full"/>
+                :columns_full="doctorColumns_full"
+                @update:array="get_doctors"/>
+
+                <!-- Xem danh sách bác sĩ đã xóa -->
+                <See_Table style="max-width: 1200px;" v-if="nav_value === 'xemBS_Xoa'"
+                :name="'Xem danh sách bác sĩ đã xóa'"
+                :array="{list: doctors_del}"
+                :columns="doctorColumns"
+                :columns_full="doctorColumns_full"
+                @update:array="get_doctors"/>
 
                 <!-- Thêm lịch làm việc cho bác sĩ -->
                 <Add_schedual style="max-width: 1100px;" v-if="nav_value === 'themlichBS'"
-                :doctors="doctors"/>
+                :doctors="doctors"
+                @formSubmitted="get_schedules"/>
 
                 <!-- Xem lịch làm việc -->
                 <Work_schedule style="max-width: 1100px;" v-if="nav_value === 'xemlichBS'"
@@ -36,27 +47,48 @@
                 :name="'Danh sách bệnh nhân'"
                 :array="{list: patients}"
                 :columns="patientColumns"
-                :columns_full="patientColumns_full"/>
+                :columns_full="patientColumns_full"
+                @update:array="get_patients"/>
+
+                <!-- Xem danh sách bệnh nhân đã xóa-->
+                <See_Table style="max-width: 1100px;" v-if="nav_value === 'xemBN_Xoa'"
+                :name="'Danh sách bệnh nhân đã xóa'"
+                :array="{list: patients_del}"
+                :columns="patientColumns"
+                :columns_full="patientColumns_full"
+                @update:array="get_patients"/>
 
                 <!-- Thêm thuốc -->
-                <Add_Medicine style="max-width: 1100px;" v-if="nav_value === 'themThuoc'"/>
+                <Add_Medicine style="max-width: 1100px;" v-if="nav_value === 'themThuoc'"
+                @formSubmitted="get_medicines"/>
 
                 <!-- Xem danh sách thuốc -->
                 <See_Table style="max-width: 1100px;" v-if="nav_value === 'xemThuoc'"
                 :name="'Danh sách thuốc'"
                 :array="{list: medicines}"
                 :columns="medicineColumns"
-                :columns_full="medicineColumns_full"/>
+                :columns_full="medicineColumns_full"
+                @update:array="get_medicines"/>
 
                 <!-- Xem danh sách thuốc gần hết -->
                 <See_Table style="max-width: 1100px;" v-if="nav_value === 'xemThuocmin'"
                 :name="'Danh sách thuốc gần hết'"
                 :array="{list: medicines_min}"
                 :columns="medicineColumns"
-                :columns_full="medicineColumns_full"/>
+                :columns_full="medicineColumns_full"
+                @update:array="get_medicines"/>
+
+                <!-- Xem danh sách thuốc đã xóa -->
+                <See_Table style="max-width: 1100px;" v-if="nav_value === 'xemThuoc_Xoa'"
+                :name="'Danh sách thuốc đã xóa'"
+                :array="{list: medicines_del}"
+                :columns="medicineColumns"
+                :columns_full="medicineColumns_full"
+                @update:array="get_medicines"/>
 
                 <!-- Thêm chuyên khoa -->
-                <Add_specialties style="max-width: 1100px;" v-if="nav_value === 'themCK'"/>
+                <Add_specialties style="max-width: 1100px;" v-if="nav_value === 'themCK'"
+                @formSubmitted="get_specialties"/>
 
                 <!-- Xem danh sách chuyên khoa -->
                 <See_Table style="max-width: 1100px;" v-if="nav_value === 'xemCK'"
@@ -73,12 +105,33 @@
                 :columns_full="recordColumns_full"
                 @update:activeIndex="update_activeIndex"/>
 
-                <Infoexam style="max-width: 1100px;" v-if="active_index !== -1"
+                <Infoexam style="max-width: 1100px;" v-if="active_index !== -1 && nav_value === 'xemBAn'"
+                :name="'Danh sách hồ sơ bệnh án'"
                 @update:activeIndex="update_activeIndex"
                 :record="records[active_index]"
                 :patient="patient"
                 :columns_full="patientColumns_full"
-                :prescriptions="prescriptions"/>
+                :prescriptions="prescriptions"
+                @update:array="get_records"
+                @update:prescriptions="get_prescriptions"/>
+
+                <!-- Xem danh sách hồ sơ bệnh án đã xóa -->
+                <Table_exam style="max-width: 1100px;" v-if="nav_value === 'xemBAn_Xoa' && active_index === -1"
+                :name="'Danh sách hồ sơ bệnh án đã xóa'"
+                :array="{list: records_del}"
+                :columns="recordColumns"
+                :columns_full="recordColumns_full"
+                @update:activeIndex="update_activeIndex"/>
+
+                <Infoexam style="max-width: 1100px;" v-if="active_index !== -1 && nav_value === 'xemBAn_Xoa'"
+                :name="'Danh sách hồ sơ bệnh án đã xóa'"
+                @update:activeIndex="update_activeIndex"
+                :record="records_del[active_index]"
+                :patient="patient"
+                :columns_full="patientColumns_full"
+                :prescriptions="prescriptions"
+                @update:array="get_records"
+                @update:prescriptions="get_prescriptions"/>
 
                 <!-- Xử lý lịch hẹn -->
                 <See_Table style="max-width: 1100px;" v-if="nav_value === 'xulyLH'"
@@ -94,7 +147,7 @@
                 :array="{list: appointments}"
                 :columns="appointmentsColumns"
                 :columns_full="appointmentsColumns_full"
-                @update:array="updateArray"/>
+                @update:array="get_appointment"/>
 
             </div>
         </div>
@@ -143,6 +196,10 @@ export default {
     data() {
         return {
             wsService: new WebSocketService(), // Khởi tạo WebSocketService
+            records_del: [],
+            medicines_del: [],
+            patients_del: [],
+            doctors_del: [],
             wsMessages: [],
             nav_value: '',
             name: '',
@@ -374,9 +431,27 @@ export default {
         update_activeIndex(index){
             this.active_index = index
             if(index !== -1){
-                this.patient = this.patients.filter(
-                    patient => patient.maBN == this.records[index].maBN
-                );
+                if(this.nav_value === 'xemBAn'){
+                    // Lấy thông tin bệnh nhân từ danh sách bệnh nhân
+                    let patient_live = this.patients.filter(
+                        patient => patient.maBN == this.records[index].maBN
+                    );
+                    
+                    let patient_del = this.patients_del.filter(
+                        patient => patient.maBN == this.records[index].maBN
+                    );
+                    this.patient = patient_live.length > 0 ? patient_live : patient_del;
+                } else if(this.nav_value === 'xemBAn_Xoa'){
+                    // Lấy thông tin bệnh nhân từ danh sách bệnh nhân đã xóa
+                    let patient_del = this.patients_del.filter(
+                        patient => patient.maBN == this.records_del[index].maBN
+                    );
+
+                    let patient_live = this.patients.filter(
+                        patient => patient.maBN == this.records_del[index].maBN
+                    );
+                    this.patient = patient_del.length > 0 ? patient_del : patient_live;
+                } 
                 this.patient = this.patient[0]
             }
         },
@@ -423,6 +498,7 @@ export default {
         async get_records() {
             try {
                 this.records = await recordService.getAll();
+                this.records_del = await recordService.getDel();
             } catch (error) {
                 console.log("Lấy danh sách hồ sơ khám bệnh không thành công:", error);
             }
@@ -435,6 +511,8 @@ export default {
                 this.medicines_min = this.medicines.filter(
                     medicine => medicine.soluongThuoc <= medicine.soluong_minThuoc
                 );
+                // Lấy danh sách thuốc đã xóa
+                this.medicines_del = await drugService.getDel();
             } catch (error) {
                 console.log("Lấy danh sách thuốc không thành công:", error);
             }
@@ -443,6 +521,7 @@ export default {
         async get_doctors(){
             try{
                 this.doctors = await doctorService.getAll()
+                this.doctors_del = await doctorService.getDel();
             }catch (error){
                 console.log("Lấy danh sách bác sĩ không thành công:", error)
             }
@@ -451,6 +530,7 @@ export default {
         async get_patients(){
             try{
                 this.patients = await patientService.getAll()
+                this.patients_del = await patientService.getDel();
             }catch (error){
                 console.log("Lấy danh sách bệnh nhân không thành công:", error)
             }

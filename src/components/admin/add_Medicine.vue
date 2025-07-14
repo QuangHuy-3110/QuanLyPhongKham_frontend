@@ -135,6 +135,9 @@ export default {
       }
     };
   },
+
+  emits: ['formSubmitted'],
+
   methods: {
     validateMaThuoc() {
       const input = this.form.maThuoc;
@@ -219,6 +222,7 @@ export default {
       try{
         await drugService.create(this.form)
         alert('Thêm thuốc mới thành công!')
+        this.$emit('formSubmitted'); // Emit sự kiện formSubmitted sau khi thêm thành công
       }catch (error){
         alert.error('Lỗi khi thêm thuốc mới!')
         console.log('Lỗi khi thêm thuốc mới:', error)

@@ -1,6 +1,87 @@
 <template>
   <div class="container mt-6">
     <h3 class="mb-4 text-center fw-bold">{{ name }}</h3>
+    <!-- Search Section -->
+    <div v-if="name.includes('bác sĩ') || name.includes('bệnh nhân') || name.includes('thuốc')" class="mb-5">
+      <div class="row g-3">
+        <!-- Search for Doctors -->
+        <div v-if="name.includes('bác sĩ')" class="col-md-4">
+          <input
+            v-model="search.maBS"
+            type="text"
+            class="form-control"
+            placeholder="Tìm theo mã bác sĩ"
+            @input="searchItems"
+          />
+        </div>
+        <div v-if="name.includes('bác sĩ')" class="col-md-4">
+          <input
+            v-model="search.tenBS"
+            type="text"
+            class="form-control"
+            placeholder="Tìm theo tên bác sĩ"
+            @input="searchItems"
+          />
+        </div>
+        <div v-if="name.includes('bác sĩ')" class="col-md-4">
+          <input
+            v-model="search.cccdBS"
+            type="text"
+            class="form-control"
+            placeholder="Tìm theo số CCCD bác sĩ"
+            @input="searchItems"
+          />
+        </div>
+        <!-- Search for Patients -->
+        <div v-if="name.includes('bệnh nhân')" class="col-md-4">
+          <input
+            v-model="search.maBN"
+            type="text"
+            class="form-control"
+            placeholder="Tìm theo mã bệnh nhân"
+            @input="searchItems"
+          />
+        </div>
+        <div v-if="name.includes('bệnh nhân')" class="col-md-4">
+          <input
+            v-model="search.hotenBN"
+            type="text"
+            class="form-control"
+            placeholder="Tìm theo tên bệnh nhân"
+            @input="searchItems"
+          />
+        </div>
+        <div v-if="name.includes('bệnh nhân')" class="col-md-4">
+          <input
+            v-model="search.cccdBN"
+            type="text"
+            class="form-control"
+            placeholder="Tìm theo số CCCD bệnh nhân"
+            @input="searchItems"
+          />
+        </div>
+        <!-- Search for Drugs -->
+        <div v-if="name.includes('thuốc')" class="col-md-6">
+          <input
+            v-model="search.maThuoc"
+            type="text"
+            class="form-control"
+            placeholder="Tìm theo mã thuốc"
+            @input="searchItems"
+          />
+        </div>
+        <div v-if="name.includes('thuốc')" class="col-md-6">
+          <input
+            v-model="search.tenthuoc"
+            type="text"
+            class="form-control"
+            placeholder="Tìm theo tên thuốc"
+            @input="searchItems"
+          />
+        </div>
+      </div>
+    </div>
+
     <!-- Bảng -->
     <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
       <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -13,7 +94,7 @@
         </thead>
         <tbody id="tbody">
           <tr
-            v-for="(row, index) in array && array.list ? array.list : []"
+            v-for="(row, index) in filteredList"
             :key="index"
             class="bg-white border-b dark:bg-gray-800 dark:border-gray-600 cursor-pointer"
             @click="openModal(index)"
@@ -24,7 +105,7 @@
               {{ formatValue(row[col.key], col.key) }}
             </td>
           </tr>
-          <tr v-if="!array || !array.list || array.list.length === 0">
+          <tr v-if="!filteredList || filteredList.length === 0">
             <td :colspan="columns.length" class="px-4 py-4 text-center">Không có dữ liệu</td>
           </tr>
         </tbody>
@@ -59,7 +140,7 @@
                 class="col-md-6 mb-3"
               >
                 <label :for="col.key" class="form-label">
-                  <strong>{{ col.header }}: &nbsp;</strong>
+                  <strong>{{ col.header }}: </strong>
                 </label>
                 <template v-if="isEditing">
                   <input
@@ -94,13 +175,20 @@
               </button>
 
               <button type="button" class="btn btn-danger m-2"
-              v-if="name !== 'Danh sách lịch hẹn'"
+              v-if="name !== 'Danh sách lịch hẹn' && name !== 'Xem danh sách bác sĩ đã xóa' && name !== 'Danh sách bệnh nhân đã xóa' && name !== 'Danh sách thuốc đã xóa' && name !== 'Lịch sử cuộc hẹn đã xóa'"
               @click="deleteItem(selectedRow)">
                 <i class="fa-solid fa-trash"></i>
               </button>
 
+              <button type="button" class="btn btn-success m-2"
+              v-if="name === 'Xem danh sách bác sĩ đã xóa' || name === 'Danh sách bệnh nhân đã xóa' || name === 'Danh sách thuốc đã xóa' || name === 'Lịch sử cuộc hẹn đã xóa'"
+              @click="restoreItem(selectedRow)">
+                <i class="fa-solid fa-reply"></i>
+                Khôi phục
+              </button>
+
               <button
-                v-if="name !== 'Danh sách lịch hẹn'"
+                v-if="name !== 'Danh sách lịch hẹn' && name !== 'Xem danh sách bác sĩ đã xóa' && name !== 'Danh sách bệnh nhân đã xóa' && name !== 'Danh sách thuốc đã xóa' && name !== 'Lịch sử cuộc hẹn đã xóa'"
                 type="button"
                 class="btn btn-warning m-2"
                 @click="toggleEdit"
@@ -185,17 +273,112 @@ export default {
       selectedIndex: null,
       isEditing: false,
       editRow: null,
+      search: {
+        maBS: '',
+        tenBS: '',
+        cccdBS: '',
+        maBN: '',
+        hotenBN: '',
+        cccdBN: '',
+        maThuoc: '',
+        tenthuoc: '',
+      },
     };
   },
-  methods: {
 
-    async cancel_appointment(appointment){
+  computed: {
+    filteredList() {
+      if (!this.array || !this.array.list) return [];
+
+      return this.array.list.filter((item) => {
+        const searchMaBS = this.search.maBS ? this.search.maBS.toLowerCase() : '';
+        const searchTenBS = this.search.tenBS ? this.search.tenBS.toLowerCase() : '';
+        const searchCccdBS = this.search.cccdBS ? this.search.cccdBS.toLowerCase() : '';
+        const searchMaBN = this.search.maBN ? this.search.maBN.toLowerCase() : '';
+        const searchHotenBN = this.search.hotenBN ? this.search.hotenBN.toLowerCase() : '';
+        const searchCccdBN = this.search.cccdBN ? this.search.cccdBN.toLowerCase() : '';
+        const searchMaThuoc = this.search.maThuoc ? this.search.maThuoc.toLowerCase() : '';
+        const searchTenthuoc = this.search.tenthuoc ? this.search.tenthuoc.toLowerCase() : '';
+
+        if (this.name.includes('bác sĩ')) {
+          return (
+            (!searchMaBS || (item.maBS && item.maBS.toLowerCase().includes(searchMaBS))) &&
+            (!searchTenBS || (item.tenBS && item.tenBS.toLowerCase().includes(searchTenBS))) &&
+            (!searchCccdBS || (item.cccdBS && item.cccdBS.toLowerCase().includes(searchCccdBS)))
+          );
+        } else if (this.name.includes('bệnh nhân')) {
+          return (
+            (!searchMaBN || (item.maBN && item.maBN.toLowerCase().includes(searchMaBN))) &&
+            (!searchHotenBN || (item.hotenBN && item.hotenBN.toLowerCase().includes(searchHotenBN))) &&
+            (!searchCccdBN || (item.cccdBN && item.cccdBN.toLowerCase().includes(searchCccdBN)))
+          );
+        } else if (this.name.includes('thuốc')) {
+          return (
+            (!searchMaThuoc || (item.maThuoc && item.maThuoc.toLowerCase().includes(searchMaThuoc))) &&
+            (!searchTenthuoc || (item.tenthuoc && item.tenthuoc.toLowerCase().includes(searchTenthuoc)))
+          );
+        }
+        return true;
+      });
+    },
+  },
+
+  watch: {
+    'array.list': {
+      handler(newValue) {
+        if (newValue) {
+          // Đặt lại selectedRow, editRow và isEditing khi array.list thay đổi
+          this.selectedRow = null;
+          this.editRow = null;
+          this.isEditing = false;
+        }
+      },
+      immediate: true,
+      deep: true,
+    },
+  },
+
+  methods: {
+    async restoreItem(item) {
       try {
-        appointment.trangthai = "Huy"
-        appointment = this.formatEditRow(appointment)
-        console.log(appointment)
-        await appointmentService.update(appointment.mahen, appointment )
-        this.$emit('update:appointment_new', {obj: appointment, name:this.name })
+        if (!confirm('Bạn có chắc muốn khôi phục mục này?')) return;
+
+        if (this.name === 'Xem danh sách bác sĩ đã xóa') {
+          item = this.formatEditRow(item); // Định dạng lại item trước khi gửi
+          item.xoa = 0; // Đánh dấu là chưa xóa
+          await doctorService.update(item.maBS, item);
+          this.$emit('update:array');
+          alert('Khôi phục bác sĩ thành công!');
+
+        } else if (this.name === 'Danh sách bệnh nhân đã xóa') {
+          item = this.formatEditRow(item); // Định dạng lại item trước khi gửi
+          item.xoa = 0; // Đánh dấu là chưa xóa
+          await patientService.update(item.maBN, item);
+          this.$emit('update:array');
+          alert('Khôi phục bệnh nhân thành công!');
+
+        } else if (this.name === 'Danh sách thuốc đã xóa') {
+          item.xoa = 0; // Đánh dấu là chưa xóa
+          await drugService.update(item.maThuoc, item);
+          this.$emit('update:array');
+          alert('Khôi phục thuốc thành công!');
+
+        } 
+        // Đóng modal và reset trạng thái
+        this.selectedRow = null;
+        this.editRow = null;
+        this.isEditing = false;
+      } catch (error) {
+        console.error('Khôi phục không thành công:', error);
+        alert('Khôi phục không thành công!');
+      }
+    },
+    async cancel_appointment(appointment) {
+      try {
+        appointment.trangthai = "Huy";
+        appointment = this.formatEditRow(appointment);
+        await appointmentService.update(appointment.mahen, appointment);
+        this.$emit('update:appointment_new', { obj: appointment, name: this.name });
 
         this.wsService.send({
           type: 'cancel_appointment',
@@ -203,15 +386,15 @@ export default {
           data: appointment,
         });
 
-        alert("Hủy lịch hẹn thành công!")
+        alert("Hủy lịch hẹn thành công!");
 
         // Đóng modal và reset trạng thái
         this.selectedRow = null;
         this.editRow = null;
         this.isEditing = false;
-      }catch (error){
-        console.log("Hủy lịch hẹn không thành công: ", error)
-        alert("Hủy lịch hẹn không thành công!")
+      } catch (error) {
+        console.log("Hủy lịch hẹn không thành công: ", error);
+        alert("Hủy lịch hẹn không thành công!");
       }
     },
 
@@ -220,20 +403,32 @@ export default {
         if (!confirm('Bạn có chắc muốn xóa mục này?')) return;
 
         if (this.name === 'Xem danh sách bác sĩ') {
-          await doctorService.delete(item.maBS);
-          this.$emit('update:array', {obj: item, name:this.name })
+          if (item.maBS === 'admin') {
+            alert('Không thể xóa bác sĩ admin!');
+            return;
+          }
+          item = this.formatEditRow(item); // Định dạng lại item trước khi gửi
+          item.xoa = 1; // Đánh dấu là đã xóa
+          await doctorService.update(item.maBS, item);
+          this.$emit('update:array');
           alert('Xóa thành công!');
+
         } else if (this.name === 'Danh sách bệnh nhân') {
-          await patientService.delete(item.maBN);
-          this.$emit('update:array', {obj: item, name:this.name })
+          item = this.formatEditRow(item); // Định dạng lại item trước khi gửi
+          item.xoa = 1; // Đánh dấu là đã xóa
+          await patientService.update(item.maBN, item);
+          this.$emit('update:array');
           alert('Xóa thành công!');
+
         } else if (this.name === 'Danh sách thuốc' || this.name === 'Danh sách thuốc gần hết') {
-          await drugService.delete(item.maThuoc);
-          this.$emit('update:array', {obj: item, name:this.name })
+          item.xoa = 1; // Đánh dấu là đã xóa
+          await drugService.update(item.maThuoc, item);
+          this.$emit('update:array');
           alert('Xóa thành công!');
-        }else if (this.name === 'Lịch sử cuộc hẹn') {
+
+        } else if (this.name === 'Lịch sử cuộc hẹn') {
           await appointmentService.delete(item.mahen);
-          this.$emit('update:array', {obj: item, name:this.name })
+          this.$emit('update:array');
           alert('Xóa thành công!');
         }
 
@@ -241,7 +436,6 @@ export default {
         this.selectedRow = null;
         this.editRow = null;
         this.isEditing = false;
-
       } catch (error) {
         console.error('Xóa không thành công:', error);
         alert('Xóa không thành công!');
@@ -250,86 +444,74 @@ export default {
 
     openModal(index) {
       this.selectedIndex = index;
-      this.selectedRow = this.array.list[index];
-      // Create a copy for editing with formatted dates
-      this.editRow = this.formatEditRow(this.array.list[index]);
+      this.selectedRow = this.filteredList[index];
+      // Tạo bản sao để chỉnh sửa với định dạng ngày
+      this.editRow = this.formatEditRow(this.filteredList[index]);
       this.isEditing = false;
       this.showModal = true;
       this.$emit('update:activeIndex', index);
     },
-    
+
     toggleEdit() {
       this.isEditing = !this.isEditing;
     },
 
     async saveChanges() {
       try {
-        // Convert editRow for backend (keep dates as YYYY-MM-DD)
+        // Chuyển đổi editRow cho backend (giữ định dạng ngày YYYY-MM-DD)
         const saveRow = this.parseEditRow(this.editRow);
-        if(this.name === 'Xem danh sách bác sĩ'){
-          console.log('Sending to backend:', saveRow); // Debug log
+        if (this.name === 'Xem danh sách bác sĩ') {
           await doctorService.update(saveRow.maBS, saveRow);
-          console.log("Cập nhật thành công!");
-          alert("Cập nhật thành công!")
-        }
-
-        if(this.name === 'Danh sách bệnh nhân'){
-          console.log('Sending to backend:', saveRow); // Debug log
+          alert("Cập nhật thành công!");
+        } else if (this.name === 'Danh sách bệnh nhân') {
           await patientService.update(saveRow.maBN, saveRow);
-          console.log("Cập nhật thành công!");
-          alert("Cập nhật thành công!")
-        }
-
-        if(this.name === 'Danh sách thuốc' || this.name === 'Danh sách thuốc gần hết'){
-          console.log('Sending to backend:', saveRow); // Debug log
+          alert("Cập nhật thành công!");
+        } else if (this.name === 'Danh sách thuốc' || this.name === 'Danh sách thuốc gần hết') {
           await drugService.update(saveRow.maThuoc, saveRow);
-          console.log("Cập nhật thành công!");
-          alert("Cập nhật thành công!")
+          alert("Cập nhật thành công!");
         }
-        
-        // Update local array with backend format
 
+        // Cập nhật mảng cục bộ với định dạng backend
         if (this.selectedIndex !== null) {
-          this.array.list[this.selectedIndex] = { ...saveRow }; // Direct assignment for Vue 3
-          this.selectedRow = { ...saveRow }; // Update displayed row
-          this.editRow = this.formatEditRow(saveRow); // Update editRow with formatted dates
+          this.array.list[this.selectedIndex] = { ...saveRow }; // Gán trực tiếp cho Vue 3
+          this.selectedRow = { ...saveRow }; // Cập nhật hàng hiển thị
+          this.editRow = this.formatEditRow(saveRow); // Cập nhật editRow với định dạng ngày
         }
         this.isEditing = false;
       } catch (error) {
-        alert.error('Cập nhật lỗi!')
         console.error("Cập nhật lỗi: ", error);
-        throw error; // Rethrow for parent handling if needed
+        alert("Cập nhật lỗi!");
       }
     },
 
     cancelEdit() {
-      this.editRow = this.selectedRow ? this.formatEditRow(this.selectedRow) : null; // Reset editRow with formatted dates
+      this.editRow = this.selectedRow ? this.formatEditRow(this.selectedRow) : null; // Reset editRow với định dạng ngày
       this.isEditing = false;
     },
 
     formatValue(value, key) {
       if (!value) return 'N/A';
-      // Check if the value is a valid ISO date string or YYYY-MM-DD
+      // Kiểm tra nếu giá trị là chuỗi ngày ISO hoặc YYYY-MM-DD
       if (typeof value === 'string' && (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z/.test(value) || /\d{4}-\d{2}-\d{2}/.test(value))) {
         const date = new Date(value);
         if (!isNaN(date)) {
-          // Format as DD/MM/YYYY
+          // Định dạng thành DD/MM/YYYY
           const day = String(date.getDate()).padStart(2, '0');
           const month = String(date.getMonth() + 1).padStart(2, '0');
           const year = date.getFullYear();
           return `${day}/${month}/${year}`;
         }
       }
-      return value; // Return original value if not a date
+      return value; // Trả về giá trị gốc nếu không phải ngày
     },
 
     isDateField(key, value) {
-      // Check if the field is a date field based on value
+      // Kiểm tra xem trường có phải là trường ngày dựa trên giá trị
       return typeof value === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z/.test(value);
     },
 
     formatEditRow(row) {
-      // Create a copy of the row with formatted dates for display
+      // Tạo bản sao của hàng với ngày được định dạng để hiển thị
       const formattedRow = { ...row };
       Object.keys(formattedRow).forEach((key) => {
         if (this.isDateField(key, formattedRow[key])) {
@@ -338,7 +520,7 @@ export default {
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const year = date.getFullYear();
-            formattedRow[key] = `${year}-${month}-${day}`; // Format for input type="date"
+            formattedRow[key] = `${year}-${month}-${day}`; // Định dạng cho input type="date"
           }
         }
       });
@@ -346,27 +528,27 @@ export default {
     },
 
     parseEditRow(row) {
-      // Create a copy of the row, keeping dates as YYYY-MM-DD and passing other fields unchanged
+      // Tạo bản sao của hàng, giữ ngày ở định dạng YYYY-MM-DD và chuyển các trường khác không thay đổi
       const parsedRow = { ...row };
       Object.keys(parsedRow).forEach((key) => {
         if (typeof parsedRow[key] === 'string' && /\d{4}-\d{2}-\d{2}/.test(parsedRow[key])) {
           const date = new Date(`${parsedRow[key]}T00:00:00.000Z`);
           if (!isNaN(date)) {
-            parsedRow[key] = parsedRow[key]; // Keep as YYYY-MM-DD for backend
+            parsedRow[key] = parsedRow[key]; // Giữ nguyên định dạng YYYY-MM-DD cho backend
           }
         }
       });
       return parsedRow;
     },
+
+    searchItems() {
+      // Trigger computed property to filter the list
+      this.$forceUpdate(); // Force update to ensure reactivity
+    },
   },
 
-  mounted(){
+  mounted() {
     this.wsService.connect();
-    // this.wsService.onMessage((message) => {
-    //   if (message.type === 'response') {
-    //     this.message = message.data;
-    //   }
-    // });
   }
 };
 </script>

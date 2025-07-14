@@ -170,6 +170,22 @@ export default {
       return days;
     }
   },
+
+  watch: {
+    'schedules': {
+      handler(newValue) {
+        if (newValue) {
+          // Đặt lại selectedRow, editRow và isEditing khi array.list thay đổi
+          this.selectedRow = null;
+          this.editRow = null;
+          this.isEditing = false;
+        }
+      },
+      immediate: true,
+      deep: true,
+    },
+  },
+
   methods: {
     validateMonth() {
       const input = document.getElementById('month');

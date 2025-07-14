@@ -6,7 +6,11 @@ class DrugService {
     }
 
     async getAll() {
-        return (await this.api.get("/")).data;
+        return (await this.api.get(`?xoa=${0}`)).data;
+    }
+
+    async getDel() {
+        return (await this.api.get(`?xoa=${1}`)).data;
     }
 
     async create(data) {

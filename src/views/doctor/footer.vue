@@ -3,8 +3,8 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <div class="footer-brand">Library</div>
-                    <p class="footer-text">A library that no one can find because it is bad and useless. Above all, it
+                    <div class="footer-brand">Clinic</div>
+                    <p class="footer-text">A clinic that no one can find because it is bad and useless. Above all, it
                         does not exist in real life..</p>
                     <div class="social-links">
                         <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
