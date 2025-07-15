@@ -1,0 +1,78 @@
+.card {
+    border-radius: 8px;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Định vị nút đóng ở góc phải trên */
+.btn-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 1;
+    /* Đảm bảo nút nằm trên các phần tử khác */
+}
+
+.card {
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 8px;
+}
+
+.card:hover {
+    background-color: #f8f9fa;
+}
+
+.card.border-primary {
+    border-width: 2px;
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.card-text {
+    font-size: 0.9rem;
+}
+
+.btn-outline-primary {
+    font-size: 0.875rem;
+}
+
+.table {
+    background-color: #fff;
+    border-radius: 8px;
+}
+
+.modal-content {
+    border-radius: 8px;
+}
+
+.modal-body p {
+    margin-bottom: 0.5rem;
+}
+
+.modal-body strong {
+    color: #333;
+}
+
+.scrollable-column {
+    max-height: 500px;
+    /* Hoặc chiều cao bạn mong muốn */
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
+    /* Tránh cắt mất nội dung khi không có thanh ngang */
+}

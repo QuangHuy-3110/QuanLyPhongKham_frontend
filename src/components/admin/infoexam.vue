@@ -63,81 +63,77 @@
   
       <!-- Hai cột -->
       <div class="row">
-        <!-- Cột 1: Danh sách lần khám (dạng card) -->
-        <div class="col-md-6">
-          <h4 class="fw-bold mb-3">Danh Sách Lần Khám</h4>
-          <div class="row g-3">
-            <div
-              v-for="exam in examinations"
-              :key="exam.stt_lankham"
-              class="col-12"
-            >
-              <div
-                class="card h-100"
-                :class="{ 'border-primary shadow': selectedExamination && selectedExamination.stt_lankham === exam.stt_lankham }"
-                @click="selectExamination(exam)"
-              >
-                <div class="card-body">
-                  <h5 class="card-title">Lần khám {{ exam.stt_lankham }}</h5>
-                  <p class="card-text mb-1"><strong>Ngày khám:</strong> {{ exam.ngaythangnamkham }}</p>
-                  <p class="card-text mb-2"><strong>Chẩn đoán:</strong> {{ exam.chuandoan }}</p>
-                  <button
-                    class="btn btn-sm btn-outline-primary"
-                    @click="openDetailModal(exam)"
-                    data-bs-toggle="modal"
-                    data-bs-target="#examDetailModal"
-                  >
-                    Xem chi tiết
-                  </button>
-                  <button type="button" class="btn btn-danger m-2"
-                  @click="deleteExam(exam)"
-                  >
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
+        <!-- Cột 1: Danh sách lần khám -->
+        <div class="col-md-6 d-flex flex-column" style="max-height: 500px;">
+          <h4 class="fw-bold mb-3 flex-shrink-0">Danh Sách Lần Khám</h4>
+          <div class="overflow-auto scrollable-column" style="flex-grow: 1;">
+            <div class="row g-3">
+              <div v-for="exam in examinations" :key="exam.stt_lankham" class="col-12">
+                <div
+                  class="card h-100"
+                  :class="{ 'border-primary shadow': selectedExamination && selectedExamination.stt_lankham === exam.stt_lankham }"
+                  @click="selectExamination(exam)"
+                >
+                  <div class="card-body">
+                    <h5 class="card-title">Lần khám {{ exam.stt_lankham }}</h5>
+                    <p class="card-text mb-1"><strong>Ngày khám:</strong> {{ exam.ngaythangnamkham }}</p>
+                    <p class="card-text mb-2"><strong>Chẩn đoán:</strong> {{ exam.chuandoan }}</p>
+                    <button
+                      class="btn btn-sm btn-outline-primary"
+                      @click="openDetailModal(exam)"
+                      data-bs-toggle="modal"
+                      data-bs-target="#examDetailModal"
+                    >
+                      Xem chi tiết
+                    </button>
+                    <button type="button" class="btn btn-danger m-2" @click="deleteExam(exam)">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-  
-        <!-- Cột 2: Toa thuốc của lần khám được chọn -->
-        <div class="col-md-6">
-          <h4 class="fw-bold mb-3">Toa Thuốc</h4>
-          <div v-if="selectedExamination && filteredPrescriptions.length">
-            <div class="table-responsive">
-              <table class="table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Mã Thuốc</th>
-                    <th>Liều Lượng</th>
-                    <th>Số Lượng</th>
-                    <th>Đơn Vị</th>
-                    <th>Thời Gian Sử Dụng</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="prescription in filteredPrescriptions" :key="prescription.maThuoc">
-                    <td>{{ prescription.maThuoc }}</td>
-                    <td>{{ prescription.lieuluong }}</td>
-                    <td>{{ prescription.soluong }}</td>
-                    <td>{{ prescription.donvi }}</td>
-                    <td>{{ prescription.thoigianSD }}</td>
-                  </tr>
-                </tbody>
 
-              </table>
-              <button type="button" class="btn btn-danger m-2" style="float: right"
-                @click="deletePre(selectedExamination)"
-              >
-                <i class="fa-solid fa-trash"></i>
-              </button>
+        <!-- Cột 2: Toa thuốc -->
+        <div class="col-md-6 d-flex flex-column" style="max-height: 500px;">
+          <h4 class="fw-bold mb-3 flex-shrink-0">Toa Thuốc</h4>
+          <div class="overflow-auto" style="flex-grow: 1;">
+            <div v-if="selectedExamination && filteredPrescriptions.length">
+              <div class="table-responsive">
+                <table class="table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Mã Thuốc</th>
+                      <th>Liều Lượng</th>
+                      <th>Số Lượng</th>
+                      <th>Đơn Vị</th>
+                      <th>Thời Gian Sử Dụng</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="prescription in filteredPrescriptions" :key="prescription.maThuoc">
+                      <td>{{ prescription.maThuoc }}</td>
+                      <td>{{ prescription.lieuluong }}</td>
+                      <td>{{ prescription.soluong }}</td>
+                      <td>{{ prescription.donvi }}</td>
+                      <td>{{ prescription.thoigianSD }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <button type="button" class="btn btn-danger m-2 float-end" @click="deletePre(selectedExamination)">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
             </div>
-          </div>
-          <div v-else class="text-muted">
-            {{ selectedExamination ? 'Không có toa thuốc cho lần khám này.' : 'Vui lòng chọn một lần khám.' }}
+            <div v-else class="text-muted">
+              {{ selectedExamination ? 'Không có toa thuốc cho lần khám này.' : 'Vui lòng chọn một lần khám.' }}
+            </div>
           </div>
         </div>
       </div>
+
   
       <!-- Modal chi tiết lần khám -->
       <div class="modal fade" id="examDetailModal" tabindex="-1" aria-labelledby="examDetailModalLabel" aria-hidden="true">
@@ -178,6 +174,7 @@
   import examinationService from '../../services/examination.sevice'
   import recordService from '../../services/record.service';
   import prescriptionService from '../../services/prescription.service';
+  import WebSocketService from '../../services/ws.service';
 
   export default {
     emits: ['update:activeIndex'],
@@ -188,9 +185,10 @@
         record: {type:Object, required: true},
         prescriptions: {type: Array, required: true}
     },
-
+   
     data() {
       return {
+        wsService: new WebSocketService(),
         examinations: [],
         selectedExamination: null
       };
@@ -304,78 +302,24 @@
 
     mounted(){
       this.get_examination()
+      this.wsService.connect()
+      this.wsService.ws.onopen = () => {
+        this.wsService.send({ type: 'init', doctorId: 'Admin' });
+      };
+      this.wsService.onMessage((message) => {
+        if (message.type === 'exam_created') {
+          this.get_examination();
+        }
+      });
+    },
+
+    beforeDestroy() {
+      this.wsService.disconnect();
     }
   };
   </script>
   
   <style scoped>
-    .card {
-        border-radius: 8px;
-    }
-
-    .card-body {
-        padding: 1.5rem;
-    }
-
-    .card-title {
-        font-size: 1.25rem;
-        margin-bottom: 0.75rem;
-    }
-
-    /* Định vị nút đóng ở góc phải trên */
-    .btn-close {
-        position: absolute;
-        top: 0.75rem;
-        right: 0.75rem;
-        z-index: 1; /* Đảm bảo nút nằm trên các phần tử khác */
-    }
-
-  .card {
-    cursor: pointer;
-    transition: all 0.2s;
-    border-radius: 8px;
-  }
-  
-  .card:hover {
-    background-color: #f8f9fa;
-  }
-  
-  .card.border-primary {
-    border-width: 2px;
-  }
-  
-  .card-body {
-    padding: 1rem;
-  }
-  
-  .card-title {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .card-text {
-    font-size: 0.9rem;
-  }
-  
-  .btn-outline-primary {
-    font-size: 0.875rem;
-  }
-  
-  .table {
-    background-color: #fff;
-    border-radius: 8px;
-  }
-  
-  .modal-content {
-    border-radius: 8px;
-  }
-  
-  .modal-body p {
-    margin-bottom: 0.5rem;
-  }
-  
-  .modal-body strong {
-    color: #333;
-  }
+    @import "@/assets/infoexam.css";
 
   </style>

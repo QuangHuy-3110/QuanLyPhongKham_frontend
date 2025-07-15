@@ -491,9 +491,19 @@ export default {
         } else if (this.name === 'Danh sách bệnh nhân') {
           await patientService.update(saveRow.maBN, saveRow);
           alert("Cập nhật thành công!");
+          this.wsService.send({
+            type: 'interact_patient',
+            sender: 'Admin',
+            data: saveRow,
+          }); // Gửi thông báo qua WebSocket
         } else if (this.name === 'Danh sách thuốc' || this.name === 'Danh sách thuốc gần hết') {
           await drugService.update(saveRow.maThuoc, saveRow);
           alert("Cập nhật thành công!");
+          this.wsService.send({
+            type: 'interact_patient',
+            sender: 'Admin',
+            data: saveRow,
+          }); // Gửi thông báo qua WebSocket
         }
 
         // Cập nhật mảng cục bộ với định dạng backend

@@ -588,7 +588,12 @@ export default {
             } else if (message.type === 'drug_update') {
                 this.get_medicines();
                 this.get_prescriptions();
+            } else if (message.type === 'record_created') {
+                this.get_records();
             } 
+            // else if (message.type === 'pre_created'){
+            //     this.get_prescriptions();
+            // }
         });
         this.updateYesterdayChuaKhamAppointments()
         this.get_patients()

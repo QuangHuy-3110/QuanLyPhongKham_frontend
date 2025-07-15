@@ -341,10 +341,16 @@ export default {
     },
   },
   mounted() {
+    this.wsService.connect();
     this.get_record();
     this.drugModal = new Modal(document.getElementById('drug'));
     this.editPatientModal = new Modal(document.getElementById('editPatientModal'));
   },
+
+  beforeDestroy() {
+    this.wsService.disconnect();
+  },
+
   methods: {
     formatDate(date) {
       if (!date) return '';
@@ -424,6 +430,11 @@ export default {
         };
         await recordService.create(exam);
         alert('Thêm hồ sơ thành công!');
+        this.wsService.send({
+          type: 'interact_record',
+          sender: 'doctor',
+          data: { maBN: this.patient.maBN, date: date },
+        });
         await this.get_record();
       } catch (error) {
         alert('Thêm hồ sơ không thành công!');
@@ -459,6 +470,11 @@ export default {
         alert('Thêm lần khám thành công!');
         await this.get_examination(this.form.maHoSo);
         this.resetForm();
+        this.wsService.send({
+          type: 'interact_exam',
+          sender: 'doctor',
+          data: { examData },
+        });
         document.querySelector('#exam_form .btn-close').click();
       } catch (error) {
         alert('Thêm lần khám không thành công!');

@@ -94,7 +94,7 @@ tbody tr:hover {
 .form-control:focus {
     border-color: #80bdff;
     outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); 
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
 input[type="date"] {
@@ -114,5 +114,19 @@ input[type="date"]:disabled {
 input[type="date"]:focus {
     border-color: #80bdff;
     outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); 
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.relative {
+    max-height: 500px;
+    /* hoặc giá trị bạn mong muốn */
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Giữ cố định phần thead */
+table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }

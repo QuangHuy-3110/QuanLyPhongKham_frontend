@@ -397,9 +397,9 @@ export default {
 
     this.wsSocket.onMessage((message) => {
       if (message.type === 'drug_update') {
-          this.loadDrugs();
-        } 
-      });
+        this.loadDrugs();
+      }
+    });
     this.previewModal = new Modal(document.getElementById('previewModal'));
     this.loadDrugs();
     

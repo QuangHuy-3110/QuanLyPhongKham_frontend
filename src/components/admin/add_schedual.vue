@@ -116,6 +116,7 @@
 
 <script>
 import workingTimeService from '../../services/working_time.service'
+import WebSocketService from '../../services/ws.service';
 export default {
   emits: ['formSubmitted'],
   props :{
@@ -123,6 +124,7 @@ export default {
   },
   data() {
     return {
+      wsService: new WebSocketService(),
       form: {
         doctorId: '',
         doctorName: '',
@@ -251,6 +253,13 @@ export default {
         }
         console.log('===========================');
         alert('Lưu lịch làm việc thành công!');
+        
+        this.wsService.send({
+          type: 'created_schedule',
+          sender: 'Admin',
+          data: this.lichlamviec.maBS,
+        });
+
         this.$emit('formSubmitted');
         this.resetForm();
       } else {
@@ -280,6 +289,14 @@ export default {
     formatDate(date) {
       return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
+  },
+
+  mounted(){
+    this.wsService.connect()
+  },
+
+  beforeDestroy() {
+    this.wsService.disconnect();
   }
 };
 </script>

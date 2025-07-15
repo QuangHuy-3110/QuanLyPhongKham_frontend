@@ -113,10 +113,12 @@
 <script>
 
 import drugService from'../../services/drug.service'
+import WebSocketService from '../../services/ws.service';
 
 export default {
   data() {
     return {
+      wsService: new WebSocketService(), // Khởi tạo WebSocketService
       form: {
         maThuoc: '',
         tenThuoc: '',
@@ -223,6 +225,11 @@ export default {
         await drugService.create(this.form)
         alert('Thêm thuốc mới thành công!')
         this.$emit('formSubmitted'); // Emit sự kiện formSubmitted sau khi thêm thành công
+        this.wsService.send({
+          type: 'interact_drug',
+          sender: 'Admin',
+          data: this.form
+        }); // Gửi thông báo qua WebSocket
       }catch (error){
         alert.error('Lỗi khi thêm thuốc mới!')
         console.log('Lỗi khi thêm thuốc mới:', error)
@@ -248,6 +255,14 @@ export default {
       };
       this.$el.querySelector('form').classList.remove('was-validated');
     }
+  },
+
+  created(){
+    this.wsService.connect();
+  },
+
+  beforeDestroy() {
+    this.wsService.disconnect(); // Ngắt kết nối WebSocket khi component bị hủy
   }
 };
 </script>

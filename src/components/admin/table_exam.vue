@@ -266,4 +266,5 @@ export default {
 
 <style scoped>
 @import "@/assets/editform.css";
+
 </style>

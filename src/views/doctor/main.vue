@@ -257,6 +257,8 @@ export default {
         this.get_list_appointment();
       }else if (message.type === 'patient_update') {
         this.get_listPatient();
+      }else if (message.type === 'created_schedule') {
+        this.get_working_time();
       }
       
     });

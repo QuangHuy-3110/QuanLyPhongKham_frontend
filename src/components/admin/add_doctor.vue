@@ -279,20 +279,10 @@ export default {
           this.chuyenkhoa.maBS = doctor[0].maBS;
           await doctor_roleService.create(this.chuyenkhoa);
           alert('Thêm bác sĩ thành công!');
-          await emailService.sendEmail(
-            doctor[0].emailBS,
-            `Tài khoản bác sĩ của bạn đã được tạo!`,
-            `Chào bạn, đây là email thông báo tài khoản bác sĩ của bạn đã được tạo thành công. Thông tin tài khoản của bạn như sau:
-            Mã bác sĩ: ${doctor[0].maBS}.
-            CCCD: ${doctor[0].cccdBS}.                  Tên bác sĩ: ${doctor[0].tenBS}. 
-            Ngày sinh: ${doctor[0].ngaysinhBS}.         Số điện thoại: ${doctor[0].sdtBS}.
-            Email: ${doctor[0].emailBS}.                Địa chỉ: ${doctor[0].diachiBS}.
-            Số CCHN: ${doctor[0].soCCHN}.               Nơi cấp CCHN: ${doctor[0].noicapCCHN}.
-            Tên chuyên khoa: ${doctor[0].tenCK}.        Vai trò: ${doctor[0].vaiTro}.
-            Tên đăng nhập: ${doctor[0].maBS}.           Tài khoản của bạn có vai trò là ${doctor[0].vaiTro}. 
-            Mật khẩu mặc định là "1". 
-            Vui lòng đăng nhập và thay đổi mật khẩu ngay sau khi đăng nhập lần đầu tiên.`
-          );
+
+          const content = this.generatePasswordResetEmailContent(doctor[0].emailBS, doctor[0]);
+          await emailService.sendEmail(doctor[0].emailBS, content);
+
           this.resetForm();
           this.$emit('formSubmitted');
         } catch (error) {
@@ -327,6 +317,94 @@ export default {
         form.classList.remove('was-validated');
       }
       
+    },
+
+    generateDoctorAccountEmailContent(email, doctor) {
+      const textContent = `Kính gửi ${doctor.tenBS || 'Bác sĩ'},
+
+      Đây là email thông báo tài khoản bác sĩ của bạn đã được tạo thành công. Thông tin tài khoản của bạn như sau:
+
+      - Mã bác sĩ: ${doctor.maBS}
+      - CCCD: ${doctor.cccdBS}
+      - Tên bác sĩ: ${doctor.tenBS}
+      - Ngày sinh: ${doctor.ngaysinhBS}
+      - Số điện thoại: ${doctor.sdtBS}
+      - Email: ${doctor.emailBS}
+      - Địa chỉ: ${doctor.diachiBS}
+      - Số CCHN: ${doctor.soCCHN}
+      - Nơi cấp CCHN: ${doctor.noicapCCHN}
+      - Tên chuyên khoa: ${doctor.tenCK}
+      - Vai trò: ${doctor.vaiTro}
+      - Tên đăng nhập: ${doctor.maBS}
+      - Mật khẩu mặc định: 1
+
+      Vui lòng đăng nhập và thay đổi mật khẩu ngay sau khi đăng nhập lần đầu tiên.
+
+      Trân trọng,
+      Phòng Khám`;
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; color: #333; }
+            .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+            .header { background-color: #007bff; padding: 20px; text-align: center; color: #ffffff; }
+            .header h1 { margin: 0; font-size: 24px; font-weight: 500; }
+            .content { padding: 30px; text-align: center; }
+            .content p { margin: 0 0 15px; font-size: 16px; line-height: 1.5; }
+            .info-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            .info-table td { padding: 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+            .info-table .label { font-weight: bold; width: 40%; }
+            .highlight { font-weight: bold; color: #007bff; }
+            .footer { background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 14px; color: #666; }
+            .footer p { margin: 0; }
+            a { color: #007bff; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>Tài Khoản Bác Sĩ Đã Được Tạo</h1>
+            </div>
+            <div class="content">
+              <p>Kính gửi ${doctor.tenBS || 'Bác sĩ'},</p>
+              <p>Chúng tôi xin thông báo tài khoản bác sĩ của bạn đã được tạo thành công. Dưới đây là thông tin tài khoản:</p>
+              <table class="info-table">
+                <tr><td class="label">Mã bác sĩ:</td><td>${doctor.maBS}</td></tr>
+                <tr><td class="label">CCCD:</td><td>${doctor.cccdBS}</td></tr>
+                <tr><td class="label">Tên bác sĩ:</td><td>${doctor.tenBS}</td></tr>
+                <tr><td class="label">Ngày sinh:</td><td>${doctor.ngaysinhBS}</td></tr>
+                <tr><td class="label">Số điện thoại:</td><td>${doctor.sdtBS}</td></tr>
+                <tr><td class="label">Email:</td><td>${doctor.emailBS}</td></tr>
+                <tr><td class="label">Địa chỉ:</td><td>${doctor.diachiBS}</td></tr>
+                <tr><td class="label">Số CCHN:</td><td>${doctor.soCCHN}</td></tr>
+                <tr><td class="label">Nơi cấp CCHN:</td><td>${doctor.noicapCCHN}</td></tr>
+                <tr><td class="label">Tên chuyên khoa:</td><td>${doctor.tenCK}</td></tr>
+                <tr><td class="label">Vai trò:</td><td>${doctor.vaiTro}</td></tr>
+                <tr><td class="label">Tên đăng nhập:</td><td>${doctor.maBS}</td></tr>
+                <tr><td class="label">Mật khẩu mặc định:</td><td class="highlight">1</td></tr>
+              </table>
+              <p>Vui lòng đăng nhập và <span class="highlight">thay đổi mật khẩu</span> ngay sau khi đăng nhập lần đầu tiên.</p>
+            </div>
+            <div class="footer">
+              <p>Trân trọng,<br>Phòng Khám</p>
+              <p><a href="your-clinic-website">Liên hệ với chúng tôi</a> nếu bạn cần hỗ trợ.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `;
+
+      return {
+        subject: 'Tài Khoản Bác Sĩ Đã Được Tạo',
+        text: textContent,
+        html: htmlContent,
+      };
     }
   }
 };

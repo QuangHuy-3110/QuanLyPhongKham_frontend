@@ -5,9 +5,21 @@ class EmailService {
         this.api = createApiClient(baseUrl);
     }
 
-    async sendEmail(to, subject, text) {
-        const emailData = { to, subject, text };
-        return (await this.api.post("/send", emailData)).data;
+    // email.service.js (client)
+    async sendEmail(to, content) {
+        try {
+            const emailData = {
+            to,
+            subject: content.subject,
+            text: content.text,
+            html: content.html,
+            };
+            const response = await this.api.post("/send", emailData);
+            return response.data;
+        } catch (error) {
+            console.error("Lỗi khi gửi email:", error);
+            throw error;
+        }
     }
 }
 
