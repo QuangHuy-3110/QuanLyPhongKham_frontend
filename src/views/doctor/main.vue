@@ -24,6 +24,7 @@
     <Create_profile
       v-if="show === 'add_patient'"
       @close:patient="close_patient"
+      :doctor="doctor"
     />
 
     <TableForm
@@ -49,6 +50,7 @@
       :columns_full="appointmentColumns"
       :name="'lichhen'"
       :role="role"
+      :doctor="doctor"
       @check-profile="check_profile"
       v-model:activeIndex="activeIndex"
       data-bs-toggle="modal"
@@ -202,6 +204,7 @@ export default {
             hotenBN: patient ? patient.hotenBN : 'Không tìm thấy tên bệnh nhân'
           };
         });
+
       } catch (error) {
         console.log('Lỗi khi lấy danh sách lịch hẹn!', error);
       }
@@ -252,7 +255,10 @@ export default {
         this.get_list_appointment();
       }else if (message.type === 'appointment_cancelled') {
         this.get_list_appointment();
+      }else if (message.type === 'patient_update') {
+        this.get_listPatient();
       }
+      
     });
   },
 

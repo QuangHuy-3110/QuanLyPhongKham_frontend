@@ -582,7 +582,13 @@ export default {
         this.wsService.onMessage((message) => {
             if (message.type === 'appointment_update') {
                 this.get_appointment_new();
-            }
+            } else if (message.type === 'appointment_examined') {
+                this.get_appointment_new();
+                this.get_appointment();
+            } else if (message.type === 'drug_update') {
+                this.get_medicines();
+                this.get_prescriptions();
+            } 
         });
         this.updateYesterdayChuaKhamAppointments()
         this.get_patients()

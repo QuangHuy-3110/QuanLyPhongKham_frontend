@@ -57,6 +57,7 @@
                     { key: 'ngaythangnam', header: 'Ngày đặt lịch' },
                     { key: 'khunggio', header: 'Khung giờ hẹn' },
                     { key: 'mota', header: 'Mô tả' },  
+                    { key: 'trangthai', header: 'Trạng thái' },  
                 ],
             }
         },
@@ -98,6 +99,8 @@
           // this.wsService.connect();
           this.wsService.onMessage((message) => {
             if (message.type === 'appointment_cancelled') {
+              this.get_list_appointment();
+            }else if (message.type === 'appointment_examined') {
               this.get_list_appointment();
             }
           });           

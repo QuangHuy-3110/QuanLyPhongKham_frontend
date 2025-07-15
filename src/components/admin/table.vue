@@ -357,11 +357,23 @@ export default {
           this.$emit('update:array');
           alert('Khôi phục bệnh nhân thành công!');
 
+          this.wsService.send({
+            type: 'interact_patient',
+            sender: 'Admin',
+            data: item,
+          });
+
         } else if (this.name === 'Danh sách thuốc đã xóa') {
           item.xoa = 0; // Đánh dấu là chưa xóa
           await drugService.update(item.maThuoc, item);
           this.$emit('update:array');
           alert('Khôi phục thuốc thành công!');
+
+          this.wsService.send({
+            type: 'interact_drug',
+            sender: 'Admin',
+            data: item,
+          });
 
         } 
         // Đóng modal và reset trạng thái
@@ -373,6 +385,7 @@ export default {
         alert('Khôi phục không thành công!');
       }
     },
+
     async cancel_appointment(appointment) {
       try {
         appointment.trangthai = "Huy";
@@ -420,11 +433,23 @@ export default {
           this.$emit('update:array');
           alert('Xóa thành công!');
 
+          this.wsService.send({
+            type: 'interact_patient',
+            sender: 'Admin',
+            data: item,
+          });
+
         } else if (this.name === 'Danh sách thuốc' || this.name === 'Danh sách thuốc gần hết') {
           item.xoa = 1; // Đánh dấu là đã xóa
           await drugService.update(item.maThuoc, item);
           this.$emit('update:array');
           alert('Xóa thành công!');
+
+          this.wsService.send({
+            type: 'interact_drug',
+            sender: 'Admin',
+            data: item,
+          });
 
         } else if (this.name === 'Lịch sử cuộc hẹn') {
           await appointmentService.delete(item.mahen);
@@ -549,7 +574,11 @@ export default {
 
   mounted() {
     this.wsService.connect();
-  }
+  },
+
+  beforeDestroy() {
+    this.wsService.disconnect(); // Đóng WebSocket khi component bị hủy
+  },
 };
 </script>
 

@@ -6,7 +6,9 @@
 
     <Profile_patient v-if="status !== 'examination'"
     @examination:patient = "examination"
-    @push:patient = "get_patient"/>
+    @push:patient = "get_patient"
+    :doctor="doctor"
+    />
 
     <Examination v-if="status === 'examination'"
     @close:examination = "close_examination"
@@ -23,14 +25,16 @@
     export default {
 
         emits : ['close:patient'],
-
+        props: {
+            doctor: {
+                type: Object,
+                required: true
+            }
+        },
         data (){
             return {
                 status: '',
                 patient: {},
-                doctor: {
-                    maBS: 'BS0001'
-                },
             }
         },
 

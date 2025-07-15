@@ -1,72 +1,59 @@
 <template>
   <div class="modal-header">
     <h4 class="card-title fw-bold p-4 text-center">THÔNG TIN BỆNH NHÂN</h4>
-
-    <button type="button" class="btn-close me-3" 
-      style="width: 20px; height: 20px; font-size: 1.5rem;"
-      data-bs-dismiss="modal" aria-label="Close" @click="close_tab">
-    </button>
-
+    <button type="button" class="btn-close me-3" style="width: 20px; height: 20px; font-size: 1.5rem;" data-bs-dismiss="modal" aria-label="Close" @click="close_tab"></button>
   </div>
   <hr>
   <div class="card position-relative">
     <div class="card-body">
-    <div>
-      <button class="btn btn-light" style="float: right" data-bs-toggle="modal" data-bs-target="#editPatientModal">
-        <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
-      </button>
-    </div>
-    
+      <div>
+        <button class="btn btn-light" style="float: right" data-bs-toggle="modal" data-bs-target="#editPatientModal">
+          <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
+        </button>
+      </div>
       <div class="row pb-1">
         <div class="col-md-4">
           <p class="mb-4"><strong>Mã bệnh nhân:</strong> {{ patient.maBN }}</p>
           <p class="mb-4"><strong>Số BHYT:</strong> {{ patient.soBHYT }}</p>
           <p class="mb-4"><strong>Số điện thoại:</strong> {{ patient.sdtBN }}</p>
         </div>
-
         <div class="col-md-4">
           <p class="mb-4"><strong>Tên Bệnh Nhân:</strong> {{ patient.hotenBN }}</p>
           <p class="mb-4"><strong>Ngày Sinh:</strong> {{ formatDate(patient.ngaysinhBN) }}</p>
           <p><strong>Email:</strong> {{ patient.emailBN }}</p>
         </div>
-
         <div class="col-md-4">
           <p class="mb-4"><strong>CCCD:</strong> {{ patient.cccdBN }}</p>
           <p><strong>Địa Chỉ:</strong> {{ patient.diachiBN }}</p>
         </div>
       </div>
-
-        <div class="row">
-            <div class="col-md-4">
-                <p><strong>Chiều cao:</strong> {{ patient.chieucao }} cm</p>
-            </div>
-
-            <div class="col-md-4">
-                <p><strong>Cân nặng:</strong> {{ patient.cannang }} kg</p>
-            </div>
-
-            <div class="col-md-4">
-                <p><strong>Nhóm máu:</strong> {{ patient.nhommau }}</p>
-            </div>
+      <div class="row">
+        <div class="col-md-4">
+          <p><strong>Chiều cao:</strong> {{ patient.chieucao }} cm</p>
         </div>
-      <!-- </div> -->
-    <!-- </div> -->
+        <div class="col-md-4">
+          <p><strong>Cân nặng:</strong> {{ patient.cannang }} kg</p>
+        </div>
+        <div class="col-md-4">
+          <p><strong>Nhóm máu:</strong> {{ patient.nhommau }}</p>
+        </div>
+      </div>
     </div>
   </div>
-
   <hr>
-
   <div class="container">
     <div class="row">
       <div class="col-md-6 scrollable-column">
-        <h3 class="text-center mx-3">Danh sách bệnh án</h3>
-        <button class="btn btn-success mb-3" type="button" @click="create_record" v-if="role === 'doctor'">
-          <i class="fa-solid fa-plus"></i> Thêm hồ sơ mới
-        </button>
+        <div class="sticky-header">
+          <h3 class="text-center mx-3">Danh sách bệnh án</h3>
+          <button class="btn btn-success mb-3 mt-2 w-100" type="button" @click="create_record" v-if="role === 'doctor'">
+            <i class="fa-solid fa-plus"></i> Thêm hồ sơ mới
+          </button>
+        </div>
         <div class="card mb-3" style="width: 100%;" v-for="(record, index) in list_record" :key="index" @click="get_examination(record.maHS)">
           <div class="card-body">
             <h5 class="card-title">{{ record.maHS }}</h5>
-            <h6 class="card-subtitle mb-2 text-muted">Ngày lập hồ sơ: {{ formatDate(record.ngaylapHS) }}</h6>
+            <h6 class="card-subtitle mb-2 text-muted">Ngày lập hồ sơ: {{ formatDateForInput(record.ngaylapHS) }}</h6>
             <p class="card-text">Chuẩn đoán: {{ getFirstExaminationDiagnosis(record.maHS) || 'Chưa có lần khám' }}</p>
             <a href="#" class="card-link" @click.prevent="delete_record(record.maHS)" v-if="role === 'doctor'">Xóa hồ sơ</a>
           </div>
@@ -75,15 +62,18 @@
       <div class="col-md-6 d-flex">
         <div class="vertical-divider mx-3"></div>
         <div class="scrollable-column" style="width: 100%;">
-          <h3 class="text-center mx-3">Danh sách lần khám</h3>
-          <button class="btn btn-success mb-3" type="button" :disabled="!record.maHS" data-bs-toggle="modal" data-bs-target="#exam_form" v-if="role === 'doctor'">
-            <i class="fa-solid fa-plus"></i> Thêm lần khám
-          </button>
+          <div class="sticky-header">
+            <h3 class="text-center mx-3">Danh sách lần khám</h3>
+            <h4 class="text-center mx-3">{{ record.maHS }}</h4>
+            <button class="btn btn-success mb-3 mt-2 w-100" type="button" :disabled="!record.maHS" data-bs-toggle="modal" data-bs-target="#exam_form" v-if="role === 'doctor'">
+              <i class="fa-solid fa-plus"></i> Thêm lần khám
+            </button>
+          </div>
           <div class="card mb-3" style="width: 100%;" v-for="(row, index) in list_examination || []" :key="index">
             <div class="card-body">
               <h5 class="card-title">Lần khám {{ row.stt_lankham }}</h5>
               <h6 class="card-subtitle mb-2 text-muted">Bác sĩ khám: {{ row.maBS }}</h6>
-              <h6 class="card-subtitle mb-2 text-muted">Ngày khám: {{ formatDate(row.ngaythangnamkham) }}</h6>
+              <h6 class="card-subtitle mb-2 text-muted">Ngày khám: {{ formatDateForInput(row.ngaythangnamkham) }}</h6>
               <p class="card-text">Triệu chứng: {{ row.trieuchung }}</p>
               <h6 class="card-subtitle mb-2">Thủ tục khám:</h6>
               <p class="card-text">{{ row.thutuckham }}</p>
@@ -93,8 +83,7 @@
               <p class="card-text">{{ row.lieutrinhdieutri }}</p>
               <h6 class="card-subtitle mb-2">Ngày tái khám: {{ formatDate(row.ngaytaikham) }}</h6>
               <a href="#" class="card-link" @click.prevent="openDrugModal('see', index)">Xem toa thuốc</a>
-              <a href="#" class="card-link" @click.prevent="openDrugModal('add', index)" :class="{ 'disabled': row.hasPrescription }" 
-              :disabled="row.hasPrescription" v-if="role === 'doctor'">Thêm toa thuốc</a>
+              <a href="#" class="card-link" @click.prevent="openDrugModal('add', index)" :class="{ 'disabled': row.hasPrescription }" :disabled="row.hasPrescription" v-if="role === 'doctor'">Thêm toa thuốc</a>
             </div>
           </div>
         </div>
@@ -242,15 +231,8 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <Add_drug v-if="status === 'add'" 
-            :selectedExamination="selectedExamination"
-            :patient="patient"
-          />
-          <Table_drug v-if="status === 'see'" 
-            :selectedExamination="selectedExamination"
-            :patient="patient"
-            :list_prescription="list_prescription"
-          />
+          <Add_drug v-if="status === 'add'" :selectedExamination="selectedExamination" :patient="patient" :doctor="doctor" />
+          <Table_drug v-if="status === 'see'" :selectedExamination="selectedExamination" :patient="patient" :list_prescription="list_prescription" />
         </div>
       </div>
     </div>
@@ -265,6 +247,7 @@ import Table_drug from '../element/table_drug.vue';
 import Add_drug from './add_drug.vue';
 import prescriptionService from '../../services/prescription.service';
 import { Modal } from 'bootstrap';
+import WebSocketService from '@/services/ws.service';
 
 export default {
   props: {
@@ -279,6 +262,7 @@ export default {
   },
   data() {
     return {
+      wsService: new WebSocketService(),
       status: '',
       selectedExamination: null,
       list_record: [],
@@ -292,7 +276,7 @@ export default {
         maHoSo: '',
         maBacSi: '',
         soThuTu: null,
-        ngayKham: new Date().toLocaleDateString('vi-VN'),
+        ngayKham: new Date().toISOString().split('T')[0],
         trieuChung: '',
         thuTucKham: '',
         chuanDoan: '',
@@ -310,11 +294,12 @@ export default {
         chieucao: null,
         cannang: null,
         nhommau: '',
+        soBHYT: '',
       },
       today: new Date(),
       drugModal: null,
       editPatientModal: null,
-      firstDiagnoses: {}, // Object để lưu trữ chuẩn đoán lần đầu tiên theo maHS
+      firstDiagnoses: {},
     };
   },
   watch: {
@@ -334,12 +319,12 @@ export default {
       handler(newMaHS) {
         if (newMaHS) {
           this.form.maHoSo = newMaHS;
-          this.form.maBacSi = this.doctor.maBS;
-          this.form.ngayKham = this.record.date;
+          this.form.maBacSi = this.doctor?.maBS || '';
+          this.form.ngayKham = this.record.date || new Date().toISOString().split('T')[0];
         } else {
           this.form.maHoSo = '';
           this.form.maBacSi = '';
-          this.form.ngayKham = new Date().toLocaleDateString('vi-VN');
+          this.form.ngayKham = new Date().toISOString().split('T')[0];
         }
       },
       immediate: true,
@@ -369,8 +354,8 @@ export default {
     formatDateForInput(date) {
       if (!date) return '';
       const d = new Date(date);
-      d.setDate(d.getDate() + 1); // Cộng thêm 1 ngày để hiển thị đúng giá trị
-      return d.toISOString().split('T')[0]; // Định dạng YYYY-MM-DD cho input type="date"
+      d.setDate(d.getDate() + 1);
+      return d.toISOString().split('T')[0];
     },
     async openDrugModal(status, index) {
       try {
@@ -387,6 +372,7 @@ export default {
     },
     close_tab() {
       this.$emit('close:examination');
+      this.selectedExamination = null;
     },
     async get_record() {
       try {
@@ -418,7 +404,7 @@ export default {
     async get_examination(maHS) {
       try {
         this.record.maHS = maHS;
-        this.record.date = new Date().toLocaleDateString('vi-VN');
+        this.record.date = new Date().toISOString().split('T')[0];
         this.list_examination = await examinationSevice.get_profile(maHS);
         for (let exam of this.list_examination) {
           const prescriptions = await prescriptionService.get_exam(exam.maLanKham);
@@ -431,7 +417,7 @@ export default {
     },
     async create_record() {
       try {
-        let date = new Date().toLocaleDateString('vi-VN');
+        let date = new Date().toISOString().split('T')[0];
         let exam = {
           maBN: this.patient.maBN,
           ngaylapHS: date,
@@ -484,7 +470,7 @@ export default {
         await patientService.update(this.editForm.maBN, this.editForm);
         alert('Cập nhật thông tin bệnh nhân thành công!');
         this.$emit('update:patient', this.editForm);
-        // this.editPatientModal.hide();
+        this.editPatientModal.hide();
       } catch (error) {
         alert('Cập nhật thông tin bệnh nhân không thành công!');
         console.log('Lỗi khi cập nhật thông tin bệnh nhân:', error);
@@ -493,9 +479,9 @@ export default {
     resetForm() {
       this.form = {
         maHoSo: this.record.maHS,
-        maBacSi: this.doctor.maBS,
+        maBacSi: this.doctor?.maBS || '',
         soThuTu: null,
-        ngayKham: new Date().toLocaleDateString('vi-VN'),
+        ngayKham: new Date().toISOString().split('T')[0],
         trieuChung: '',
         thuTucKham: '',
         chuanDoan: '',
@@ -511,6 +497,13 @@ export default {
 .scrollable-column {
   max-height: 700px;
   overflow-y: auto;
+}
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #fff;
+  padding-top: 10px;
 }
 .vertical-divider {
   border-left: 1px solid #dee2e6;

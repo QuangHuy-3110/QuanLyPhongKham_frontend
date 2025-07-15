@@ -67,11 +67,18 @@
 
   <script>
   import patientService from '../../services/patient.service';
-  
+  import WebSocketService from '../../services/ws.service';
   export default {
+    props: {
+      doctor: {
+        type: Object,
+        required: true
+      }
+    },
     emits: ['examination:patient', 'push:patient'],
     data() {
       return {
+        wsSocket: new WebSocketService(),
         status: '',
         patient: {
           emailBN: '',
@@ -107,6 +114,7 @@
         this.$emit('examination:patient', 'examination');
         this.$emit('push:patient', this.patient);
       },
+
       async create_patient() {
         try {
           if (!this.isFormValid) {
@@ -117,6 +125,12 @@
           alert('Thêm bệnh nhân thành công!');
           this.examination()
           this.resetForm();
+          // Gửi thông báo đến bác sĩ qua WebSocket
+          this.wsSocket.sendMessage({
+            type: 'interact_patient',
+            sender: 'doctor',
+            data: this.patient,
+          });
         } catch (error) {
           alert('Thêm bệnh nhân không thành công!');
           console.log('Lỗi khi thêm bệnh nhân:', error);
@@ -137,7 +151,16 @@
         };
       },
     },
+
+    created() {
+      this.wsSocket.connect();
+    },
+
+    beforeDestroy() {
+      this.wsSocket.disconnect();
+    },
   };
+
   </script>
   
   <style scoped>

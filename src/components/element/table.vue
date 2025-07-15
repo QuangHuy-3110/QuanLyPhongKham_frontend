@@ -70,7 +70,7 @@
           </div>
           <div class="modal-footer">
             <button v-if="role !== 'patient'" type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="check_profile(filteredList[activeIndex], 'patient')">Xem hồ sơ bệnh nhân</button>
-            <button v-if="role !== 'patient' && filteredList[activeIndex] && isToday(filteredList[activeIndex].ngaythangnam)" type="button" class="btn btn-warning" data-bs-dismiss="modal" @click="check_profile(filteredList[activeIndex], 'doctor')">Khám bệnh</button>
+            <button v-if="role !== 'patient' && filteredList[activeIndex] " type="button" class="btn btn-warning" data-bs-dismiss="modal" @click="check_profile(filteredList[activeIndex], 'doctor')">Khám bệnh</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
           </div>
         </div>
@@ -81,6 +81,8 @@
 
 <script>
 import AppointmentService from '@/services/appointment.service';
+import doctorService from '../../services/doctor.service';
+import WebSocketService from '@/services/ws.service';
 export default {
   props: {
     array: {
@@ -116,6 +118,11 @@ export default {
       default: 'doctor',
     },
 
+    doctor: {
+      type: Object,
+      default: () => ({}),
+    },
+
     patient: {
       type: Object,
       default: {},
@@ -124,6 +131,7 @@ export default {
   emits: ["update:activeIndex", "check-profile", "update:appointment"],
   data() {
     return {
+      wsService: new WebSocketService(),
       filterDate: new Date().toISOString().split('T')[0], // Ngày hiện tại (YYYY-MM-DD)
       activeIndex: null, // Thêm activeIndex để lưu index của hàng được chọn
     };
@@ -151,6 +159,13 @@ export default {
           appointment.trangthai = 'DaKham';
           await AppointmentService.update(appointment.mahen, appointment);
           this.$emit('update:appointment')
+
+          this.wsService.send({
+            type: 'appointment_examined',
+            sender: 'doctor',
+            data: appointment,
+          });
+
         }catch (error) {
           console.error("Error updating appointment status:", error);
         }
@@ -197,7 +212,15 @@ export default {
       const appointmentDate = new Date(date).toISOString().split('T')[0];
       return appointmentDate === today;
     }
-  }
+  },
+
+  created(){
+    this.wsService.connect();
+  },
+
+  beforeDestroy() {
+    this.wsService.disconnect(); // Đóng WebSocket khi component bị hủy
+  },
 };
 </script>
 
