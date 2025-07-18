@@ -118,6 +118,58 @@
                         </div>
                     </div>
 
+                     <!-- Quản lý nhà cung cấp -->
+                    <div class="accordion-item p-3">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed list-group-item" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false"
+                                aria-controls="collapseSeven">
+                                <i class="fa-solid fa-truck me-2"></i> <span class="fw-semibold" style="font-size: 1.125rem;">Quản lý nhà cung cấp</span>
+                            </button>
+                        </h2>
+                        <div id="collapseSeven" class="accordion-collapse collapse bg-dark-subtle"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                    @click="changeNav_value('themNPP')">
+                                    <i class="fa-solid fa-plus me-2"></i> <span class="fs-6 text-dark">Thêm nhà cung cấp</span>
+                                </a>
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                    @click="changeNav_value('xemNPP')">
+                                    <i class="fa-regular fa-address-book me-2"></i> <span class="fs-6 text-dark">Xem nhà cung cấp</span>
+                                </a>
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                    @click="changeNav_value('xemNPP_Xoa')">
+                                    <i class="fa-solid fa-trash-can-arrow-up me-2"></i> <span class="fs-6 text-dark">Xem nhà cung cấp đã xóa</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- Quản lý hóa đơn -->
+                    <div class="accordion-item p-3">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed list-group-item" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#collapseEight" aria-expanded="false"
+                                aria-controls="collapseEight">
+                                <i class="fa-solid fa-receipt me-2"></i> <span class="fw-semibold" style="font-size: 1.125rem;">Quản lý hóa đơn</span>
+                            </button>
+                        </h2>
+                        <div id="collapseEight" class="accordion-collapse collapse bg-dark-subtle"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                    @click="changeNav_value('themHD')">
+                                    <i class="fa-solid fa-plus me-2"></i> <span class="fs-6 text-dark">Thêm hóa đơn</span>
+                                </a>
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                    @click="changeNav_value('xemHD')">
+                                    <i class="bi bi-list-ul me-2"></i> <span class="fs-6 text-dark">Xem hóa đơn</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Quản lý hồ sơ bệnh án -->
                     <div class="accordion-item p-3">
                         <h2 class="accordion-header">
@@ -166,6 +218,8 @@
                         </div>
                     </div>
                 </div>
+
+           
 
                 <a href="#" class="list-group-item border-end-0 rounded-3 mt-2 d-inline-block text-truncate bg-success text-white p-3"
                    @click="changeNav_value('refresh')">

@@ -1,3 +1,4 @@
+```vue
 <template>
   <div class="container mt-6">
     <h3 class="mb-4 text-center fw-bold">{{ name }}</h3>
@@ -61,7 +62,7 @@
           />
         </div>
         <!-- Search for Drugs -->
-        <div v-if="name.includes('thuốc')" class="col-md-6">
+        <div v-if="name.includes('thuốc')" class="col-md-4">
           <input
             v-model="search.maThuoc"
             type="text"
@@ -70,12 +71,21 @@
             @input="searchItems"
           />
         </div>
-        <div v-if="name.includes('thuốc')" class="col-md-6">
+        <div v-if="name.includes('thuốc')" class="col-md-4">
           <input
             v-model="search.tenthuoc"
             type="text"
             class="form-control"
             placeholder="Tìm theo tên thuốc"
+            @input="searchItems"
+          />
+        </div>
+        <div v-if="name.includes('thuốc')" class="col-md-4">
+          <input
+            v-model="search.maNPP"
+            type="text"
+            class="form-control"
+            placeholder="Tìm theo nhà cung cấp"
             @input="searchItems"
           />
         </div>
@@ -120,8 +130,8 @@
       aria-labelledby="exampleModalLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content shadow-md sm:rounded-lg">
           <div class="modal-header bg-gray-700 text-gray-100">
             <h5 class="modal-title" id="exampleModalLabel">{{ isEditing ? 'Chỉnh Sửa Thông Tin' : 'Chi Tiết Thông Tin' }}</h5>
             <button
@@ -132,70 +142,88 @@
               @click="cancelEdit"
             ></button>
           </div>
-          <div class="modal-body">
-            <div v-if="selectedRow" class="row">
-              <div
-                v-for="col in columns_full"
-                :key="col.key"
-                class="col-md-6 mb-3"
-              >
-                <label :for="col.key" class="form-label">
-                  <strong>{{ col.header }}: </strong>
-                </label>
-                <template v-if="isEditing">
-                  <input
-                    v-if="isDateField(col.key, selectedRow[col.key])"
-                    :id="col.key"
-                    v-model="editRow[col.key]"
-                    type="date"
-                    class="form-control"
-                    :disabled="col.key.startsWith('ma')"
-                  />
-                  <input
-                    v-else
-                    :id="col.key"
-                    v-model="editRow[col.key]"
-                    type="text"
-                    class="form-control"
-                    :placeholder="col.header"
-                    :disabled="col.key.startsWith('ma')"
-                  />
-                </template>
-                <template v-else>
-                  {{ formatValue(selectedRow[col.key], col.key) }}
-                </template>
+          <div class="modal-body invoice-body">
+            <div v-if="selectedRow" class="invoice-container">
+              <div class="invoice-header text-center mb-4">
+                <h2>{{ isEditing ? 'CHỈNH SỬA THÔNG TIN' : 'THÔNG TIN CHI TIẾT' }}</h2>
+                <p class="text-muted">
+                  {{ name.includes('bác sĩ') ? `Mã bác sĩ: ${selectedRow.maBS}` : 
+                     name.includes('bệnh nhân') ? `Mã bệnh nhân: ${selectedRow.maBN}` : 
+                     name.includes('thuốc') ? `Mã thuốc: ${selectedRow.maThuoc}` : 
+                     name.includes('lịch hẹn') ? `Mã lịch hẹn: ${selectedRow.mahen}` : 
+                     name.includes('nhà cung cấp') ? `Mã nhà cung cấp: ${selectedRow.maNPP}` : '' }}
+                </p>
+              </div>
+              <div class="invoice-info mb-4">
+                <div class="row">
+                  <div
+                    v-for="col in columns_full"
+                    :key="col.key"
+                    class="col-md-6 mb-2"
+                  >
+                    <strong>{{ col.header }}: </strong>
+                    <template v-if="isEditing">
+                      <input
+                        v-if="isDateField(col.key, selectedRow[col.key])"
+                        :id="col.key"
+                        v-model="editRow[col.key]"
+                        type="date"
+                        class="form-control"
+                        :disabled="col.key.startsWith('ma')"
+                      />
+                      <input
+                        v-else
+                        :id="col.key"
+                        v-model="editRow[col.key]"
+                        type="text"
+                        class="form-control"
+                        :placeholder="col.header"
+                        :disabled="col.key.startsWith('ma')"
+                      />
+                    </template>
+                    <template v-else>
+                      <span>{{ formatValue(selectedRow[col.key], col.key) }}</span>
+                    </template>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex justify-content-end mb-3">
+                <button 
+                  type="button" 
+                  class="btn btn-danger m-2" 
+                  v-if="name === 'Danh sách lịch hẹn'"
+                  @click="cancel_appointment(selectedRow)"
+                >
+                  Hủy lịch hẹn
+                </button>
+                <button 
+                  type="button" 
+                  class="btn btn-danger m-2"
+                  v-if="name !== 'Danh sách lịch hẹn' && name !== 'Xem danh sách bác sĩ đã xóa' && name !== 'Danh sách nhà cung cấp đã xóa' && name !== 'Danh sách bệnh nhân đã xóa' && name !== 'Danh sách thuốc đã xóa' && name !== 'Lịch sử cuộc hẹn đã xóa'"
+                  @click="deleteItem(selectedRow)"
+                >
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+                <button 
+                  type="button" 
+                  class="btn btn-success m-2"
+                  v-if="name === 'Xem danh sách bác sĩ đã xóa' || name === 'Danh sách bệnh nhân đã xóa' || name === 'Danh sách nhà cung cấp đã xóa' || name === 'Danh sách thuốc đã xóa' || name === 'Lịch sử cuộc hẹn đã xóa'"
+                  @click="restoreItem(selectedRow)"
+                >
+                  <i class="fa-solid fa-reply"></i>
+                  Khôi phục
+                </button>
+                <button
+                  v-if="name !== 'Danh sách lịch hẹn' && name !== 'Xem danh sách bác sĩ đã xóa' && name !== 'Danh sách nhà cung cấp đã xóa' && name !== 'Danh sách bệnh nhân đã xóa' && name !== 'Danh sách thuốc đã xóa' && name !== 'Lịch sử cuộc hẹn đã xóa'"
+                  type="button"
+                  class="btn btn-warning m-2"
+                  @click="toggleEdit"
+                >
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
               </div>
             </div>
             <div v-else class="text-center">Không có dữ liệu để hiển thị</div>
-            <div class="d-flex justify-content-end mb-3">
-              <button type="button" class="btn btn-danger m-2" 
-              v-if="name === 'Danh sách lịch hẹn'"
-              @click="cancel_appointment(selectedRow)">
-                Hủy lịch hẹn
-              </button>
-
-              <button type="button" class="btn btn-danger m-2"
-              v-if="name !== 'Danh sách lịch hẹn' && name !== 'Xem danh sách bác sĩ đã xóa' && name !== 'Danh sách bệnh nhân đã xóa' && name !== 'Danh sách thuốc đã xóa' && name !== 'Lịch sử cuộc hẹn đã xóa'"
-              @click="deleteItem(selectedRow)">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-
-              <button type="button" class="btn btn-success m-2"
-              v-if="name === 'Xem danh sách bác sĩ đã xóa' || name === 'Danh sách bệnh nhân đã xóa' || name === 'Danh sách thuốc đã xóa' || name === 'Lịch sử cuộc hẹn đã xóa'"
-              @click="restoreItem(selectedRow)">
-                <i class="fa-solid fa-reply"></i>
-                Khôi phục
-              </button>
-
-              <button
-                v-if="name !== 'Danh sách lịch hẹn' && name !== 'Xem danh sách bác sĩ đã xóa' && name !== 'Danh sách bệnh nhân đã xóa' && name !== 'Danh sách thuốc đã xóa' && name !== 'Lịch sử cuộc hẹn đã xóa'"
-                type="button"
-                class="btn btn-warning m-2"
-                @click="toggleEdit"
-              >
-                <i class="fa-solid fa-pen-to-square"></i>
-              </button>
-            </div>
           </div>
           <div class="modal-footer">
             <button
@@ -235,6 +263,8 @@ import patientService from '../../services/patient.service';
 import drugService from '../../services/drug.service';
 import appointmentService from '../../services/appointment.service';
 import WebSocketService from '@/services/ws.service';
+import distributorService from '../../services/distributor.service';
+import invoiceService from '../../services/invoice.service';
 
 export default {
   props: {
@@ -282,6 +312,7 @@ export default {
         cccdBN: '',
         maThuoc: '',
         tenthuoc: '',
+        maNPP: '',
       },
     };
   },
@@ -299,6 +330,7 @@ export default {
         const searchCccdBN = this.search.cccdBN ? this.search.cccdBN.toLowerCase() : '';
         const searchMaThuoc = this.search.maThuoc ? this.search.maThuoc.toLowerCase() : '';
         const searchTenthuoc = this.search.tenthuoc ? this.search.tenthuoc.toLowerCase() : '';
+        const searchNhaCungCap = this.search.maNPP ? this.search.maNPP.toLowerCase() : '';
 
         if (this.name.includes('bác sĩ')) {
           return (
@@ -315,7 +347,8 @@ export default {
         } else if (this.name.includes('thuốc')) {
           return (
             (!searchMaThuoc || (item.maThuoc && item.maThuoc.toLowerCase().includes(searchMaThuoc))) &&
-            (!searchTenthuoc || (item.tenthuoc && item.tenthuoc.toLowerCase().includes(searchTenthuoc)))
+            (!searchTenthuoc || (item.tenthuoc && item.tenthuoc.toLowerCase().includes(searchTenthuoc))) &&
+            (!searchNhaCungCap || (item.maNPP && item.maNPP.toLowerCase().includes(searchNhaCungCap)))
           );
         }
         return true;
@@ -349,7 +382,6 @@ export default {
           await doctorService.update(item.maBS, item);
           this.$emit('update:array');
           alert('Khôi phục bác sĩ thành công!');
-
         } else if (this.name === 'Danh sách bệnh nhân đã xóa') {
           item = this.formatEditRow(item); // Định dạng lại item trước khi gửi
           item.xoa = 0; // Đánh dấu là chưa xóa
@@ -362,7 +394,12 @@ export default {
             sender: 'Admin',
             data: item,
           });
-
+        } else if (this.name === 'Danh sách nhà cung cấp đã xóa') {
+          item = this.formatEditRow(item); // Định dạng lại item trước khi gửi
+          item.xoa = 0; // Đánh dấu là chưa xóa
+          await distributorService.update(item.maNPP, item);
+          this.$emit('update:array');
+          alert('Khôi phục nhà cung cấp thành công!');
         } else if (this.name === 'Danh sách thuốc đã xóa') {
           item.xoa = 0; // Đánh dấu là chưa xóa
           await drugService.update(item.maThuoc, item);
@@ -374,7 +411,6 @@ export default {
             sender: 'Admin',
             data: item,
           });
-
         } 
         // Đóng modal và reset trạng thái
         this.selectedRow = null;
@@ -425,7 +461,6 @@ export default {
           await doctorService.update(item.maBS, item);
           this.$emit('update:array');
           alert('Xóa thành công!');
-
         } else if (this.name === 'Danh sách bệnh nhân') {
           item = this.formatEditRow(item); // Định dạng lại item trước khi gửi
           item.xoa = 1; // Đánh dấu là đã xóa
@@ -438,7 +473,12 @@ export default {
             sender: 'Admin',
             data: item,
           });
-
+        } else if (this.name === 'Danh sách nhà cung cấp') {
+          item = this.formatEditRow(item); // Định dạng lại item trước khi gửi
+          item.xoa = 1; // Đánh dấu là đã xóa
+          await distributorService.update(item.maNPP, item);
+          this.$emit('update:array');
+          alert('Xóa thành công!');
         } else if (this.name === 'Danh sách thuốc' || this.name === 'Danh sách thuốc gần hết') {
           item.xoa = 1; // Đánh dấu là đã xóa
           await drugService.update(item.maThuoc, item);
@@ -450,7 +490,6 @@ export default {
             sender: 'Admin',
             data: item,
           });
-
         } else if (this.name === 'Lịch sử cuộc hẹn') {
           await appointmentService.delete(item.mahen);
           this.$emit('update:array');
@@ -500,7 +539,7 @@ export default {
           await drugService.update(saveRow.maThuoc, saveRow);
           alert("Cập nhật thành công!");
           this.wsService.send({
-            type: 'interact_patient',
+            type: 'interact_drug',
             sender: 'Admin',
             data: saveRow,
           }); // Gửi thông báo qua WebSocket
@@ -595,3 +634,4 @@ export default {
 <style scoped>
 @import "@/assets/editform.css";
 </style>
+```

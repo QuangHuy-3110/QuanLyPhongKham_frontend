@@ -73,14 +73,18 @@
             <!-- Nơi sản xuất -->
             <div class="col-md-6">
               <label for="noisanxuatThuoc" class="form-label fw-bold">Nơi Sản Xuất <span class="text-danger">*</span></label>
-              <input
-                type="text"
-                class="form-control"
+              <select
+                class="form-select"
                 id="noisanxuatThuoc"
-                v-model="form.noisanxuatThuoc"
+                v-model="form.maNPP"
                 required
-                @input="validateNoisanxuatThuoc"
-              />
+                @change="validateNoisanxuatThuoc"
+              >
+                <option value="" disabled>Chọn nơi sản xuất</option>
+                <option v-for="distributor in distributors" :value="distributor.maNPP" :key="distributor.maNPP">
+                  {{ distributor.maNPP }} - {{ distributor.tenNPP }}
+                </option>
+              </select>
               <div class="invalid-feedback" v-if="errors.noisanxuatThuoc">{{ errors.noisanxuatThuoc }}</div>
             </div>
 
@@ -111,20 +115,23 @@
 </template>
 
 <script>
-
-import drugService from'../../services/drug.service'
+import drugService from '../../services/drug.service';
 import WebSocketService from '../../services/ws.service';
 
 export default {
+  props: {
+    distributors: { type: Array, required: true }
+  },
+
   data() {
     return {
-      wsService: new WebSocketService(), // Khởi tạo WebSocketService
+      wsService: new WebSocketService(),
       form: {
         maThuoc: '',
         tenThuoc: '',
         soluongThuoc: null,
         donvitinhThuoc: '',
-        noisanxuatThuoc: '',
+        maNPP: '',
         soluong_minThuoc: null
       },
       errors: {
@@ -181,14 +188,14 @@ export default {
       if (!input) {
         this.errors.donvitinhThuoc = 'Vui lòng chọn đơn vị tính.';
       } else {
-        this.errors.donvitinhThuoc = '';
+        this.errors.donvitinhThuoc = ''; 
       }
     },
 
     validateNoisanxuatThuoc() {
-      const input = this.form.noisanxuatThuoc;
+      const input = this.form.maNPP;
       if (!input) {
-        this.errors.noisanxuatThuoc = 'Nơi sản xuất là bắt buộc.';
+        this.errors.noisanxuatThuoc = 'Vui lòng chọn nơi sản xuất.';
       } else {
         this.errors.noisanxuatThuoc = '';
       }
@@ -206,7 +213,6 @@ export default {
     },
 
     async submitForm() {
-      // Kiểm tra tất cả các trường
       this.validateMaThuoc();
       this.validateTenThuoc();
       this.validateSoluongThuoc();
@@ -214,29 +220,28 @@ export default {
       this.validateNoisanxuatThuoc();
       this.validateSoluongMinThuoc();
 
-      // Kiểm tra nếu có lỗi
       const hasErrors = Object.values(this.errors).some((error) => error !== '');
       if (hasErrors) {
         const form = this.$el.querySelector('form');
         form.classList.add('was-validated');
         return;
       }
-      try{
-        await drugService.create(this.form)
-        alert('Thêm thuốc mới thành công!')
-        this.$emit('formSubmitted'); // Emit sự kiện formSubmitted sau khi thêm thành công
+      try {
+        await drugService.create(this.form);
+        alert('Thêm thuốc mới thành công!');
+        this.$emit('formSubmitted');
+
         this.wsService.send({
           type: 'interact_drug',
           sender: 'Admin',
           data: this.form
-        }); // Gửi thông báo qua WebSocket
-      }catch (error){
-        alert.error('Lỗi khi thêm thuốc mới!')
-        console.log('Lỗi khi thêm thuốc mới:', error)
+        });
+        
+      } catch (error) {
+        alert('Lỗi khi thêm thuốc mới!');
+        console.log('Lỗi khi thêm thuốc mới:', error);
       }
-      
 
-      // Reset form sau khi thêm
       this.form = {
         maThuoc: '',
         tenThuoc: '',
@@ -257,56 +262,16 @@ export default {
     }
   },
 
-  created(){
+  created() {
     this.wsService.connect();
   },
 
   beforeDestroy() {
-    this.wsService.disconnect(); // Ngắt kết nối WebSocket khi component bị hủy
+    this.wsService.disconnect();
   }
 };
 </script>
 
 <style scoped>
-.card {
-  border-radius: 8px;
-  background-color: #fff;
-}
-
-.card-body {
-  padding: 1.5rem;
-}
-
-.form-label {
-  color: #333;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
-}
-
-.btn-primary:hover {
-  background-color: #0056b3;
-  border-color: #0056b3;
-}
-
-.invalid-feedback {
-  font-size: 0.875rem;
-}
-
-input:focus, select:focus {
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-  border-color: #007bff;
-}
-
-form.was-validated .form-control:invalid,
-form.was-validated .form-select:invalid {
-  border-color: #dc3545;
-}
-
-form.was-validated .form-control:valid,
-form.was-validated .form-select:valid {
-  border-color: #28a745;
-}
+@import "@/assets/addMedicine.css";
 </style>

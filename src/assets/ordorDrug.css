@@ -1,3 +1,17 @@
+.invoice-body {
+    padding: 2rem;
+    background-color: #f8f9fa;
+}
+
+.invoice-container {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+}
+
 .relative {
     width: 100%;
     max-width: none;
@@ -58,8 +72,6 @@ tbody tr:hover {
 
 .modal-content {
     border-radius: 0.5rem;
-    border: 1px solid #dee2e6;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .btn-close-white {
@@ -96,26 +108,6 @@ tbody tr:hover {
     border-color: #bd2130;
 }
 
-.btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
-}
-
-.btn-success:hover {
-    background-color: #218838;
-    border-color: #1e7e34;
-}
-
-.btn-warning {
-    background-color: #ffc107;
-    border-color: #ffc107;
-}
-
-.btn-warning:hover {
-    background-color: #e0a800;
-    border-color: #d39e00;
-}
-
 .form-control {
     width: 100%;
     padding: 0.375rem 0.75rem;
@@ -131,70 +123,7 @@ tbody tr:hover {
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
 }
 
-input[type="date"] {
-    width: 100%;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    border-radius: 0.25rem;
-    border: 1px solid #ced4da;
-}
-
-input[type="date"]:disabled {
-    background-color: #e9ecef;
-    opacity: 1;
-}
-
-input[type="date"]:focus {
-    border-color: #80bdff;
-    outline: 0;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-
-.relative {
-    max-height: 500px;
-    overflow-y: auto;
-    position: relative;
-}
-
-table thead {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.invoice-body {
-    padding: 2rem;
-    background-color: #f8f9fa;
-}
-
-.invoice-container {
-    background-color: #fff;
-    border: 1px solid #dee2e6;
-    border-radius: 0.5rem;
-    padding: 2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    width: 100%;
-}
-
-.invoice-header h2 {
-    font-size: 1.5rem;
-    font-weight: bold;
+.form-label {
+    font-weight: 500;
     margin-bottom: 0.5rem;
-}
-
-.invoice-header .text-muted {
-    color: #6c757d !important;
-    font-size: 0.9rem;
-}
-
-.invoice-info strong {
-    display: inline-block;
-    width: 150px;
-}
-
-.invoice-info span,
-.invoice-info input {
-    display: inline-block;
-    width: calc(100% - 160px);
 }

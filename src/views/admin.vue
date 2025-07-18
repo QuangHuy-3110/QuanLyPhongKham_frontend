@@ -60,6 +60,7 @@
 
                 <!-- Thêm thuốc -->
                 <Add_Medicine style="max-width: 1100px;" v-if="nav_value === 'themThuoc'"
+                :distributors="distributors"
                 @formSubmitted="get_medicines"/>
 
                 <!-- Xem danh sách thuốc -->
@@ -71,12 +72,11 @@
                 @update:array="get_medicines"/>
 
                 <!-- Xem danh sách thuốc gần hết -->
-                <See_Table style="max-width: 1100px;" v-if="nav_value === 'xemThuocmin'"
+                <Order_drug style="max-width: 1100px;" v-if="nav_value === 'xemThuocmin'" 
                 :name="'Danh sách thuốc gần hết'"
-                :array="{list: medicines_min}"
+                :medicine="{list: medicines_min}"
                 :columns="medicineColumns"
-                :columns_full="medicineColumns_full"
-                @update:array="get_medicines"/>
+                :distributors="{list: distributors}"/>
 
                 <!-- Xem danh sách thuốc đã xóa -->
                 <See_Table style="max-width: 1100px;" v-if="nav_value === 'xemThuoc_Xoa'"
@@ -96,6 +96,44 @@
                 :array="{list: specialties}"
                 :columns="specialtiesColumns"
                 :columns_full="specialtiesColumns_full"/>
+
+                <!-- Quản lý nhà phân phối -->
+                <Add_distributor style="max-width: 1100px;" v-if="nav_value === 'themNPP'"
+                @formSubmitted="get_distributor"/>
+
+                <!-- Xem nhà phân phối -->
+                <See_Table style="max-width: 1100px;" v-if="nav_value === 'xemNPP'"
+                :name="'Danh sách nhà cung cấp'"
+                :array="{list: distributors}"
+                :columns="distributorsColumns"
+                :columns_full="distributorsColumns_full"
+                @update:array="get_distributor"/>
+
+                <!-- Xem nhà phân phối đã xóa -->
+                <See_Table style="max-width: 1100px;" v-if="nav_value === 'xemNPP_Xoa'"
+                :name="'Danh sách nhà cung cấp đã xóa'"
+                :array="{list: distributors_del}"
+                :columns="distributorsColumns"
+                :columns_full="distributorsColumns_full"
+                @update:array="get_distributor"/>
+
+                <!-- Quản lý hóa đơn -->
+                <Add_invoce style="max-width: 1200px;" v-if="nav_value === 'themHD'"
+                :name="'Thêm Hóa Đơn'"
+                :medicine="medicines"
+                :distributors="distributors"
+                @formSubmitted="update_invoice"/>
+
+                <!-- Xem hóa đơn -->
+                 <Table_invoice_detail style="max-width: 1100px;" v-if="nav_value === 'xemHD'"
+                 :name="'Danh sách hóa đơn'"
+                 :array="{list:invoices}"
+                 :columns="invoicesColumns_full"
+                 :chiTietArray="{list:invoice_details}"
+                 :chiTietColumns="invoice_detailsColumns_full"
+                 @invoiceDeleted="update_invoice"
+                 />
+
 
                 <!-- Xem danh sách hồ sơ bệnh án -->
                 <Table_exam style="max-width: 1100px;" v-if="nav_value === 'xemBAn' && active_index === -1"
@@ -165,6 +203,10 @@ import Add_Medicine from '../components/admin/add_Medicine.vue';
 import Add_specialties from '../components/admin/add_specialties.vue'
 import Infoexam from '../components/admin/infoexam.vue';
 import Table_exam from '../components/admin/table_exam.vue';
+import Add_distributor from '../components/admin/add_distributor.vue';
+import Add_invoce from '../components/admin/add_invoce.vue';
+import Table_invoice_detail from '../components/admin/table_invoice_detail.vue';
+import Order_drug from '../components/admin/order_drug.vue';
 
 import doctorService from '../services/doctor.service'
 import working_timeService from '../services/working_time.service';
@@ -175,6 +217,9 @@ import drugService from '../services/drug.service';
 import recordService from '../services/record.service'
 import prescriptionService from '../services/prescription.service'
 import appointmentService from '../services/appointment.service'
+import distributorService from '../services/distributor.service'
+import invoiceService from '../services/invoice.service'
+import invoice_detailService from '../services/invoice_details.service'
 
 import WebSocketService from '@/services/ws.service';
 import { useAuthStore } from "@/stores/authStore";
@@ -190,7 +235,11 @@ export default {
         Add_Medicine,
         Add_specialties,
         Infoexam,
-        Table_exam
+        Table_exam,
+        Add_distributor,
+        Add_invoce,
+        Table_invoice_detail,
+        Order_drug
     },
 
     data() {
@@ -272,14 +321,14 @@ export default {
                 { key: 'tenThuoc', header: 'Tên thuốc' },
                 { key: 'soluongThuoc', header: 'Số lượng' },
                 { key: 'donvitinhThuoc', header: 'Đơn vị tính' },
-                { key: 'noisanxuatThuoc', header: 'Nơi sản xuất' },
+                { key: 'maNPP', header: 'Nhà cung cấp' },
             ],
             medicineColumns_full: [
             { key: 'maThuoc', header: 'Mã thuốc' },
                 { key: 'tenThuoc', header: 'Tên thuốc' },
                 { key: 'soluongThuoc', header: 'Số lượng' },
                 { key: 'donvitinhThuoc', header: 'Đơn vị tính' },
-                { key: 'noisanxuatThuoc', header: 'Nơi sản xuất' },
+                { key: 'maNPP', header: 'Nhà cung cấp' },
                 { key: 'soluong_minThuoc', header: 'Số lượng tôi thiểu' },
             ],
 
@@ -314,6 +363,44 @@ export default {
                 { key: 'khunggio', header: 'Khung giờ' },
                 { key: 'mota', header: 'Mô tả' },
                 { key: 'trangthai', header: 'Trạng thái' },
+            ],
+
+            distributors: [],
+            distributors_del: [],
+            distributorsColumns: [
+                { key: 'maNPP', header: 'Mã nhà phân phối' },
+                { key: 'tenNPP', header: 'Tên nhà phân phối' },
+                { key: 'diachiNPP', header: 'Địa chỉ' },
+                { key: 'sdtNPP', header: 'Số điện thoại' },
+                { key: 'emailNPP', header: 'Email' },
+            ],
+            distributorsColumns_full: [
+                { key: 'maNPP', header: 'Mã nhà phân phối' },
+                { key: 'tenNPP', header: 'Tên nhà phân phối' },
+                { key: 'diachiNPP', header: 'Địa chỉ' },
+                { key: 'sdtNPP', header: 'Số điện thoại' },
+                { key: 'emailNPP', header: 'Email' },
+                { key: 'stkNPP', header: 'Số tài khoản' },
+                { key: 'nganhangNPP', header: 'Ngân hàng' },
+            ],
+
+            invoices: [],
+            invoices_del: [],
+            invoicesColumns_full: [
+                { key: 'maHD', header: 'Mã hóa đơn' },
+                { key: 'maNPP', header: 'Mã nhà phân phối' },
+                { key: 'ngaynhap', header: 'Ngày nhập hàng' },
+                { key: 'tongtien', header: 'Tổng tiền' },
+            ],
+
+            invoice_details: [],
+            invoice_detailsColumns_full: [
+                { key: 'maHD', header: 'Mã hóa đơn' },
+                { key: 'maThuoc', header: 'Mã thuốc' },
+                { key: 'soluong', header: 'Số lượng' },
+                { key: 'donvitinh', header: 'Đơn vị tính' },
+                { key: 'dongia', header: 'Đơn giá' },
+                { key: 'thanhtien', header: 'Thành tiền' },
             ],
 
             schedules: [],
@@ -354,6 +441,38 @@ export default {
         changeNav_value (name){
             this.nav_value = name
             this.active_index = -1
+        },
+
+        async update_invoice(){
+            await this.get_invoice()
+            await this.get_invoice_detail()
+            await this.get_medicines()
+        },
+
+        async get_invoice_detail(){
+            try {
+                this.invoice_details = await invoice_detailService.getAll()
+            }catch (error){
+                console.log("Lấy chi tiết hóa đơn không thành công:". error)
+            }
+        },
+
+        async get_invoice(){
+            try {
+                this.invoices = await invoiceService.getAll()
+                this.invoices_del = await invoiceService.getDel()
+            }catch (error){
+                console.log("Lấy danh sách hóa đơn không thành công:". error)
+            }
+        },
+
+        async get_distributor(){
+            try {
+                this.distributors = await distributorService.getAll()
+                this.distributors_del = await distributorService.getDel()
+            }catch (error){
+                console.log("Lấy danh sách nhà phân phối không thành công:". error)
+            }
         },
 
         async getUser(){
@@ -606,7 +725,9 @@ export default {
         this.get_prescriptions()
         this.get_appointment()
         this.get_appointment_new()
-
+        this.get_distributor()
+        this.get_invoice()
+        this.get_invoice_detail()
     },
 
     async created() {

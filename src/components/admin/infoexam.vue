@@ -321,5 +321,4 @@
   
   <style scoped>
     @import "@/assets/infoexam.css";
-
   </style>
