@@ -324,6 +324,7 @@ export default {
           for (const chiTiet of this.form.chiTietHoaDon) {
             let thuoc = this.medicine.find(thuoc => thuoc.maThuoc === chiTiet.maThuoc);
             if (thuoc) {
+              thuoc.giaThuoc = chiTiet.dongia + (chiTiet.dongia * 20 / 100)
               thuoc.soluongThuoc = (thuoc.soluongThuoc || 0) + chiTiet.soluong;
               await drugService.update(chiTiet.maThuoc, thuoc);
             }

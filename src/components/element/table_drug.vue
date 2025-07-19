@@ -40,6 +40,7 @@
                   <th scope="col">Đơn vị</th>
                   <th scope="col">Liều dùng</th>
                   <th scope="col">Thời gian</th>
+                  <th scope="col">Thành tiền</th>
                 </tr>
               </thead>
               <tbody>
@@ -50,10 +51,12 @@
                   <td>{{ medicine.donvi }}</td>
                   <td>{{ medicine.lieuluong }}</td>
                   <td>{{ medicine.thoigianSD }}</td>
+                  <td>{{ medicine.thanhtien }}</td>
                 </tr>
               </tbody>
             </table>
-            <h6>Ghi chú</h6>
+            <h6>Chi phí khám bệnh: 60.000</h6>
+            <h5>Tổng tiền: {{ selectedExamination.tongtien }}</h5>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
@@ -73,6 +76,7 @@ export default {
     patient:{type: Object, required: true},
     list_prescription: {type: Array}
   },
+
   data() {
     return {
       previewModal: null,

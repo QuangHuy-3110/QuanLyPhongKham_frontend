@@ -145,7 +145,7 @@
             <div class="modal-body">
               <h6>Thông tin bệnh nhân</h6>
               <p><strong>Họ và tên:</strong> {{ patient.hotenBN }}</p>
-              <p><strong>Ngày tháng năm sinh:</strong> {{ patient.ngaysinhBN }}</p>
+              <p><strong>Ngày tháng năm sinh:</strong> {{ formatDate(patient.ngaysinhBN) }}</p>
               <p><strong>Chẩn đoán:</strong> {{ selectedExamination.chuandoan }}</p>
               <h6 class="mt-4">Danh sách thuốc</h6>
               <table class="table table-bordered">
@@ -188,6 +188,7 @@
 <script>
 import { Modal } from 'bootstrap';
 import prescriptionService from '../../services/prescription.service';
+import examinationSevice from '../../services/examination.sevice';
 import drugService from '../../services/drug.service';
 import WebSocketService from '../../services/ws.service';
 
@@ -218,7 +219,22 @@ export default {
     };
   },
 
+  emits: ['update:price'],
+
   methods: {
+    formatDate(date) {
+      if (!date) return '';
+      const d = new Date(date);
+      return d.toLocaleDateString('vi-VN');
+    },
+
+    formatDateForInput(date) {
+      if (!date) return '';
+      const d = new Date(date);
+      d.setDate(d.getDate() + 1);
+      return d.toISOString().split('T')[0];
+    },
+
     async loadDrugs() {
       try {
         const response = await drugService.getAll();
@@ -332,6 +348,7 @@ export default {
 
     async savePrescription() {
       try {
+        let tongtien = 0
         for (const medicine of this.medicines) {
           // Kiểm tra số lượng thuốc trong kho và liều dùng trước khi lưu
           const thuoc = this.allDrugs.find(drug => drug.maThuoc === medicine.maThuoc);
@@ -354,6 +371,8 @@ export default {
             throw new Error(`Liều dùng lớn hơn hoặc bằng số lượng cho thuốc ${medicine.maThuoc}`);
           }
 
+          let total = thuoc.giaThuoc * medicine.quantity
+          tongtien = tongtien + total
           const prescriptionData = {
             maLanKham: this.selectedExamination.maLanKham,
             maThuoc: medicine.maThuoc,
@@ -362,6 +381,7 @@ export default {
             donvi: medicine.unit,
             lieuluong: medicine.dosage,
             thoigianSD: medicine.time,
+            thanhtien: total
           };
           await prescriptionService.create(prescriptionData);
           console.log(`Đã lưu thuốc ${medicine.name} cho lần khám ${this.selectedExamination.maLanKham}`);
@@ -372,10 +392,22 @@ export default {
           await drugService.update(medicine.maThuoc, thuoc);
           console.log(`Đã cập nhật số lượng thuốc ${medicine.name} trong kho`);
         }
-        alert('Toa thuốc đã được lưu thành công!');
 
+        let exam = {...this.selectedExamination}
+        exam.tongtien = tongtien + 60000
+        exam.ngaytaikham= this.formatDateForInput(exam.ngaytaikham)
+        exam.ngaythangnamkham= this.formatDateForInput(exam.ngaythangnamkham)
+        await examinationSevice.update(exam.maLanKham, exam)
+        alert('Toa thuốc đã được lưu thành công!');
+        this.$emit('update:price', exam.maHS) 
         this.wsSocket.send({
           type: 'interact_drug',
+          sender: 'doctor',
+          data: {},
+        });
+
+        this.wsSocket.send({
+          type: 'interact_exam',
           sender: 'doctor',
           data: {},
         });

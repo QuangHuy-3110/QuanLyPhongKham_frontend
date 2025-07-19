@@ -1,3 +1,4 @@
+```vue
 <template>
   <div class="container">
     <h3 class="mb-4 text-center fw-bold">Xem Lịch Làm Việc</h3>
@@ -84,10 +85,10 @@
               <div v-if="day.date" class="day-number">{{ day.date.getDate() }}</div>
               <div v-if="day.schedules && day.schedules.length > 0" class="schedule-content">
                 <div v-if="viewMode === 'doctor'" v-for="schedule in day.schedules" :key="schedule.giobatdau">
-                  {{ schedule.giobatdau }} - {{ schedule.gioketthuc }}
+                  {{ schedule.giobatdau }} - {{ schedule.gioketthuc }} - {{ schedule.trangthai || 'Chưa chấm công' }}
                 </div>
                 <div v-else v-for="doctor in day.schedules" :key="doctor.maBS">
-                  {{ doctor.maBS }} - {{ doctor.tenBS }}
+                  {{ doctor.maBS }} - {{ doctor.tenBS }} - {{ doctor.trangthai || 'Chưa chấm công' }}
                 </div>
               </div>
             </div>
@@ -109,7 +110,9 @@
           <div class="modal-body">
             <ul v-if="doctorsOnSelectedDate.length > 0" class="list-group">
               <li v-for="doctor in doctorsOnSelectedDate" :key="doctor.maBS" class="list-group-item">
-                {{ doctor.maBS }} - {{ doctor.tenBS }}
+                {{ doctor.maBS }} - {{ doctor.tenBS }} - {{ doctor.trangthai || 'Chưa chấm công' }}
+                <button v-if="!doctor.trangthai" class="btn btn-danger me-2" @click="update_status('Nghỉ', doctor)">Nghỉ</button>
+                <button v-if="!doctor.trangthai" class="btn btn-success" @click="update_status('Hoàn thành', doctor)">Hoàn thành</button>
                 <span v-if="viewMode === 'doctor'"> ({{ doctor.giobatdau }} - {{ doctor.gioketthuc }})</span>
               </li>
             </ul>
@@ -126,6 +129,7 @@
 
 <script>
 import { Modal } from 'bootstrap';
+import working_timeService from '../../services/working_time.service';
 
 export default {
   props: {
@@ -187,14 +191,69 @@ export default {
   },
 
   methods: {
-    validateMonth() {
-      const input = document.getElementById('month');
-      if (!this.form.month) {
-        input.setCustomValidity('Vui lòng chọn tháng hợp lệ.');
-        this.monthError = 'Vui lòng chọn tháng hợp lệ.';
-      } else {
-        input.setCustomValidity('');
-        this.monthError = '';
+    async update_status(status, doctor) {
+      try {
+        // Lấy thông tin ngày được chọn
+        const dateStr = this.toLocalDateString(this.selectedDate);
+
+        // Tìm lịch làm việc tương ứng với bác sĩ và ngày
+        const schedule = this.schedules.find(s => 
+          s.maBS === doctor.maBS && 
+          new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr &&
+          s.giobatdau === doctor.giobatdau &&
+          s.gioketthuc === doctor.gioketthuc
+        );
+
+        if (!schedule) {
+          console.error('Không tìm thấy lịch làm việc phù hợp');
+          return;
+        }
+
+        // Định dạng lại ngaythangnam thành YYYY-MM-DD
+        const formattedDate = new Date(schedule.ngaythangnam).toLocaleDateString('en-CA'); // Định dạng YYYY-MM-DD
+
+        // Chuẩn bị dữ liệu để cập nhật
+        const updatedSchedule = { 
+          ...schedule, 
+          trangthai: status, 
+          ngaythangnam: formattedDate 
+        };
+
+        // Gọi API update
+        await working_timeService.update(
+          doctor.maBS, 
+          formattedDate, 
+          schedule.giobatdau, 
+          updatedSchedule
+        );
+
+        // Hiển thị thông báo thành công
+        alert("Chấm công thành công!");
+
+        // Cập nhật danh sách bác sĩ trong modal
+        this.doctorsOnSelectedDate = this.doctorsOnSelectedDate.map(d =>
+          d.maBS === doctor.maBS &&
+          d.giobatdau === doctor.giobatdau &&
+          d.gioketthuc === doctor.gioketthuc
+            ? { ...d, trangthai: status }
+            : d
+        );
+
+        // Phát ra sự kiện để component cha cập nhật schedules
+        // this.$emit('update:schedules', this.schedules.map(s =>
+        //   s.maBS === doctor.maBS &&
+        //   new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr &&
+        //   s.giobatdau === doctor.giobatdau &&
+        //   s.gioketthuc === doctor.gioketthuc
+        //     ? { ...s, trangthai: status, ngaythangnam: formattedDate }
+        //     : s
+        // ));
+        this.$emit('update:schedules')
+        // Buộc cập nhật giao diện
+        this.$forceUpdate();
+      } catch (error) {
+        console.error('Lỗi khi cập nhật trạng thái lịch làm việc:', error);
+        alert('Lỗi khi chấm công: ' + error.message);
       }
     },
 
@@ -222,7 +281,11 @@ export default {
               const scheduleDate = new Date(s.ngaythangnam).toLocaleDateString('en-CA');
               return s.maBS === doctor.maBS && scheduleDate === dateStr;
             });
-            return hasSchedule ? { maBS: doctor.maBS, tenBS: doctor.tenBS } : null;
+            return hasSchedule ? { 
+              maBS: doctor.maBS, 
+              tenBS: doctor.tenBS,
+              trangthai: this.schedules.find(s => s.maBS === doctor.maBS && new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr)?.trangthai
+            } : null;
           })
           .filter((d) => d !== null);
       }
@@ -274,7 +337,8 @@ export default {
               maBS: doctor.maBS,
               tenBS: doctor.tenBS,
               giobatdau: schedule.giobatdau,
-              gioketthuc: schedule.gioketthuc
+              gioketthuc: schedule.gioketthuc,
+              trangthai: schedule.trangthai
             });
             uniqueDoctors.add(schedule.maBS);
           }
@@ -292,3 +356,4 @@ export default {
 <style scoped>
 @import "@/assets/workSchedual.css";
 </style>
+```

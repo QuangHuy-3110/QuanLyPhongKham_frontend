@@ -29,6 +29,10 @@ class ExaminationService {
         return (await this.api.get(`?maHS=${profile}`)).data;
     }
 
+    async get_date(date) {
+        return (await this.api.get(`?ngaythangnamkham=${date}`)).data;
+    }
+
     async get_doctor(maBS) {
         return (await this.api.get(`?maBS=${maBS}`)).data;
     }

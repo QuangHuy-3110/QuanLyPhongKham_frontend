@@ -25,7 +25,7 @@
           <div class="session-content">
             <template v-if="getAppointments(day.date, 'morning').length">
               <div v-for="appt in getAppointments(day.date, 'morning')" :key="appt.maBS" class="appointment" @click="getdate(day, appt.giobatdau, appt.gioketthuc)">
-                {{ appt.giobatdau }} - {{ appt.gioketthuc }}
+                {{ appt.giobatdau }} - {{ appt.gioketthuc }} - {{ appt.trangthai }}
               </div>
             </template>
             <template v-else>Trống</template>
@@ -36,7 +36,7 @@
           <div class="session-content">
             <template v-if="getAppointments(day.date, 'afternoon').length" >
               <div v-for="appt in getAppointments(day.date, 'afternoon')" :key="appt.maBS" class="appointment" @click="getdate(day, appt.giobatdau, appt.gioketthuc)">
-                {{ appt.giobatdau }} - {{ appt.gioketthuc }}
+                {{ appt.giobatdau }} - {{ appt.gioketthuc }} - {{ appt.trangthai }}
               </div>
             </template>
             <template v-else>Trống</template>

@@ -40,6 +40,7 @@
                 :doctors="doctor_big"
                 :specialties="specialties"
                 :schedules="schedules"
+                @update:schedules="get_schedules"
                 />
 
                 <!-- Xem danh sách bệnh nhân -->
@@ -76,7 +77,8 @@
                 :name="'Danh sách thuốc gần hết'"
                 :medicine="{list: medicines_min}"
                 :columns="medicineColumns"
-                :distributors="{list: distributors}"/>
+                :distributors="{list: distributors}"
+                @orderPlaced="get_log"/>
 
                 <!-- Xem danh sách thuốc đã xóa -->
                 <See_Table style="max-width: 1100px;" v-if="nav_value === 'xemThuoc_Xoa'"
@@ -85,6 +87,16 @@
                 :columns="medicineColumns"
                 :columns_full="medicineColumns_full"
                 @update:array="get_medicines"/>
+
+                <!-- Xem nhật kí -->
+                 <Table_invoice_detail style="max-width: 1100px;" v-if="nav_value === 'xemNK'"
+                 :name="'Xem nhật kí đặt thuốc'"
+                 :array="{list:logs}"
+                 :columns="logColumn"
+                 :chiTietArray="{list:log_details}"
+                 :chiTietColumns="log_detailColumn"
+                 @invoiceDeleted="get_log"
+                 />
 
                 <!-- Thêm chuyên khoa -->
                 <Add_specialties style="max-width: 1100px;" v-if="nav_value === 'themCK'"
@@ -187,6 +199,13 @@
                 :columns_full="appointmentsColumns_full"
                 @update:array="get_appointment"/>
 
+                <!-- <canvas ref="someChart"></canvas> -->
+                <!-- Vẽ biểu đồ -->
+                <ChartComponent style="max-width: 1100px;" v-if="nav_value === 'chart'"
+                :lankham="examinations"
+                :hoadonnhap="invoices"/>
+                {{ console.log("hjákdfádjkf", examinations) }}
+                {{ console.log("hjákdfádjkfkldslf", invoices) }}
             </div>
         </div>
     </div>
@@ -207,6 +226,8 @@ import Add_distributor from '../components/admin/add_distributor.vue';
 import Add_invoce from '../components/admin/add_invoce.vue';
 import Table_invoice_detail from '../components/admin/table_invoice_detail.vue';
 import Order_drug from '../components/admin/order_drug.vue';
+import ChartComponent from '../components/admin/chart.vue'
+import examinationService from '../services/examination.sevice';
 
 import doctorService from '../services/doctor.service'
 import working_timeService from '../services/working_time.service';
@@ -220,6 +241,8 @@ import appointmentService from '../services/appointment.service'
 import distributorService from '../services/distributor.service'
 import invoiceService from '../services/invoice.service'
 import invoice_detailService from '../services/invoice_details.service'
+import logService from '../services/log.service';
+import log_detailsService from '../services/log_details.service';
 
 import WebSocketService from '@/services/ws.service';
 import { useAuthStore } from "@/stores/authStore";
@@ -239,7 +262,8 @@ export default {
         Add_distributor,
         Add_invoce,
         Table_invoice_detail,
-        Order_drug
+        Order_drug,
+        ChartComponent
     },
 
     data() {
@@ -322,6 +346,7 @@ export default {
                 { key: 'soluongThuoc', header: 'Số lượng' },
                 { key: 'donvitinhThuoc', header: 'Đơn vị tính' },
                 { key: 'maNPP', header: 'Nhà cung cấp' },
+                { key: 'giaThuoc', header: 'Giá thuốc' },
             ],
             medicineColumns_full: [
             { key: 'maThuoc', header: 'Mã thuốc' },
@@ -330,6 +355,7 @@ export default {
                 { key: 'donvitinhThuoc', header: 'Đơn vị tính' },
                 { key: 'maNPP', header: 'Nhà cung cấp' },
                 { key: 'soluong_minThuoc', header: 'Số lượng tôi thiểu' },
+                { key: 'giaThuoc', header: 'Giá thuốc' },
             ],
 
             records: [],
@@ -403,6 +429,24 @@ export default {
                 { key: 'thanhtien', header: 'Thành tiền' },
             ],
 
+            logs: [],
+            logColumn: [
+                { key: 'maNK', header: 'Mã lần đặt hàng' },
+                { key: 'maNPP', header: 'Mã nhà phân phối' },
+                { key: 'tenNPP', header: 'Tên nhà phân phối' },
+                { key: 'ngaygoi', header: 'Ngày đặt hàng' },
+            ],
+
+            log_details: [],
+            log_detailColumn: [
+                { key: 'maThuoc', header: 'Mã thuốc' },
+                { key: 'tenThuoc', header: 'Tên thuốc' },
+                { key: 'soluong', header: 'Số lượng' },
+                { key: 'donvitinh', header: 'Đơn vị tính' },
+            ],
+
+            examinations: [],
+
             schedules: [],
             doctor_role: [],
             doctor_big: []
@@ -438,6 +482,48 @@ export default {
 
 
     methods: {
+        async get_exam(){
+            try{
+                this.examinations = await examinationService.getAll()
+                // console.log(this.examinations)
+            }catch(error){
+                console.log("Lỗi khi lấy lần khám:",error)
+            }
+        },
+
+        async get_log() {
+            try {
+                // Lấy dữ liệu từ các service
+                this.logs = await logService.getAll();
+                this.log_details = await log_detailsService.getAll();
+
+                // Thêm thuộc tính tenNPP vào mỗi phần tử của logs
+                if (this.logs && this.distributors && Array.isArray(this.logs) && Array.isArray(this.distributors)) {
+                    this.logs = this.logs.map(log => {
+                        const distributor = this.distributors.find(npp => npp.maNPP === log.maNPP);
+                        return {
+                            ...log,
+                            tenNPP: distributor ? distributor.tenNPP : 'N/A'
+                        };
+                    });
+                }
+
+                // Thêm thuộc tính tenThuoc vào mỗi phần tử của log_details
+                if (this.log_details && this.medicines && Array.isArray(this.log_details) && Array.isArray(this.medicines)) {
+                    this.log_details = this.log_details.map(detail => {
+                        const medicine = this.medicines.find(med => med.maThuoc === detail.maThuoc);
+                        return {
+                            ...detail,
+                            tenThuoc: medicine ? medicine.tenThuoc : 'N/A'
+                        };
+                    });
+                }
+
+            } catch (error) {
+                console.log("Lỗi khi lấy nhật kí đặt hàng!", error);
+            }
+        },
+
         changeNav_value (name){
             this.nav_value = name
             this.active_index = -1
@@ -728,6 +814,8 @@ export default {
         this.get_distributor()
         this.get_invoice()
         this.get_invoice_detail()
+        this.get_log()
+        this.get_exam()
     },
 
     async created() {

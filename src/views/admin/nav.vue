@@ -32,7 +32,7 @@
                                 </a>
                                 <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
                                    @click="changeNav_value('xemBS_Xoa')">
-                                    <i class="fa-solid fa-trash-can-arrow-up me-2"></i><span class="fs-6 text-dark">Xem bác sĩ đã xóa</span>
+                                    <i class="bi bi-trash3 me-2"></i><span class="fs-6 text-dark">Xem bác sĩ đã xóa</span>
                                 </a>
                             </div>
                         </div>
@@ -56,7 +56,7 @@
                                 </a>
                                 <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
                                    @click="changeNav_value('xemBN_Xoa')">
-                                    <i class="fa-solid fa-trash-can-arrow-up me-2"></i> <span class="fs-6 text-dark">Xem bệnh nhân đã xóa</span>
+                                    <i class="bi bi-trash3 me-2"></i> <span class="fs-6 text-dark">Xem bệnh nhân đã xóa</span>
                                 </a>
                             </div>
                         </div>
@@ -88,7 +88,11 @@
                                 </a>
                                 <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
                                    @click="changeNav_value('xemThuoc_Xoa')">
-                                    <i class="fa-solid fa-trash-can-arrow-up me-2"></i> <span class="fs-6 text-dark">Xem thuốc đã xóa</span>
+                                    <i class="bi bi-trash3 me-2"></i> <span class="fs-6 text-dark">Xem thuốc đã xóa</span>
+                                </a>
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                   @click="changeNav_value('xemNK')">
+                                    <i class="bi bi-journal-text me-2"></i> <span class="fs-6 text-dark">Xem nhật kí đặt thuốc</span>
                                 </a>
                             </div>
                         </div>
@@ -124,7 +128,7 @@
                             <button class="accordion-button collapsed list-group-item" type="button"
                                 data-bs-toggle="collapse" data-bs-target="#collapseSeven" aria-expanded="false"
                                 aria-controls="collapseSeven">
-                                <i class="fa-solid fa-truck me-2"></i> <span class="fw-semibold" style="font-size: 1.125rem;">Quản lý nhà cung cấp</span>
+                                <i class="bi bi-truck me-2"></i> <span class="fw-semibold" style="font-size: 1.125rem;">Quản lý nhà cung cấp</span>
                             </button>
                         </h2>
                         <div id="collapseSeven" class="accordion-collapse collapse bg-dark-subtle"
@@ -140,7 +144,7 @@
                                 </a>
                                 <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
                                     @click="changeNav_value('xemNPP_Xoa')">
-                                    <i class="fa-solid fa-trash-can-arrow-up me-2"></i> <span class="fs-6 text-dark">Xem nhà cung cấp đã xóa</span>
+                                    <i class="bi bi-trash3 me-2"></i> <span class="fs-6 text-dark">Xem nhà cung cấp đã xóa</span>
                                 </a>
                             </div>
                         </div>
@@ -152,7 +156,7 @@
                             <button class="accordion-button collapsed list-group-item" type="button"
                                 data-bs-toggle="collapse" data-bs-target="#collapseEight" aria-expanded="false"
                                 aria-controls="collapseEight">
-                                <i class="fa-solid fa-receipt me-2"></i> <span class="fw-semibold" style="font-size: 1.125rem;">Quản lý hóa đơn</span>
+                                <i class="bi bi-receipt me-2"></i> <span class="fw-semibold" style="font-size: 1.125rem;">Quản lý hóa đơn</span>
                             </button>
                         </h2>
                         <div id="collapseEight" class="accordion-collapse collapse bg-dark-subtle"
@@ -188,7 +192,7 @@
                                 </a>
                                 <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
                                    @click="changeNav_value('xemBAn_Xoa')">
-                                    <i class="fa-solid fa-trash-can-arrow-up me-2"></i> <span class="fs-6 text-dark">Xem hồ sơ bệnh án đã xóa</span>
+                                    <i class="bi bi-trash3 me-2"></i> <span class="fs-6 text-dark">Xem hồ sơ bệnh án đã xóa</span>
                                 </a>
                             </div>
                         </div>
@@ -213,6 +217,28 @@
                                 <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
                                    @click="changeNav_value('xemLH')">
                                     <i class="bi bi-list-ul me-2"></i> <span class="fs-6 text-dark">Xem danh sách cuộc hẹn</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <!-- </div> -->
+
+
+                <!-- Xem biểu đồ -->
+                    <div class="accordion-item p-3">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed list-group-item" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#collapseNine" aria-expanded="false"
+                                aria-controls="collapseNine">
+                                <i class="bi bi-graph-up me-2"></i> <span class="fw-semibold" style="font-size: 1.125rem;">Thống kê</span>
+                            </button>
+                        </h2>
+                        <div id="collapseNine" class="accordion-collapse collapse bg-dark-subtle"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                   @click="changeNav_value('chart')">
+                                    <i class="bi bi-bar-chart-line me-2"></i> <span class="fs-6 text-dark">Thống kê thu chi</span>
                                 </a>
                             </div>
                         </div>

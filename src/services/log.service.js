@@ -1,20 +1,12 @@
 import createApiClient from "./api.service";
 
-class InvoiceService {
-    constructor(baseUrl = "/api/invoices") {
+class LogService {
+    constructor(baseUrl = "/api/logs") {
         this.api = createApiClient(baseUrl);
     }
 
     async getAll() {
-        return (await this.api.get(`?xoa=${0}`)).data;
-    }
-
-    async getDel() {
-        return (await this.api.get(`?xoa=${1}`)).data;
-    }
-
-    async getDate(date) {
-        return (await this.api.get(`?ngaynhap=${date}`)).data;
+        return (await this.api.get()).data;
     }
 
     async create(data) {
@@ -34,7 +26,7 @@ class InvoiceService {
     }
 
     async get_date(date) {
-        return (await this.api.get(`?ngaynhap=${date}`)).data;
+        return (await this.api.get(`?ngaygoi=${date}`)).data;
     }
 
     async update(id, data) {
@@ -45,4 +37,4 @@ class InvoiceService {
         return (await this.api.delete(`/${id}`)).data;
     }
 }
-export default new InvoiceService();
+export default new LogService();

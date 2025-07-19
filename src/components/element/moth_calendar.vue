@@ -36,7 +36,7 @@
             v-for="(session, sessionIndex) in getDaySessions(day.date)"
             :key="`session-${sessionIndex}`"
           >
-            {{ session.giobatdau }} - {{ session.gioketthuc }}
+            {{ session.giobatdau }} - {{ session.gioketthuc }} - {{ session.trangthai }}
           </div>
           <div class="session" v-if="getDaySessions(day.date).length === 0">
             Trống

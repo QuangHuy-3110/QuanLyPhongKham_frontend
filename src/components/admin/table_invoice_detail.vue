@@ -88,8 +88,10 @@
             <div v-if="selectedRow" class="invoice-container">
               <!-- Tiêu đề hóa đơn -->
               <div class="invoice-header text-center mb-4">
-                <h2>HÓA ĐƠN NHẬP HÀNG</h2>
-                <p class="text-muted">Mã hóa đơn: {{ selectedRow.maHD }}</p>
+                <h2 v-if="name === 'Danh sách hóa đơn'">HÓA ĐƠN NHẬP HÀNG</h2>
+                <h2 v-if="name === 'Xem nhật kí đặt thuốc'">CHI TIẾT LẦN ĐẶT HÀNG</h2>
+                <p class="text-muted" v-if="name === 'Danh sách hóa đơn'">Mã hóa đơn: {{ selectedRow.maHD }}</p>
+                <p class="text-muted" v-if="name === 'Xem nhật kí đặt thuốc'">Mã lần đặt: {{ selectedRow.maNK }}</p>
               </div>
               <!-- Thông tin hóa đơn -->
               <div class="invoice-info mb-4">
@@ -125,7 +127,7 @@
               </div>
               <!-- Tổng tiền -->
               <div class="invoice-footer text-end mt-4">
-                <h5><strong>Tổng tiền: </strong>{{ formatValue(selectedRow.tongtien, 'tongtien') }} VND</h5>
+                <h5 v-if="name === 'Danh sách hóa đơn'"><strong>Tổng tiền: </strong>{{ formatValue(selectedRow.tongtien, 'tongtien') }} VND</h5>
               </div>
             </div>
             <div v-else class="text-center">Không có dữ liệu để hiển thị</div>
@@ -159,6 +161,8 @@
 
 import invoice_detailsService from '../../services/invoice_details.service';
 import invoiceService from '../../services/invoice.service';
+import logService from '../../services/log.service';
+import log_detailsService from '../../services/log_details.service';
 
 export default {
   props: {
@@ -260,7 +264,8 @@ export default {
   },
   methods: {
     async delete_invoice() {
-      if (!this.selectedRow || !this.selectedRow.maHD) {
+
+      if (!this.selectedRow) {
         alert('Không có hóa đơn được chọn để xóa!');
         return;
       }
@@ -271,11 +276,22 @@ export default {
 
       try {
         // Xóa các chi tiết hóa đơn trước
-        for (const detail of this.selectedChiTiet) {
-          await invoice_detailsService.delete(detail.maHD, detail.maThuoc);
+        if(this.name === 'Danh sách hóa đơn'){
+          for (const detail of this.selectedChiTiet) {
+            await invoice_detailsService.delete(detail.maHD, detail.maThuoc);
+          }
+          // Xóa hóa đơn
+          await invoiceService.delete(this.selectedRow.maHD);
         }
-        // Xóa hóa đơn
-        await invoiceService.delete(this.selectedRow.maHD);
+
+        else if(this.name === 'Xem nhật kí đặt thuốc'){
+          for (const detail of this.selectedChiTiet) {
+            await log_detailsService.delete(detail.maNK, detail.maThuoc);
+          }
+          // Xóa nhật kí
+          await logService.delete(this.selectedRow.maNK)
+        }
+
         alert('Xóa hóa đơn thành công!');
         this.$emit('invoiceDeleted');
         this.closeModal();
@@ -289,9 +305,16 @@ export default {
     openModal(index) {
       this.selectedIndex = index;
       this.selectedRow = this.filteredList[index];
-      this.selectedChiTiet = this.chiTietArray.list.filter(
-        (chiTiet) => chiTiet.maHD === this.selectedRow.maHD
-      );
+      if(this.name === 'Danh sách hóa đơn'){
+        this.selectedChiTiet = this.chiTietArray.list.filter(
+          (chiTiet) => chiTiet.maHD === this.selectedRow.maHD
+        );
+      }else if (this.name === 'Xem nhật kí đặt thuốc'){
+        this.selectedChiTiet = this.chiTietArray.list.filter(
+          (chiTiet) => chiTiet.maNK === this.selectedRow.maNK
+        );
+      }
+      
       this.$emit('update:activeIndex', index);
     },
 

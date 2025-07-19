@@ -158,7 +158,7 @@
                 @change="updateOrderList"
               >
                 <option value="">Chọn nhà phân phối</option>
-                <option v-for="npp in distributors.list" :key="npp.maNPP" :value="npp.maNPP">
+                <option v-for="npp in availableDistributors" :key="npp.maNPP" :value="npp.maNPP">
                   {{ npp.maNPP }} - {{ npp.tenNPP }}
                 </option>
               </select>
@@ -208,10 +208,10 @@
             </div>
             <div v-else class="text-center">Vui lòng chọn nhà phân phối</div>
           </div>
-          <div class="modal-footer">
+          <div class-anywhere v-if="selectedNPP" class="d-flex justify-content-end m-4">
             <button
               type="button"
-              class="btn btn-secondary"
+              class="btn btn-secondary me-2"
               data-bs-dismiss="modal"
               @click="closeOrderModal"
             >
@@ -234,6 +234,8 @@
 
 <script>
 import emailService from '../../services/email.service';
+import logService from '../../services/log.service';
+import log_detailsService from '../../services/log_details.service';
 
 export default {
   props: {
@@ -294,6 +296,14 @@ export default {
           (!searchMaNPP || (item.maNPP && item.maNPP === searchMaNPP))
         );
       });
+    },
+    availableDistributors() {
+      if (!this.medicine || !this.medicine.list || !this.distributors || !this.distributors.list) return [];
+
+      // Lấy danh sách maNPP từ medicine.list
+      const medicineNPPs = [...new Set(this.medicine.list.map(item => item.maNPP).filter(maNPP => maNPP))];
+      // Lọc danh sách nhà phân phối chỉ bao gồm những nhà có trong medicine.list
+      return this.distributors.list.filter(npp => medicineNPPs.includes(npp.maNPP));
     },
   },
   watch: {
@@ -366,6 +376,7 @@ export default {
         const orderDetails = this.orderList
           .filter((item) => item.soLuongCanNhap > 0)
           .map((item) => ({
+            maThuoc: item.maThuoc,
             tenThuoc: item.tenThuoc,
             soLuong: item.soLuongCanNhap,
             donViTinh: item.donvitinhThuoc,
@@ -376,19 +387,39 @@ export default {
           return;
         }
 
+        // Tạo nhật ký đặt hàng
+        const ngaygoi = new Date().toISOString().split('T')[0]; // Lấy ngày hiện tại định dạng YYYY-MM-DD
+        const logData = {
+          maNPP: this.selectedNPP,
+          ngaygoi: ngaygoi,
+        };
+        const logResponse = await logService.create(logData); // Giả định trả về maNK
+        const maNK = logResponse.maNK; // Giả định API trả về mã nhật ký vừa tạo
+
+        // Lưu chi tiết đặt hàng
+        const logDetails = orderDetails.map((item) => ({
+          maNK: maNK,
+          maThuoc: item.maThuoc,
+          soluong: item.soLuong,
+          donvitinh: item.donViTinh,
+        }));
+        for (const detail of logDetails) {
+          await log_detailsService.create(detail); // Lưu từng bản ghi riêng lẻ
+        }
+
         const emailText = `
             Kính gửi ${npp.tenNPP},
 
             Chúng tôi xin gửi đơn đặt hàng với các chi tiết sau:
             ${orderDetails
-            .map((item, index) => `${index + 1}. ${item.tenThuoc}: ${item.soLuong} ${item.donViTinh}`)
-            .join('\n')}
+              .map((item, index) => `${index + 1}. ${item.tenThuoc}: ${item.soLuong} ${item.donViTinh}`)
+              .join('\n')}
 
             Trân trọng,
             [Clinic]
-                    `;
+        `;
 
-                    const emailHtml = `
+        const emailHtml = `
             <!DOCTYPE html>
             <html>
             <head>
@@ -408,7 +439,7 @@ export default {
                 </thead>
                 <tbody>
                 ${orderDetails
-                    .map(
+                  .map(
                     (item, index) => `
                 <tr>
                     <td style="border: 1px solid #ddd; padding: 12px; text-align: left;">${index + 1}</td>
@@ -416,8 +447,8 @@ export default {
                     <td style="border: 1px solid #ddd; padding: 12px; text-align: right;">${item.soLuong}</td>
                     <td style="border: 1px solid #ddd; padding: 12px; text-align: left;">${item.donViTinh}</td>
                 </tr>`
-                    )
-                    .join('')}
+                  )
+                  .join('')}
                 </tbody>
             </table>
             <p style="font-size: 16px;">Trân trọng,<br>[Clinic]</p>
@@ -431,12 +462,12 @@ export default {
           html: emailHtml,
         });
 
-        alert('Đơn hàng đã được gửi thành công!');
-        this.$emit('orderPlaced', { maNPP: this.selectedNPP, orderList: orderDetails });
+        alert('Đơn hàng đã được gửi và nhật ký đặt hàng đã được lưu thành công!');
+        this.$emit('orderPlaced');
         this.closeOrderModal();
       } catch (error) {
-        alert(`Lỗi khi gửi đơn hàng: ${error.message}`);
-        console.error('Lỗi khi gửi đơn hàng:', error);
+        alert(`Lỗi khi gửi đơn hàng hoặc lưu nhật ký: ${error.message}`);
+        console.error('Lỗi khi gửi đơn hàng hoặc lưu nhật ký:', error);
       }
     },
     formatValue(value, key) {
@@ -466,5 +497,5 @@ export default {
 </script>
 
 <style scoped>
-@import "@/assets/ordorDrug.css";
+  @import "@/assets/ordorDrug.css";
 </style>

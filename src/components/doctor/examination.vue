@@ -231,8 +231,17 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <Add_drug v-if="status === 'add'" :selectedExamination="selectedExamination" :patient="patient" :doctor="doctor" />
-          <Table_drug v-if="status === 'see'" :selectedExamination="selectedExamination" :patient="patient" :list_prescription="list_prescription" />
+          <Add_drug v-if="status === 'add'" 
+          :selectedExamination="selectedExamination" 
+          :patient="patient" 
+          :doctor="doctor" 
+          @update:price="get_examination"/>
+
+          <Table_drug v-if="status === 'see'" 
+          :selectedExamination="selectedExamination" 
+          :patient="patient" 
+          :list_prescription="list_prescription" 
+          />
         </div>
       </div>
     </div>
@@ -309,6 +318,13 @@ export default {
       },
       immediate: true,
     },
+    'list_examination': {
+      handler(newLength) {
+        this.updateUI();
+      },
+      immediate: true,
+      deep: true
+    },
     'list_examination.length': {
       handler(newLength) {
         this.updateUI();
@@ -352,6 +368,10 @@ export default {
   },
 
   methods: {
+    update_price(exam){
+      this.selectedExamination = exam
+    },
+
     formatDate(date) {
       if (!date) return '';
       const d = new Date(date);
@@ -363,6 +383,7 @@ export default {
       d.setDate(d.getDate() + 1);
       return d.toISOString().split('T')[0];
     },
+
     async openDrugModal(status, index) {
       try {
         this.status = status;
@@ -373,13 +394,16 @@ export default {
         console.log("Lỗi khi lấy toa thuốc:", error);
       }
     },
+
     updateUI() {
       // console.log('Cập nhật giao diện với list_record:', this.list_record);
     },
+
     close_tab() {
       this.$emit('close:examination');
       this.selectedExamination = null;
     },
+
     async get_record() {
       try {
         this.list_record = await recordService.get_patient(this.patient.maBN);
@@ -390,6 +414,7 @@ export default {
         console.log('Lỗi khi lấy hồ sơ khám bệnh:', error);
       }
     },
+
     async fetchFirstDiagnosis(maHS) {
       try {
         const examinations = await examinationSevice.get_profile(maHS);
@@ -404,9 +429,11 @@ export default {
         this.firstDiagnoses[maHS] = '';
       }
     },
+
     getFirstExaminationDiagnosis(maHS) {
       return this.firstDiagnoses[maHS] || 'Chưa có lần khám';
     },
+
     async get_examination(maHS) {
       try {
         this.record.maHS = maHS;
@@ -421,6 +448,7 @@ export default {
         console.log('Lỗi khi lấy danh sách lần khám:', error);
       }
     },
+
     async create_record() {
       try {
         let date = new Date().toISOString().split('T')[0];
@@ -441,6 +469,7 @@ export default {
         console.log('Lỗi khi thêm hồ sơ bệnh án:', error);
       }
     },
+
     async delete_record(id) {
       try {
         await recordService.delete(id);
@@ -453,6 +482,7 @@ export default {
         console.log('Lỗi khi xóa hồ sơ bệnh án:', error);
       }
     },
+
     async submit_examform() {
       try {
         const examData = {
@@ -481,6 +511,7 @@ export default {
         console.log('Lỗi khi thêm lần khám:', error);
       }
     },
+
     async submit_editPatient() {
       try {
         await patientService.update(this.editForm.maBN, this.editForm);
@@ -492,6 +523,7 @@ export default {
         console.log('Lỗi khi cập nhật thông tin bệnh nhân:', error);
       }
     },
+
     resetForm() {
       this.form = {
         maHoSo: this.record.maHS,
