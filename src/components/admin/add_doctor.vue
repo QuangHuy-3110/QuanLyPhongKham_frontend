@@ -264,6 +264,27 @@ export default {
         this.ageError = 'Vui lòng chọn ngày sinh hợp lệ (bác sĩ phải trên 18 tuổi).';
       }
     },
+
+    isDateField(key, value) {
+      return typeof value === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z/.test(value);
+    },
+
+    formatEditRow(row) {
+      const formattedRow = { ...row };
+      Object.keys(formattedRow).forEach((key) => {
+        if (this.isDateField(key, formattedRow[key])) {
+          const date = new Date(formattedRow[key]);
+          if (!isNaN(date)) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            formattedRow[key] = `${year}-${month}-${day}`;
+          }
+        }
+      });
+      return formattedRow;
+    },
+
     async handleSubmit() {
       const form = this.$refs.doctorForm;
       if (form && form.checkValidity()) {
@@ -274,14 +295,16 @@ export default {
           delete this.form.tenCK;
 
           await doctorService.create(this.form);
-          let doctor = await doctorService.get_cccd(this.form.cccdBS);
-
-          this.chuyenkhoa.maBS = doctor[0].maBS;
+          let doctors = await doctorService.get_cccd(this.form.cccdBS);
+          console.log(doctors[0])
+          let doctor = this.formatEditRow(doctors[0])
+          console.log(doctor)
+          this.chuyenkhoa.maBS = doctor.maBS;
           await doctor_roleService.create(this.chuyenkhoa);
           alert('Thêm bác sĩ thành công!');
 
-          const content = this.generatePasswordResetEmailContent(doctor[0].emailBS, doctor[0]);
-          await emailService.sendEmail(doctor[0].emailBS, content);
+          const content = this.generateDoctorAccountEmailContent(doctor.emailBS, doctor);
+          await emailService.sendEmail(doctor.emailBS, content);
 
           this.resetForm();
           this.$emit('formSubmitted');
@@ -384,7 +407,6 @@ export default {
                 <tr><td class="label">Địa chỉ:</td><td>${doctor.diachiBS}</td></tr>
                 <tr><td class="label">Số CCHN:</td><td>${doctor.soCCHN}</td></tr>
                 <tr><td class="label">Nơi cấp CCHN:</td><td>${doctor.noicapCCHN}</td></tr>
-                <tr><td class="label">Tên chuyên khoa:</td><td>${doctor.tenCK}</td></tr>
                 <tr><td class="label">Vai trò:</td><td>${doctor.vaiTro}</td></tr>
                 <tr><td class="label">Tên đăng nhập:</td><td>${doctor.maBS}</td></tr>
                 <tr><td class="label">Mật khẩu mặc định:</td><td class="highlight">1</td></tr>

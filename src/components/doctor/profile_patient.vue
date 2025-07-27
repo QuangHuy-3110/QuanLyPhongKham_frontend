@@ -5,7 +5,7 @@
       <div class="col-xl-8 mx-auto">
         <!-- Account details card-->
         <div class="card mb-4">
-          <div class="card-header">Account Details</div>
+          <div class="card-header">Nhập thông tin bệnh nhân</div>
           <div class="card-body d-flex flex-column align-items-center">
             <form @submit.prevent="create_patient" class="w-100">
               <div class="row gx-3 mb-3">

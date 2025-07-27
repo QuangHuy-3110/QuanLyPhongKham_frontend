@@ -210,7 +210,7 @@
               <input type="text" class="form-control" id="soBHYT" name="soBHYT" v-model="editForm.soBHYT" placeholder="Nhập số bảo hiểm y tế">
             </div>
             <div class="col-12">
-              <button type="submit" class="btn btn-primary">Lưu thông tin</button>
+              <button type="submit" data-bs-dismiss="modal" class="btn btn-primary">Lưu thông tin</button>
             </div>
           </form>
         </div>
@@ -517,7 +517,7 @@ export default {
         await patientService.update(this.editForm.maBN, this.editForm);
         alert('Cập nhật thông tin bệnh nhân thành công!');
         this.$emit('update:patient', this.editForm);
-        this.editPatientModal.hide();
+        // this.editPatientModal.hide();
       } catch (error) {
         alert('Cập nhật thông tin bệnh nhân không thành công!');
         console.log('Lỗi khi cập nhật thông tin bệnh nhân:', error);

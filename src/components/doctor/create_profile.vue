@@ -1,6 +1,6 @@
 <template>
     <div class="modal-header" v-if="status !== 'examination'">
-        <h5 class="modal-title">Tiêu đề</h5>
+        <h5 class="modal-title">Thêm bệnh nhân</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="close_tab"></button>
     </div>
 

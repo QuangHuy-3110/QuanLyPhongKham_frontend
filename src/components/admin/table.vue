@@ -6,7 +6,7 @@
     <div v-if="name.includes('bác sĩ') || name.includes('bệnh nhân') || name.includes('thuốc')" class="mb-5">
       <div class="row g-3">
         <!-- Search for Doctors -->
-        <div v-if="name.includes('bác sĩ')" class="col-md-4">
+        <div v-if="name.includes('bác sĩ')" class="col-md-3">
           <input
             v-model="search.maBS"
             type="text"
@@ -15,7 +15,7 @@
             @input="searchItems"
           />
         </div>
-        <div v-if="name.includes('bác sĩ')" class="col-md-4">
+        <div v-if="name.includes('bác sĩ')" class="col-md-3">
           <input
             v-model="search.tenBS"
             type="text"
@@ -24,12 +24,21 @@
             @input="searchItems"
           />
         </div>
-        <div v-if="name.includes('bác sĩ')" class="col-md-4">
+        <div v-if="name.includes('bác sĩ')" class="col-md-3">
           <input
             v-model="search.cccdBS"
             type="text"
             class="form-control"
             placeholder="Tìm theo số CCCD bác sĩ"
+            @input="searchItems"
+          />
+        </div>
+        <div v-if="name.includes('bác sĩ')" class="col-md-3">
+          <input
+            v-model="search.maCK"
+            type="text"
+            class="form-control"
+            placeholder="Tìm theo số mã chuyên khoa"
             @input="searchItems"
           />
         </div>
@@ -163,8 +172,23 @@
                   >
                     <strong>{{ col.header }}: </strong>
                     <template v-if="isEditing">
+                      <select
+                        v-if="col.key === 'maCK' && name === 'Xem danh sách bác sĩ'"
+                        :id="col.key"
+                        v-model="editRow[col.key]"
+                        class="form-control"
+                      >
+                        <option value="" disabled>Chọn chuyên khoa</option>
+                        <option
+                          v-for="specialty in specialties"
+                          :key="specialty.maCK"
+                          :value="specialty.maCK"
+                        >
+                          {{ specialty.tenCK }}
+                        </option>
+                      </select>
                       <input
-                        v-if="isDateField(col.key, selectedRow[col.key])"
+                        v-else-if="isDateField(col.key, selectedRow[col.key])"
                         :id="col.key"
                         v-model="editRow[col.key]"
                         type="date"
@@ -265,6 +289,8 @@ import appointmentService from '../../services/appointment.service';
 import WebSocketService from '@/services/ws.service';
 import distributorService from '../../services/distributor.service';
 import invoiceService from '../../services/invoice.service';
+import doctor_roleService from '../../services/doctor_role.service';
+import specialtiesService from '../../services/specialties.service';
 
 export default {
   props: {
@@ -292,6 +318,13 @@ export default {
       type: String,
       default: '',
       required: true,
+    },
+    specialties: {
+      type: Array,
+      default: () => [],
+      validator: (specialties) => {
+        return specialties.every((specialty) => 'maCK' in specialty && 'tenCK' in specialty);
+      },
     },
   },
   emits: ['update:activeIndex', 'update:appointment_new', 'update:array'],
@@ -325,6 +358,7 @@ export default {
         const searchMaBS = this.search.maBS ? this.search.maBS.toLowerCase() : '';
         const searchTenBS = this.search.tenBS ? this.search.tenBS.toLowerCase() : '';
         const searchCccdBS = this.search.cccdBS ? this.search.cccdBS.toLowerCase() : '';
+        const searchmaCK = this.search.maCK ? this.search.maCK.toLowerCase() : '';
         const searchMaBN = this.search.maBN ? this.search.maBN.toLowerCase() : '';
         const searchHotenBN = this.search.hotenBN ? this.search.hotenBN.toLowerCase() : '';
         const searchCccdBN = this.search.cccdBN ? this.search.cccdBN.toLowerCase() : '';
@@ -336,7 +370,8 @@ export default {
           return (
             (!searchMaBS || (item.maBS && item.maBS.toLowerCase().includes(searchMaBS))) &&
             (!searchTenBS || (item.tenBS && item.tenBS.toLowerCase().includes(searchTenBS))) &&
-            (!searchCccdBS || (item.cccdBS && item.cccdBS.toLowerCase().includes(searchCccdBS)))
+            (!searchCccdBS || (item.cccdBS && item.cccdBS.toLowerCase().includes(searchCccdBS))) &&
+            (!searchmaCK || (item.maCK && item.maCK.toLowerCase().includes(searchmaCK)))
           );
         } else if (this.name.includes('bệnh nhân')) {
           return (
@@ -525,8 +560,25 @@ export default {
         // Chuyển đổi editRow cho backend (giữ định dạng ngày YYYY-MM-DD)
         const saveRow = this.parseEditRow(this.editRow);
         if (this.name === 'Xem danh sách bác sĩ') {
-          await doctorService.update(saveRow.maBS, saveRow);
+          // Lưu chuyên môn cũ
+          const oldSpecialty = {
+            maBS: this.selectedRow.maBS,
+            maCK: this.selectedRow.maCK,
+          };
+          // Lưu chuyên môn mới
+          const newSpecialty = {
+            maBS: saveRow.maBS,
+            maCK: saveRow.maCK,
+          };
+          // In ra console
+          // console.log('Chuyên môn cũ:', oldSpecialty);
+          // console.log('Chuyên môn mới:', newSpecialty);
+          await doctor_roleService.update(oldSpecialty.maBS, oldSpecialty.maCK, newSpecialty)
+          const { maCK, ...updatedRow } = saveRow;
+          // console.log('BS moi:', updatedRow);
+          await doctorService.update(updatedRow.maBS, updatedRow);
           alert("Cập nhật thành công!");
+
         } else if (this.name === 'Danh sách bệnh nhân') {
           await patientService.update(saveRow.maBN, saveRow);
           alert("Cập nhật thành công!");
@@ -543,6 +595,9 @@ export default {
             sender: 'Admin',
             data: saveRow,
           }); // Gửi thông báo qua WebSocket
+        } else if (this.name === 'Danh sách chuyên khoa'){
+          await specialtiesService.update(saveRow.maCK, saveRow)
+          alert("Cập nhật thành công!");
         }
 
         // Cập nhật mảng cục bộ với định dạng backend

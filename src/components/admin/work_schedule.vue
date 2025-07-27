@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="container">
     <h3 class="mb-4 text-center fw-bold">Xem Lịch Làm Việc</h3>
@@ -101,21 +100,42 @@
 
     <!-- Modal hiển thị danh sách bác sĩ -->
     <div class="modal fade" id="doctorModal" tabindex="-1" aria-labelledby="doctorModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="doctorModalLabel">Danh sách bác sĩ làm việc ngày {{ selectedDate ? selectedDate.toLocaleDateString('vi-VN') : '' }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <ul v-if="doctorsOnSelectedDate.length > 0" class="list-group">
-              <li v-for="doctor in doctorsOnSelectedDate" :key="doctor.maBS" class="list-group-item">
-                {{ doctor.maBS }} - {{ doctor.tenBS }} - {{ doctor.trangthai || 'Chưa chấm công' }}
-                <button v-if="!doctor.trangthai" class="btn btn-danger me-2" @click="update_status('Nghỉ', doctor)">Nghỉ</button>
-                <button v-if="!doctor.trangthai" class="btn btn-success" @click="update_status('Hoàn thành', doctor)">Hoàn thành</button>
-                <span v-if="viewMode === 'doctor'"> ({{ doctor.giobatdau }} - {{ doctor.gioketthuc }})</span>
-              </li>
-            </ul>
+            <div v-if="doctorsOnSelectedDate.length > 0">
+              <template v-if="viewMode === 'doctor'">
+                <ul class="list-group">
+                  <li v-for="doctor in doctorsOnSelectedDate" :key="doctor.maBS + doctor.giobatdau" class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                      {{ doctor.maBS }} - {{ doctor.tenBS }} - {{ doctor.trangthai || 'Chưa chấm công' }} ({{ doctor.giobatdau }} - {{ doctor.gioketthuc }})
+                    </span>
+                    <span v-if="!doctor.trangthai">
+                      <button class="btn btn-danger btn-sm me-2" @click="update_status('Nghỉ', doctor)">Nghỉ</button>
+                      <button class="btn btn-success btn-sm" @click="update_status('Hoàn thành', doctor)">Hoàn thành</button>
+                    </span>
+                  </li>
+                </ul>
+              </template>
+              <template v-else>
+                <ul class="list-group">
+                  <li v-for="doctor in doctorsOnSelectedDate" :key="doctor.maBS" class="list-group-item">
+                    <strong>{{ doctor.maBS }} - {{ doctor.tenBS }}</strong>
+                    <ul class="mt-2">
+                      <li v-for="schedule in doctor.schedules" :key="schedule.giobatdau" class="ms-3">
+                        {{ schedule.giobatdau }} - {{ schedule.gioketthuc }} - {{ schedule.trangthai || 'Chưa chấm công' }}
+                        <button v-if="!schedule.trangthai" class="btn btn-danger btn-sm me-2" @click="update_status('Nghỉ', doctor, schedule)">Nghỉ</button>
+                        <button v-if="!schedule.trangthai" class="btn btn-success btn-sm" @click="update_status('Hoàn thành', doctor, schedule)">Hoàn thành</button>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </template>
+            </div>
             <p v-else class="text-muted">Không có bác sĩ làm việc trong ngày này.</p>
           </div>
           <div class="modal-footer">
@@ -174,12 +194,10 @@ export default {
       return days;
     }
   },
-
   watch: {
     'schedules': {
       handler(newValue) {
         if (newValue) {
-          // Đặt lại selectedRow, editRow và isEditing khi array.list thay đổi
           this.selectedRow = null;
           this.editRow = null;
           this.isEditing = false;
@@ -189,76 +207,81 @@ export default {
       deep: true,
     },
   },
-
   methods: {
-    async update_status(status, doctor) {
+    async update_status(status, doctor, schedule = null) {
       try {
-        // Lấy thông tin ngày được chọn
         const dateStr = this.toLocalDateString(this.selectedDate);
+        let targetSchedule;
 
-        // Tìm lịch làm việc tương ứng với bác sĩ và ngày
-        const schedule = this.schedules.find(s => 
-          s.maBS === doctor.maBS && 
-          new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr &&
-          s.giobatdau === doctor.giobatdau &&
-          s.gioketthuc === doctor.gioketthuc
-        );
+        if (this.viewMode === 'doctor') {
+          targetSchedule = this.schedules.find(s => 
+            s.maBS === doctor.maBS && 
+            new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr &&
+            s.giobatdau === doctor.giobatdau &&
+            s.gioketthuc === doctor.gioketthuc
+          );
+        } else {
+          targetSchedule = this.schedules.find(s => 
+            s.maBS === doctor.maBS && 
+            new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr &&
+            s.giobatdau === schedule.giobatdau &&
+            s.gioketthuc === schedule.gioketthuc
+          );
+        }
 
-        if (!schedule) {
+        if (!targetSchedule) {
           console.error('Không tìm thấy lịch làm việc phù hợp');
           return;
         }
 
-        // Định dạng lại ngaythangnam thành YYYY-MM-DD
-        const formattedDate = new Date(schedule.ngaythangnam).toLocaleDateString('en-CA'); // Định dạng YYYY-MM-DD
-
-        // Chuẩn bị dữ liệu để cập nhật
+        const formattedDate = new Date(targetSchedule.ngaythangnam).toLocaleDateString('en-CA');
         const updatedSchedule = { 
-          ...schedule, 
+          ...targetSchedule, 
           trangthai: status, 
           ngaythangnam: formattedDate 
         };
 
-        // Gọi API update
         await working_timeService.update(
           doctor.maBS, 
           formattedDate, 
-          schedule.giobatdau, 
+          targetSchedule.giobatdau, 
           updatedSchedule
         );
 
-        // Hiển thị thông báo thành công
         alert("Chấm công thành công!");
 
-        // Cập nhật danh sách bác sĩ trong modal
-        this.doctorsOnSelectedDate = this.doctorsOnSelectedDate.map(d =>
-          d.maBS === doctor.maBS &&
-          d.giobatdau === doctor.giobatdau &&
-          d.gioketthuc === doctor.gioketthuc
-            ? { ...d, trangthai: status }
-            : d
-        );
+        if (this.viewMode === 'doctor') {
+          this.doctorsOnSelectedDate = this.doctorsOnSelectedDate.map(d =>
+            d.maBS === doctor.maBS &&
+            d.giobatdau === doctor.giobatdau &&
+            d.gioketthuc === doctor.gioketthuc
+              ? { ...d, trangthai: status }
+              : d
+          );
+        } else {
+          this.doctorsOnSelectedDate = this.doctorsOnSelectedDate.map(d =>
+            d.maBS === doctor.maBS
+              ? {
+                  ...d,
+                  schedules: d.schedules.map(s =>
+                    s.giobatdau === schedule.giobatdau && s.gioketthuc === schedule.gioketthuc
+                      ? { ...s, trangthai: status }
+                      : s
+                  )
+                }
+              : d
+          );
+        }
 
-        // Phát ra sự kiện để component cha cập nhật schedules
-        // this.$emit('update:schedules', this.schedules.map(s =>
-        //   s.maBS === doctor.maBS &&
-        //   new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr &&
-        //   s.giobatdau === doctor.giobatdau &&
-        //   s.gioketthuc === doctor.gioketthuc
-        //     ? { ...s, trangthai: status, ngaythangnam: formattedDate }
-        //     : s
-        // ));
-        this.$emit('update:schedules')
-        // Buộc cập nhật giao diện
+        this.$emit('update:schedules');
         this.$forceUpdate();
       } catch (error) {
         console.error('Lỗi khi cập nhật trạng thái lịch làm việc:', error);
         alert('Lỗi khi chấm công: ' + error.message);
       }
     },
-
     getSchedulesForDate(date) {
-      const dateStr = this.toLocalDateString(date); // YYYY-MM-DD
+      const dateStr = this.toLocalDateString(date);
       if (this.viewMode === 'doctor') {
         const uniqueSchedules = [];
         const seen = new Set();
@@ -275,77 +298,102 @@ export default {
         const specialtyDoctors = this.doctors.filter(
           (d) => d.maCK === this.form.specialtyId
         );
-        return specialtyDoctors
-          .map((doctor) => {
-            const hasSchedule = this.schedules.some((s) => {
+        const doctorSchedules = {};
+        specialtyDoctors.forEach((doctor) => {
+          const doctorSchedulesList = this.schedules
+            .filter((s) => {
               const scheduleDate = new Date(s.ngaythangnam).toLocaleDateString('en-CA');
               return s.maBS === doctor.maBS && scheduleDate === dateStr;
-            });
-            return hasSchedule ? { 
-              maBS: doctor.maBS, 
+            })
+            .map((s) => ({
+              giobatdau: s.giobatdau,
+              gioketthuc: s.gioketthuc,
+              trangthai: s.trangthai
+            }));
+          if (doctorSchedulesList.length > 0) {
+            doctorSchedules[doctor.maBS] = {
+              maBS: doctor.maBS,
               tenBS: doctor.tenBS,
-              trangthai: this.schedules.find(s => s.maBS === doctor.maBS && new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr)?.trangthai
-            } : null;
-          })
-          .filter((d) => d !== null);
+              schedules: doctorSchedulesList
+            };
+          }
+        });
+        return Object.values(doctorSchedules);
       }
     },
-
     toLocalDateString(date) {
-      return date.toLocaleDateString('en-CA'); // Định dạng YYYY-MM-DD
+      return date.toLocaleDateString('en-CA');
     },
-
     resetSelection() {
       this.form.doctorId = '';
       this.form.specialtyId = '';
       const form = document.getElementById('scheduleForm');
       if (form) form.classList.remove('was-validated');
     },
-
     prevMonth() {
       const [year, month] = this.form.month.split('-').map(Number);
       const newMonth = new Date(year, month - 2, 1);
       this.form.month = `${newMonth.getFullYear()}-${String(newMonth.getMonth() + 1).padStart(2, '0')}`;
       this.validateMonth();
     },
-
     nextMonth() {
       const [year, month] = this.form.month.split('-').map(Number);
       const newMonth = new Date(year, month, 1);
       this.form.month = `${newMonth.getFullYear()}-${String(newMonth.getMonth() + 1).padStart(2, '0')}`;
       this.validateMonth();
     },
-
     formatMonth(month) {
       const [year, monthNum] = month.split('-').map(Number);
       return new Date(year, monthNum - 1).toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' });
     },
-
     showDoctorModal(date) {
       this.selectedDate = date;
       const dateStr = this.toLocalDateString(date);
       this.doctorsOnSelectedDate = [];
 
-      // Lấy tất cả bác sĩ có lịch vào ngày được chọn
-      const uniqueDoctors = new Set();
-      this.schedules.forEach((schedule) => {
-        const scheduleDate = new Date(schedule.ngaythangnam).toLocaleDateString('en-CA');
-        if (scheduleDate === dateStr && !uniqueDoctors.has(schedule.maBS)) {
-          const doctor = this.doctors.find((d) => d.maBS === schedule.maBS);
-          if (doctor) {
-            this.doctorsOnSelectedDate.push({
-              maBS: doctor.maBS,
-              tenBS: doctor.tenBS,
-              giobatdau: schedule.giobatdau,
-              gioketthuc: schedule.gioketthuc,
-              trangthai: schedule.trangthai
-            });
-            uniqueDoctors.add(schedule.maBS);
+      if (this.viewMode === 'doctor') {
+        const uniqueDoctors = new Set();
+        this.schedules.forEach((schedule) => {
+          const scheduleDate = new Date(schedule.ngaythangnam).toLocaleDateString('en-CA');
+          if (scheduleDate === dateStr && schedule.maBS === this.form.doctorId && !uniqueDoctors.has(schedule.maBS + schedule.giobatdau)) {
+            const doctor = this.doctors.find((d) => d.maBS === schedule.maBS);
+            if (doctor) {
+              this.doctorsOnSelectedDate.push({
+                maBS: doctor.maBS,
+                tenBS: doctor.tenBS,
+                giobatdau: schedule.giobatdau,
+                gioketthuc: schedule.gioketthuc,
+                trangthai: schedule.trangthai
+              });
+              uniqueDoctors.add(schedule.maBS + schedule.giobatdau);
+            }
           }
-        }
-      });
+        });
+      } else {
+        const uniqueDoctors = new Set();
+        this.schedules.forEach((schedule) => {
+          const scheduleDate = new Date(schedule.ngaythangnam).toLocaleDateString('en-CA');
+          if (scheduleDate === dateStr && !uniqueDoctors.has(schedule.maBS)) {
+            const doctor = this.doctors.find((d) => d.maBS === schedule.maBS);
+            if (doctor && doctor.maCK === this.form.specialtyId) {
+              const doctorSchedules = this.schedules
+                .filter(s => s.maBS === doctor.maBS && new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr)
+                .map(s => ({
+                  giobatdau: s.giobatdau,
+                  gioketthuc: s.gioketthuc,
+                  trangthai: s.trangthai
+                }));
+              this.doctorsOnSelectedDate.push({
+                maBS: doctor.maBS,
+                tenBS: doctor.tenBS,
+                schedules: doctorSchedules
+              });
+              uniqueDoctors.add(schedule.maBS);
+            }
+          }
+        });
+      }
 
-      // Mở modal
       const modal = new Modal(document.getElementById('doctorModal'));
       modal.show();
     }
@@ -356,4 +404,3 @@ export default {
 <style scoped>
 @import "@/assets/workSchedual.css";
 </style>
-```

@@ -17,9 +17,10 @@
                 <!-- Xem danh sách bác sĩ -->
                 <See_Table style="max-width: 1200px;" v-if="nav_value === 'xemBS'"
                 :name="'Xem danh sách bác sĩ'"
-                :array="{list: doctors}"
+                :array="{list: doctor_big}"
                 :columns="doctorColumns"
                 :columns_full="doctorColumns_full"
+                :specialties="specialties"
                 @update:array="get_doctors"/>
 
                 <!-- Xem danh sách bác sĩ đã xóa -->
@@ -304,6 +305,7 @@ export default {
                 { key: 'soCCHN', header: 'Số chứng chỉ hành nghề' },
                 { key: 'noicapCCHN', header: 'Nơi cấp chứng chỉ hành nghề' },
                 { key: 'diachiBS', header: 'Địa chỉ' },
+                { key: 'maCK', header: 'Mã chuyên khoa' },
             ],
 
             patients: [],
@@ -727,6 +729,7 @@ export default {
             try{
                 this.doctors = await doctorService.getAll()
                 this.doctors_del = await doctorService.getDel();
+                await this.get_doctorRole()
             }catch (error){
                 console.log("Lấy danh sách bác sĩ không thành công:", error)
             }
