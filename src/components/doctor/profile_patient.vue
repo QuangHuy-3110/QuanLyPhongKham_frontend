@@ -126,16 +126,19 @@
           this.examination()
           this.resetForm();
           // Gửi thông báo đến bác sĩ qua WebSocket
-          this.wsSocket.sendMessage({
+          this.wsSocket.send({
             type: 'interact_patient',
             sender: 'doctor',
             data: this.patient,
           });
         } catch (error) {
-          alert('Thêm bệnh nhân không thành công!');
-          console.log('Lỗi khi thêm bệnh nhân:', error);
+          // alert('Thêm bệnh nhân không thành công!');
+          // console.log('Lỗi khi thêm bệnh nhân:', error);
+          const errorMessage = error.response?.data?.message || 'Thêm bệnh nhân thất bại!';
+          alert(errorMessage);
         }
       },
+      
       resetForm() {
         this.patient = {
           emailBN: '',

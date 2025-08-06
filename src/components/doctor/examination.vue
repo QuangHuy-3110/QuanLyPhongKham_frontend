@@ -377,6 +377,7 @@ export default {
       const d = new Date(date);
       return d.toLocaleDateString('vi-VN');
     },
+
     formatDateForInput(date) {
       if (!date) return '';
       const d = new Date(date);
@@ -465,8 +466,10 @@ export default {
         });
         await this.get_record();
       } catch (error) {
-        alert('Thêm hồ sơ không thành công!');
-        console.log('Lỗi khi thêm hồ sơ bệnh án:', error);
+        // alert('Thêm hồ sơ không thành công!');
+        // console.log('Lỗi khi thêm hồ sơ bệnh án:', error);
+        const errorMessage = error.response?.data?.message || 'Lỗi khi thêm hồ sơ bệnh án!';
+        alert(errorMessage);
       }
     },
 
@@ -478,8 +481,10 @@ export default {
         this.record.maHS = '';
         this.list_examination = [];
       } catch (error) {
-        alert('Xóa hồ sơ không thành công!');
-        console.log('Lỗi khi xóa hồ sơ bệnh án:', error);
+        // alert('Xóa hồ sơ không thành công!');
+        // console.log('Lỗi khi xóa hồ sơ bệnh án:', error);
+        const errorMessage = error.response?.data?.message || 'Lỗi khi xóa hồ sơ bệnh án!';
+        alert(errorMessage);
       }
     },
 
@@ -507,8 +512,10 @@ export default {
         });
         document.querySelector('#exam_form .btn-close').click();
       } catch (error) {
-        alert('Thêm lần khám không thành công!');
-        console.log('Lỗi khi thêm lần khám:', error);
+        // alert('Thêm lần khám không thành công!');
+        // console.log('Lỗi khi thêm lần khám:', error);
+        const errorMessage = error.response?.data?.message || 'Lỗi khi thêm lần khám!';
+        alert(errorMessage);
       }
     },
 
@@ -519,8 +526,10 @@ export default {
         this.$emit('update:patient', this.editForm);
         // this.editPatientModal.hide();
       } catch (error) {
-        alert('Cập nhật thông tin bệnh nhân không thành công!');
-        console.log('Lỗi khi cập nhật thông tin bệnh nhân:', error);
+        // alert('Cập nhật thông tin bệnh nhân không thành công!');
+        // console.log('Lỗi khi cập nhật thông tin bệnh nhân:', error);
+        const errorMessage = error.response?.data?.message || 'Lỗi khi cập nhật thông tin bệnh nhân!';
+        alert(errorMessage);
       }
     },
 

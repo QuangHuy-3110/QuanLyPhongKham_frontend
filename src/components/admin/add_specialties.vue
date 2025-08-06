@@ -62,25 +62,31 @@
     emits: ['formSubmitted'],
     methods: {
       async submitForm() {
-        const form = document.getElementById('specialtyForm');
-        if (form.checkValidity()) {
-          try{
-            await specialtiesService.create(this.form)
-            alert('Thêm chuyên khoa thành công!');
-          }catch (error){
-            console.log('Lỗi khi thêm chuyên khoa:', this.form);
-          }          
-          // Reset form
-          this.form = {
-            maCK: '',
-            tenCK: ''
-          };
-          form.classList.remove('was-validated');
-          this.$emit('formSubmitted'); // Emit sự kiện formSubmitted sau khi thêm thành công
-        } else {
-          form.classList.add('was-validated');
+        try{
+          const form = document.getElementById('specialtyForm');
+          if (form.checkValidity()) {
+            try{
+              await specialtiesService.create(this.form)
+              alert('Thêm chuyên khoa thành công!');
+            }catch (error){
+              console.log('Lỗi khi thêm chuyên khoa:', this.form);
+            }          
+            // Reset form
+            this.form = {
+              maCK: '',
+              tenCK: ''
+            };
+            form.classList.remove('was-validated');
+            this.$emit('formSubmitted'); // Emit sự kiện formSubmitted sau khi thêm thành công
+          } else {
+            form.classList.add('was-validated');
+          }
+        }catch(error){
+          const errorMessage = error.response?.data?.message || 'Thêm chuyên khoa thất bại!';
+          alert(errorMessage);
         }
-      }
+        
+      },
     }
   };
   </script>

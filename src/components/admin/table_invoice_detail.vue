@@ -297,8 +297,10 @@ export default {
         this.closeModal();
         this.searchItems();
       } catch (error) {
-        alert(`Lỗi khi xóa hóa đơn: ${error.message}`);
-        console.error('Lỗi khi xóa hóa đơn:', error);
+        // alert(`Lỗi khi xóa hóa đơn: ${error.message}`);
+        // console.error('Lỗi khi xóa hóa đơn:', error);
+        const errorMessage = error.response?.data?.message || 'Xóa hóa đơn thất bại!';
+        alert(errorMessage);
       }
     },
 

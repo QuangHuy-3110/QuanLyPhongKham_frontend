@@ -1,3 +1,4 @@
+```vue
 <template>
   <!-- Overlay cho modal -->
   <div v-if="isModalOpen" class="modal-overlay"></div>
@@ -167,8 +168,8 @@
           </div>
         </ul>
       </div>
-      </div>
-    </nav>
+    </div>
+  </nav>
 </template>
 
 <script>
@@ -363,38 +364,184 @@ export default {
 </script>
 
 <style scoped>
+/* Modal overlay styles */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 999;
+  backdrop-filter: blur(3px);
+  transition: opacity 0.3s ease;
 }
-input[readonly], textarea[readonly] {
-  background-color: #e9ecef;
+
+/* Modal dialog styles */
+/* .modal-dialog {
+  margin: 1.75rem auto;
+  max-width: 600px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform: translateY(-50px);
+  opacity: 0;
+} */
+
+.modal.show .modal-dialog {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Modal content styles */
+.modal-content {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+/* Modal header styles */
+.modal-header {
+  background: linear-gradient(135deg, #4b5e6d, #6b7280);
+  color: #ffffff;
+  padding: 1.25rem;
+  border-bottom: none;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.btn-close-white {
+  filter: invert(1);
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.btn-close-white:hover {
+  opacity: 1;
+}
+
+/* Modal body styles */
+.modal-body {
+  padding: 1.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-body .form-label {
+  font-weight: 500;
+  color: #4b5e6d;
+  margin-bottom: 0.5rem;
+}
+
+.modal-body .form-control {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.75rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal-body .form-control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  outline: none;
+}
+
+.modal-body .form-control[readonly] {
+  background-color: #f3f4f6;
   cursor: not-allowed;
 }
+
+.modal-body textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Modal footer styles */
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 0 0 12px 12px;
+}
+
+.modal-footer .btn {
+  border-radius: 8px;
+  padding: 0.5rem 1.25rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.modal-footer .btn:hover {
+  transform: translateY(-1px);
+}
+
+.modal-footer .btn-primary {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.modal-footer .btn-primary:hover {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.modal-footer .btn-secondary {
+  background-color: #6b7280;
+  border-color: #6b7280;
+}
+
+.modal-footer .btn-secondary:hover {
+  background-color: #4b5e6d;
+  border-color: #4b5e6d;
+}
+
+.modal-footer .btn-warning {
+  background-color: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.modal-footer .btn-warning:hover {
+  background-color: #d97706;
+  border-color: #d97706;
+}
+
+/* Alert styles within modal */
+.modal-body .alert {
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
+/* Navbar styles (unchanged) */
 .navbar-nav .nav-link {
   color: #6b7280;
   transition: all 0.3s ease;
 }
+
 .navbar-nav .nav-link:hover {
   color: #2563eb;
   background-color: rgba(0, 0, 0, 0.05);
   border-radius: 0.25rem;
 }
+
 .navbar-nav .nav-link.active {
   color: #2563eb;
   background-color: rgba(37, 99, 235, 0.1);
   border-bottom: 2px solid #2563eb;
   border-radius: 0.25rem;
 }
+
 .navbar-nav .nav-link.active i {
   transform: scale(1.2);
 }
+
 .navbar-nav .nav-link i {
   transition: transform 0.3s ease;
 }
 </style>
+```

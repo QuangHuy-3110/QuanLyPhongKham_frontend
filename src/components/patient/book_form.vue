@@ -1,3 +1,4 @@
+```vue
 <template>
   <!-- Post a Comment -->
   <div class="container content-space-2">
@@ -103,11 +104,11 @@
                   <div class="row g-3">
                     <div class="col-4">
                       <label for="ngayHen" class="form-label">Chọn ngày</label>
-                      <input type="date" class="form-control" id="ngayHen" name="ngayHen" disabled required v-model="ngayHen">
+                      <input type="date" class="form-control" id="ngayHen" name="ngayHen" :min="minDate" disabled required v-model="ngayHen">
                     </div>
                     <div class="col-4">
                       <label for="gioHen" class="form-label">Chọn giờ</label>
-                      <select class="form-control" id="gioHen" name="gioHen" required v-model="gioHen">
+                      <select class="form-control" id="gioHen" name="gioHen" required v-model="gioHen" :disabled="!availableTimes.length">
                         <option value="" disabled>Chọn khung giờ</option>
                         <option v-for="(time, index) in availableTimes" :key="index" :value="time">{{ time }}</option>
                       </select>
@@ -171,14 +172,16 @@ export default {
       working_timeColumns: [
         { key: 'ngaythangnam', header: 'Ngày' },
         { key: 'giobatdau', header: 'Giờ bắt đầu' },
-        { key: 'gioketthuc', header: 'Giờ kết thúc' }
+        { key: 'gioketthuc', header: 'Giờ kết thúc' },
+        { key: 'trangthai', header: 'Trạng thái' }
       ],
       ngayHen: null,
       gioHen: null,
       moTaBenh: null,
       errorMessage: null,
-      minTime: '13:00', // Giới hạn giờ bắt đầu
-      maxTime: '14:00', // Giới hạn giờ kết thúc
+      minTime: null, // Giới hạn giờ bắt đầu
+      maxTime: null, // Giới hạn giờ kết thúc
+      minDate: null, // Ngày tối thiểu (hôm nay)
     };
   },
 
@@ -193,6 +196,10 @@ export default {
     },
     // Tạo danh sách các khung giờ từ minTime đến maxTime, cách nhau 30 phút
     availableTimes() {
+      // Nếu không có minTime hoặc maxTime, trả về mảng rỗng
+      if (!this.minTime || !this.maxTime) {
+        return [];
+      }
       const times = [];
       const [minHours, minMinutes] = this.minTime.split(':').map(Number);
       const [maxHours, maxMinutes] = this.maxTime.split(':').map(Number);
@@ -213,11 +220,33 @@ export default {
   },
 
   methods: {
-    getdate(day, min, max) {
+    getdate(day, min, max, trangthai) {
+      // Kiểm tra ngày có trạng thái "Nghỉ" hay không
+      if (trangthai === 'Nghỉ') {
+        this.errorMessage = 'Buổi này bác sĩ không làm việc. Vui lòng chọn ngày khác.';
+        this.ngayHen = null;
+        this.gioHen = null;
+        this.minTime = null;
+        this.maxTime = null;
+        return;
+      }
+      // Kiểm tra ngày trong quá khứ
+      const selectedDate = new Date(day);
+      const today = new Date(this.minDate);
+      today.setHours(0, 0, 0, 0); // Đặt giờ về 00:00 để so sánh chính xác
+      if (selectedDate < today) {
+        this.errorMessage = 'Không thể chọn ngày trong quá khứ. Vui lòng chọn ngày từ hôm nay trở đi.';
+        this.ngayHen = null;
+        this.gioHen = null;
+        this.minTime = null;
+        this.maxTime = null;
+        return;
+      }
       this.ngayHen = day; // Lưu ngày được chọn
       this.minTime = min; // Lưu giờ bắt đầu
       this.maxTime = max; // Lưu giờ kết thúc
       this.gioHen = null; // Đặt lại giờ khi chọn ngày mới
+      this.errorMessage = null; // Xóa thông báo lỗi nếu ngày hợp lệ
     },
 
     async get_specialties() {
@@ -244,6 +273,8 @@ export default {
           this.working_time = []; // Xóa lịch làm việc khi thay đổi chuyên khoa
           this.ngayHen = null; // Đặt lại ngày hẹn
           this.gioHen = null; // Đặt lại giờ hẹn
+          this.minTime = null; // Đặt lại giờ bắt đầu
+          this.maxTime = null; // Đặt lại giờ kết thúc
         }
       } catch (error) {
         console.error('Lỗi khi lấy danh sách bác sĩ!', error);
@@ -254,6 +285,8 @@ export default {
       this.selectedDoctor = doctor; // Lưu bác sĩ được chọn
       this.ngayHen = null; // Đặt lại ngày hẹn
       this.gioHen = null; // Đặt lại giờ hẹn
+      this.minTime = null; // Đặt lại giờ bắt đầu
+      this.maxTime = null; // Đặt lại giờ kết thúc
       try {
         this.working_time = await WorkingTime.get_doctor(doctor.maBS); // Lấy lịch làm việc của bác sĩ
       } catch (error) {
@@ -263,18 +296,27 @@ export default {
     },
 
     async bookAppointment() {
+      // Kiểm tra trạng thái ngày hẹn
+      const selectedWorkTime = this.working_time.find(item => item.ngaythangnam === this.ngayHen);
+      if (selectedWorkTime && selectedWorkTime.trangthai === 'Nghỉ') {
+        this.errorMessage = 'Buổi này bác sĩ không làm việc. Vui lòng chọn ngày khác.';
+        return;
+      }
+
       // Kiểm tra lại điều kiện hợp lệ
       if (!this.isFormValid) {
         this.errorMessage = 'Vui lòng điền đầy đủ thông tin: chuyên khoa, bác sĩ, ngày, giờ và mô tả bệnh trạng.';
         return;
       }
 
-      // Kiểm tra xem giờ chọn có nằm trong khoảng minTime và maxTime không
-      const selectedTime = this.gioHen;
-      // if (selectedTime < this.minTime || selectedTime > this.maxTime) {
-      //   this.errorMessage = `Giờ chọn không hợp lệ. Vui lòng chọn giờ trong khoảng từ ${this.minTime} đến ${this.maxTime}.`;
-      //   return;
-      // }
+      // Kiểm tra ngày trong quá khứ
+      const selectedDate = new Date(this.ngayHen);
+      const today = new Date(this.minDate);
+      today.setHours(0, 0, 0, 0); // Đặt giờ về 00:00 để so sánh chính xác
+      if (selectedDate < today) {
+        this.errorMessage = 'Không thể chọn ngày trong quá khứ. Vui lòng chọn ngày từ hôm nay trở đi.';
+        return;
+      }
 
       this.errorMessage = null; // Xóa thông báo lỗi nếu hợp lệ
 
@@ -300,13 +342,23 @@ export default {
         this.message = 'Lịch hẹn đã được gửi!';        
         alert("Đặt lịch thành công!");
       } catch (error) {
-        alert("Đặt lịch không thành công!");
-        console.log("Đặt lịch không thành công: ", error);
+        const errorMessage = error.response?.data?.message || 'Thêm lịch hẹn thất bại!';
+        alert(errorMessage);
       }
+    },
+
+    // Hàm tính ngày hiện tại để làm giá trị min cho input date
+    getTodayDate() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
     }
   },
 
   mounted() {
+    this.minDate = this.getTodayDate(); // Thiết lập ngày tối thiểu khi component được mount
     this.get_specialties();
     this.wsService.connect(); // Kết nối WebSocket
     // Xử lý tin nhắn từ server (ví dụ: xác nhận từ server)
@@ -331,3 +383,4 @@ export default {
   transition: all 0.3s ease; /* Hiệu ứng mượt */
 }
 </style>
+```

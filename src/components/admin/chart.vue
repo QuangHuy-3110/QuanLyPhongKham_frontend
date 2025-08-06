@@ -24,19 +24,12 @@
       </div>
     </div>
 
-    <!-- Biểu đồ Thu nhập -->
-    <div v-if="revenueChartData.labels.length > 0" class="chart-container mb-5">
-      <h4 class="text-center mb-3">Biểu đồ Thu nhập</h4>
-      <canvas ref="revenueChart"></canvas>
+    <!-- Biểu đồ kết hợp -->
+    <div v-if="combinedChartData.labels.length > 0" class="chart-container mb-5">
+      <h4 class="text-center mb-3">Biểu đồ Thu nhập và Chi tiêu</h4>
+      <canvas ref="combinedChart"></canvas>
     </div>
-    <div v-else class="text-center mb-5">Không có dữ liệu thu nhập để hiển thị</div>
-
-    <!-- Biểu đồ Chi tiêu -->
-    <div v-if="expenseChartData.labels.length > 0" class="chart-container">
-      <h4 class="text-center mb-3">Biểu đồ Chi tiêu</h4>
-      <canvas ref="expenseChart"></canvas>
-    </div>
-    <div v-else class="text-center">Không có dữ liệu chi tiêu để hiển thị</div>
+    <div v-else class="text-center mb-5">Không có dữ liệu để hiển thị</div>
   </div>
 </template>
 
@@ -75,7 +68,7 @@ export default {
         { value: '12', label: 'Tháng 12' },
       ],
       years: Array.from({ length: 10 }, (_, i) => (new Date().getFullYear() - i).toString()),
-      revenueChartData: {
+      combinedChartData: {
         labels: [],
         datasets: [
           {
@@ -85,11 +78,6 @@ export default {
             borderColor: 'rgba(54, 162, 235, 1)',
             borderWidth: 1,
           },
-        ],
-      },
-      expenseChartData: {
-        labels: [],
-        datasets: [
           {
             label: 'Chi tiêu (Hóa đơn nhập)',
             data: [],
@@ -99,19 +87,15 @@ export default {
           },
         ],
       },
-      revenueChartInstance: null,
-      expenseChartInstance: null,
+      combinedChartInstance: null,
     };
   },
   mounted() {
     this.processChartData();
   },
   beforeDestroy() {
-    if (this.revenueChartInstance) {
-      this.revenueChartInstance.destroy();
-    }
-    if (this.expenseChartInstance) {
-      this.expenseChartInstance.destroy();
+    if (this.combinedChartInstance) {
+      this.combinedChartInstance.destroy();
     }
   },
   watch: {
@@ -225,11 +209,9 @@ export default {
       }
 
       // Cập nhật dữ liệu biểu đồ
-      this.revenueChartData.labels = labels;
-      this.revenueChartData.datasets[0].data = revenueData;
-
-      this.expenseChartData.labels = labels;
-      this.expenseChartData.datasets[0].data = expenseData;
+      this.combinedChartData.labels = labels;
+      this.combinedChartData.datasets[0].data = revenueData;
+      this.combinedChartData.datasets[1].data = expenseData;
 
       this.$nextTick(() => {
         this.renderCharts();
@@ -237,15 +219,15 @@ export default {
     },
 
     renderCharts() {
-      // Vẽ biểu đồ thu nhập
-      if (this.revenueChartInstance) {
-        this.revenueChartInstance.destroy();
+      // Vẽ biểu đồ kết hợp
+      if (this.combinedChartInstance) {
+        this.combinedChartInstance.destroy();
       }
-      const revenueCanvas = this.$refs.revenueChart;
-      if (revenueCanvas) {
-        this.revenueChartInstance = new Chart(revenueCanvas.getContext('2d'), {
+      const combinedCanvas = this.$refs.combinedChart;
+      if (combinedCanvas) {
+        this.combinedChartInstance = new Chart(combinedCanvas.getContext('2d'), {
           type: 'bar',
-          data: this.revenueChartData,
+          data: this.combinedChartData,
           options: {
             responsive: true,
             scales: {
@@ -269,46 +251,7 @@ export default {
               },
               title: {
                 display: true,
-                text: `Biểu đồ Thu nhập ${this.filter.month ? `Tháng ${this.filter.month}/${this.filter.year}` : `Năm ${this.filter.year}`}`,
-              },
-            },
-          },
-        });
-      }
-
-      // Vẽ biểu đồ chi tiêu
-      if (this.expenseChartInstance) {
-        this.expenseChartInstance.destroy();
-      }
-      const expenseCanvas = this.$refs.expenseChart;
-      if (expenseCanvas) {
-        this.expenseChartInstance = new Chart(expenseCanvas.getContext('2d'), {
-          type: 'bar',
-          data: this.expenseChartData,
-          options: {
-            responsive: true,
-            scales: {
-              y: {
-                beginAtZero: true,
-                title: {
-                  display: true,
-                  text: 'Số tiền (VND)',
-                },
-              },
-              x: {
-                title: {
-                  display: true,
-                  text: this.filter.month ? 'Ngày trong tháng' : 'Tháng trong năm',
-                },
-              },
-            },
-            plugins: {
-              legend: {
-                position: 'top',
-              },
-              title: {
-                display: true,
-                text: `Biểu đồ Chi tiêu ${this.filter.month ? `Tháng ${this.filter.month}/${this.filter.year}` : `Năm ${this.filter.year}`}`,
+                text: `Biểu đồ Thu nhập và Chi tiêu ${this.filter.month ? `Tháng ${this.filter.month}/${this.filter.year}` : `Năm ${this.filter.year}`}`,
               },
             },
           },

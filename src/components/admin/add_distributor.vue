@@ -171,8 +171,10 @@ export default {
           this.resetForm();
           this.$emit('formSubmitted');
         } catch (error) {
-          console.error('Lỗi khi thêm nhà phân phối:', error);
-          alert('Thêm nhà phân phối thất bại!');
+          // console.error('Lỗi khi thêm nhà phân phối:', error);
+          // alert('Thêm nhà phân phối thất bại!');
+          const errorMessage = error.response?.data?.message || 'Thêm nhà phân phối thất bại!';
+          alert(errorMessage);
         }
       } else if (form) {
         form.classList.add('was-validated');

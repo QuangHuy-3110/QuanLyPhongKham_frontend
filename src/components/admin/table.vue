@@ -608,8 +608,10 @@ export default {
         }
         this.isEditing = false;
       } catch (error) {
-        console.error("Cập nhật lỗi: ", error);
-        alert("Cập nhật lỗi!");
+        // console.error("Cập nhật lỗi: ", error);
+        // alert("Cập nhật lỗi!");
+        const errorMessage = error.response?.data?.message || 'Cập nhật thất bại!';
+        alert(errorMessage);
       }
     },
 

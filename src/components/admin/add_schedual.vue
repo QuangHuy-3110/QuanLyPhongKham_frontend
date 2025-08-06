@@ -231,39 +231,44 @@ export default {
     },
 
     async handleSubmit() {
-      const form = document.getElementById('scheduleForm');
-      if (form.checkValidity()) {
-        this.lichlamviec.maBS = this.form.doctorId;
+      try{
+        const form = document.getElementById('scheduleForm');
+        if (form.checkValidity()) {
+          this.lichlamviec.maBS = this.form.doctorId;
 
-        // Duyệt qua các ngày trong lịch
-        for (const day of Object.keys(this.form.schedule)) {
-          if (this.form.schedule[day].length > 0) {
-            const dayInfo = this.daysOfWeek.find(d => d.name === day);
-            const formattedDate = dayInfo ? this.formatDate(dayInfo.date) : '';
-            this.lichlamviec.ngaythangnam = formattedDate;
+          // Duyệt qua các ngày trong lịch
+          for (const day of Object.keys(this.form.schedule)) {
+            if (this.form.schedule[day].length > 0) {
+              const dayInfo = this.daysOfWeek.find(d => d.name === day);
+              const formattedDate = dayInfo ? this.formatDate(dayInfo.date) : '';
+              this.lichlamviec.ngaythangnam = formattedDate;
 
-            // Duyệt qua các ca làm việc trong ngày
-            for (const shift of this.form.schedule[day]) {
-              this.lichlamviec.giobatdau = shift.startTime;
-              this.lichlamviec.gioketthuc = shift.endTime;
-              console.log(this.lichlamviec);
-              await workingTimeService.create(this.lichlamviec); // Gọi API tạo lịch
+              // Duyệt qua các ca làm việc trong ngày
+              for (const shift of this.form.schedule[day]) {
+                this.lichlamviec.giobatdau = shift.startTime;
+                this.lichlamviec.gioketthuc = shift.endTime;
+                console.log(this.lichlamviec);
+                await workingTimeService.create(this.lichlamviec); // Gọi API tạo lịch
+              }
             }
           }
-        }
-        console.log('===========================');
-        alert('Lưu lịch làm việc thành công!');
-        
-        this.wsService.send({
-          type: 'created_schedule',
-          sender: 'Admin',
-          data: this.lichlamviec.maBS,
-        });
+          // console.log('===========================');
+          alert('Lưu lịch làm việc thành công!');
+          
+          this.wsService.send({
+            type: 'created_schedule',
+            sender: 'Admin',
+            data: this.lichlamviec.maBS,
+          });
 
-        this.$emit('formSubmitted');
-        this.resetForm();
-      } else {
-        form.classList.add('was-validated');
+          this.$emit('formSubmitted');
+          this.resetForm();
+        } else {
+          form.classList.add('was-validated');
+        }
+      }catch(error){
+        const errorMessage = error.response?.data?.message || `Thêm lịch làm việc ${lichlamviec.ngaythangnam} thất bại!`;
+        alert(errorMessage);
       }
     },
     

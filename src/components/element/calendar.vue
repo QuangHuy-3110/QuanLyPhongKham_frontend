@@ -1,3 +1,4 @@
+```vue
 <template>
   <div class="container">
     <div class="header">{{ weekLabel }}</div>
@@ -24,7 +25,10 @@
           <div class="session-title">Buổi sáng</div>
           <div class="session-content">
             <template v-if="getAppointments(day.date, 'morning').length">
-              <div v-for="appt in getAppointments(day.date, 'morning')" :key="appt.maBS" class="appointment" @click="getdate(day, appt.giobatdau, appt.gioketthuc)">
+              <div v-for="appt in getAppointments(day.date, 'morning')" :key="appt.maBS" 
+                   class="appointment" 
+                   :class="{ 'selected': isSelected(day.date, appt.giobatdau, appt.gioketthuc) }"
+                   @click="getdate(day, appt.giobatdau, appt.gioketthuc, appt.trangthai)">
                 {{ appt.giobatdau }} - {{ appt.gioketthuc }} - {{ appt.trangthai }}
               </div>
             </template>
@@ -35,7 +39,10 @@
           <div class="session-title">Buổi chiều</div>
           <div class="session-content">
             <template v-if="getAppointments(day.date, 'afternoon').length" >
-              <div v-for="appt in getAppointments(day.date, 'afternoon')" :key="appt.maBS" class="appointment" @click="getdate(day, appt.giobatdau, appt.gioketthuc)">
+              <div v-for="appt in getAppointments(day.date, 'afternoon')" :key="appt.maBS" 
+                   class="appointment" 
+                   :class="{ 'selected': isSelected(day.date, appt.giobatdau, appt.gioketthuc) }"
+                   @click="getdate(day, appt.giobatdau, appt.gioketthuc, appt.trangthai)">
                 {{ appt.giobatdau }} - {{ appt.gioketthuc }} - {{ appt.trangthai }}
               </div>
             </template>
@@ -73,15 +80,28 @@ export default {
       days: [],
       weekLabel: '',
       dayNames: ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'],
+      selectedAppointment: null, // Lưu thông tin ô được chọn
     };
   },
   methods: {
-    getdate(day, min, max) {
+    getdate(day, min, max, trangthai) {
       const d = new Date(day.date);
       d.setDate(d.getDate() + 1); // Cộng thêm 1 ngày để hiển thị đúng giá trị
       const formattedDate = d.toISOString().split('T')[0]; // Định dạng YYYY-MM-DD
-      // console.log('Selected date:', formattedDate, min, max);
-      this.$emit('getdate', formattedDate, min, max);
+      this.selectedAppointment = { date: formattedDate, giobatdau: min, gioketthuc: max }; // Cập nhật ô được chọn
+      this.$emit('getdate', formattedDate, min, max, trangthai);
+    },
+
+    isSelected(date, giobatdau, gioketthuc) {
+      if (!this.selectedAppointment) return false;
+      const d = new Date(date);
+      d.setDate(d.getDate() + 1);
+      const formattedDate = d.toISOString().split('T')[0];
+      return (
+        this.selectedAppointment.date === formattedDate &&
+        this.selectedAppointment.giobatdau === giobatdau &&
+        this.selectedAppointment.gioketthuc === gioketthuc
+      );
     },
 
     getMonday(date) {
@@ -137,10 +157,12 @@ export default {
     },
     prevWeek() {
       this.currentDate.setDate(this.currentDate.getDate() - 7);
+      this.selectedAppointment = null; // Xóa lựa chọn khi chuyển tuần
       this.renderWeek();
     },
     nextWeek() {
       this.currentDate.setDate(this.currentDate.getDate() + 7);
+      this.selectedAppointment = null; // Xóa lựa chọn khi chuyển tuần
       this.renderWeek();
     },
   },
@@ -268,6 +290,16 @@ button:active {
 .appointment {
   margin: 0.25rem 0;
   text-align: center;
+  cursor: pointer;
+  padding: 0.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.25rem;
+  transition: border-color 0.2s ease;
+}
+
+.appointment.selected {
+  border: 2px solid #007bff; /* Viền đậm khi được chọn */
+  font-weight: 600; /* Tùy chọn: làm chữ đậm để nổi bật */
 }
 
 @media (max-width: 768px) {
@@ -314,5 +346,10 @@ button:active {
     font-size: 0.75rem;
     padding: 0.375rem;
   }
+
+  .appointment.selected {
+    border: 2px solid #007bff; /* Giữ viền đậm cho giao diện mobile */
+  }
 }
 </style>
+```

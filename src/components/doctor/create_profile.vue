@@ -61,7 +61,7 @@
                     this.patient = await patientService.get_cccd(patient.cccdBN)
                     console.log(this.patient)
                 }catch (error){
-                    console.log("Lỗi ở create profile khi lấy mã bệnh nhâm:", error)
+                    console.log("Lỗi ở create profile khi lấy mã bệnh nhân:", error)
                 }
                 
             }

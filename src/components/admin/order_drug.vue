@@ -337,6 +337,7 @@ export default {
       this.selectedNPP = '';
       this.orderList = [];
     },
+
     updateOrderList() {
       if (!this.selectedNPP) {
         this.orderList = [];
@@ -349,14 +350,17 @@ export default {
           soLuongCanNhap: 100 - (item.soluongThuoc || 0), // Gợi ý số lượng cần nhập
         }));
     },
+
     validateQuantity(index) {
       if (this.orderList[index].soLuongCanNhap < 0) {
         this.orderList[index].soLuongCanNhap = 0;
       }
     },
+
     removeFromOrderList(index) {
       this.orderList.splice(index, 1);
     },
+
     async placeOrder() {
       if (!this.selectedNPP || this.orderList.length === 0) {
         alert('Vui lòng chọn nhà phân phối và ít nhất một thuốc để đặt hàng!');
@@ -466,10 +470,13 @@ export default {
         this.$emit('orderPlaced');
         this.closeOrderModal();
       } catch (error) {
-        alert(`Lỗi khi gửi đơn hàng hoặc lưu nhật ký: ${error.message}`);
-        console.error('Lỗi khi gửi đơn hàng hoặc lưu nhật ký:', error);
+        // alert(`Lỗi khi gửi đơn hàng hoặc lưu nhật ký: ${error.message}`);
+        // console.error('Lỗi khi gửi đơn hàng hoặc lưu nhật ký:', error);
+        const errorMessage = error.response?.data?.message || 'Lỗi khi gửi đơn hàng hoặc lưu nhật ký!';
+        alert(errorMessage);
       }
     },
+
     formatValue(value, key) {
       if (!value) return 'N/A';
       if (

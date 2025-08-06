@@ -276,10 +276,13 @@ export default {
         this.$emit('update:schedules');
         this.$forceUpdate();
       } catch (error) {
-        console.error('Lỗi khi cập nhật trạng thái lịch làm việc:', error);
-        alert('Lỗi khi chấm công: ' + error.message);
+        // console.error('Lỗi khi cập nhật trạng thái lịch làm việc:', error);
+        // alert('Lỗi khi chấm công: ' + error.message);
+        const errorMessage = error.response?.data?.message || 'Lỗi khi chấm công!';
+        alert(errorMessage);
       }
     },
+    
     getSchedulesForDate(date) {
       const dateStr = this.toLocalDateString(date);
       if (this.viewMode === 'doctor') {

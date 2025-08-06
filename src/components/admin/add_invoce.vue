@@ -341,8 +341,10 @@ export default {
           });
 
         } catch (error) {
-          console.error('Lỗi khi thêm hóa đơn hoặc cập nhật số lượng thuốc:', error);
-          alert('Thêm hóa đơn thất bại!');
+          // console.error('Lỗi khi thêm hóa đơn hoặc cập nhật số lượng thuốc:', error);
+          // alert('Thêm hóa đơn thất bại!');
+          const errorMessage = error.response?.data?.message || 'Thêm hóa đơn thất bại!';
+          alert(errorMessage);
         }
       } else if (form) {
         form.classList.add('was-validated');

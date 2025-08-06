@@ -238,8 +238,10 @@ export default {
         });
         
       } catch (error) {
-        alert('Lỗi khi thêm thuốc mới!');
-        console.log('Lỗi khi thêm thuốc mới:', error);
+        // alert('Lỗi khi thêm thuốc mới!');
+        // console.log('Lỗi khi thêm thuốc mới:', error);
+        const errorMessage = error.response?.data?.message || 'Thêm thuốc thất bại!';
+        alert(errorMessage);
       }
 
       this.form = {

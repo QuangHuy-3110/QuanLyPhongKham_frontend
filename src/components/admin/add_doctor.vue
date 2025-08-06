@@ -185,6 +185,7 @@ import doctor_roleService from '../../services/doctor_role.service';
 import specialtiesService from '../../services/specialties.service';
 import emailService from '../../services/email.service';
 import bcrypt from 'bcryptjs';
+import { ErrorCodes } from 'vue';
 
 export default {
   data() {
@@ -309,8 +310,11 @@ export default {
           this.resetForm();
           this.$emit('formSubmitted');
         } catch (error) {
-          console.error('Lỗi khi thêm bác sĩ:', error);
-          alert('Thêm bác sĩ thất bại!');
+          // console.error('Lỗi khi thêm bác sĩ:', error);
+          // alert('Thêm bác sĩ thất bại!');
+          // Hiển thị thông báo lỗi cụ thể từ backend
+            const errorMessage = error.response?.data?.message || 'Thêm bác sĩ thất bại!';
+            alert(errorMessage);
         }
       } else if (form) {
         form.classList.add('was-validated');
