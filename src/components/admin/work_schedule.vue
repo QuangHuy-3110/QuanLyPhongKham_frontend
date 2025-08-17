@@ -115,8 +115,9 @@
                       {{ doctor.maBS }} - {{ doctor.tenBS }} - {{ doctor.trangthai || 'Chưa chấm công' }} ({{ doctor.giobatdau }} - {{ doctor.gioketthuc }})
                     </span>
                     <span v-if="!doctor.trangthai">
-                      <button class="btn btn-danger btn-sm me-2" @click="update_status('Nghỉ', doctor)">Nghỉ</button>
-                      <button class="btn btn-success btn-sm" @click="update_status('Hoàn thành', doctor)">Hoàn thành</button>
+                      <button class="btn btn-warning btn-sm me-2" @click="update_status('Nghỉ', doctor)">Nghỉ</button>
+                      <button class="btn btn-success btn-sm me-2" @click="update_status('Hoàn thành', doctor)">Hoàn thành</button>
+                      <button class="btn btn-danger btn-sm" @click="delete_schedule(doctor)">Xóa</button>
                     </span>
                   </li>
                 </ul>
@@ -126,10 +127,11 @@
                   <li v-for="doctor in doctorsOnSelectedDate" :key="doctor.maBS" class="list-group-item">
                     <strong>{{ doctor.maBS }} - {{ doctor.tenBS }}</strong>
                     <ul class="mt-2">
-                      <li v-for="schedule in doctor.schedules" :key="schedule.giobatdau" class="ms-3">
+                      <li v-for="schedule in doctor.schedules" :key="schedule.giobatdau" class="ms-3 mb-2">
                         {{ schedule.giobatdau }} - {{ schedule.gioketthuc }} - {{ schedule.trangthai || 'Chưa chấm công' }}
-                        <button v-if="!schedule.trangthai" class="btn btn-danger btn-sm me-2" @click="update_status('Nghỉ', doctor, schedule)">Nghỉ</button>
-                        <button v-if="!schedule.trangthai" class="btn btn-success btn-sm" @click="update_status('Hoàn thành', doctor, schedule)">Hoàn thành</button>
+                        <button v-if="!schedule.trangthai" class="btn btn-warning btn-sm me-2" @click="update_status('Nghỉ', doctor, schedule)">Nghỉ</button>
+                        <button v-if="!schedule.trangthai" class="btn btn-success btn-sm me-2" @click="update_status('Hoàn thành', doctor, schedule)">Hoàn thành</button>
+                        <button v-if="!schedule.trangthai" class="btn btn-danger btn-sm" @click="delete_schedule(doctor)">Xóa</button>
                       </li>
                     </ul>
                   </li>
@@ -283,6 +285,45 @@ export default {
       }
     },
     
+    delete_schedule(doctor) {
+      const dateStr = this.toLocalDateString(this.selectedDate);
+      let targetSchedule;
+
+      if (this.viewMode === 'doctor') {
+        targetSchedule = this.schedules.find(s => 
+          s.maBS === doctor.maBS && 
+          new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr &&
+          s.giobatdau === doctor.giobatdau &&
+          s.gioketthuc === doctor.gioketthuc
+        );
+      } else {
+        targetSchedule = this.schedules.find(s => 
+          s.maBS === doctor.maBS && 
+          new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr &&
+          s.giobatdau === doctor.schedules[0].giobatdau &&
+          s.gioketthuc === doctor.schedules[0].gioketthuc
+        );
+      }
+
+      if (!targetSchedule) {
+        console.error('Không tìm thấy lịch làm việc phù hợp');
+        return;
+      }
+
+      working_timeService.delete(doctor.maBS, dateStr, targetSchedule.giobatdau)
+        .then(() => {
+          alert("Xóa lịch làm việc thành công!");
+          this.doctorsOnSelectedDate = this.doctorsOnSelectedDate.filter(d =>
+            !(d.maBS === doctor.maBS && d.giobatdau === doctor.giobatdau && d.gioketthuc === doctor.gioketthuc)
+          );
+          this.$emit('update:schedules');
+        })
+        .catch(error => {
+          const errorMessage = error.response?.data?.message || 'Lỗi khi xóa lịch làm việc!';
+          alert(errorMessage);
+        });
+    },
+
     getSchedulesForDate(date) {
       const dateStr = this.toLocalDateString(date);
       if (this.viewMode === 'doctor') {

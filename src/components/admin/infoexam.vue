@@ -23,7 +23,7 @@
 
             <div class="col-md-6">
                 <p><strong>Tên Bệnh Nhân:</strong> {{ patient.hotenBN }}</p>
-                <p><strong>Ngày Sinh:</strong> {{ patient.ngaysinhBN }}</p>
+                <p><strong>Ngày Sinh:</strong> {{ formatValue(patient.ngaysinhBN) }}</p>
                 <p><strong>Địa Chỉ:</strong> {{ patient.diachiBN }}</p>
                 <p><strong>Email:</strong> {{ patient.emailBN }}</p>
             </div>
@@ -76,7 +76,7 @@
                 >
                   <div class="card-body">
                     <h5 class="card-title">Lần khám {{ exam.stt_lankham }}</h5>
-                    <p class="card-text mb-1"><strong>Ngày khám:</strong> {{ exam.ngaythangnamkham }}</p>
+                    <p class="card-text mb-1"><strong>Ngày khám:</strong> {{ formatValue(exam.ngaythangnamkham) }}</p>
                     <p class="card-text mb-2"><strong>Chẩn đoán:</strong> {{ exam.chuandoan }}</p>
                     <button
                       class="btn btn-sm btn-outline-primary"
@@ -149,8 +149,8 @@
                   <p><strong>STT Lần Khám:</strong> {{ selectedExamination.stt_lankham }}</p>
                   <p><strong>Mã Hồ Sơ:</strong> {{ selectedExamination.maHS }}</p>
                   <p><strong>Mã Bác Sĩ:</strong> {{ selectedExamination.maBS }}</p>
-                  <p><strong>Ngày Khám:</strong> {{ selectedExamination.ngaythangnamkham }}</p>
-                  <p><strong>Ngày Tái Khám:</strong> {{ selectedExamination.ngaytaikham }}</p>
+                  <p><strong>Ngày Khám:</strong> {{ formatValue(selectedExamination.ngaythangnamkham) }}</p>
+                  <p><strong>Ngày Tái Khám:</strong> {{ formatValue(selectedExamination.ngaytaikham) }}</p>
                 </div>
                 <div class="col-md-6">
                   <p><strong>Triệu Chứng:</strong> {{ selectedExamination.trieuchung }}</p>
@@ -258,6 +258,22 @@
               alert("Lỗi khi xóa lần khám!");
             }
         },
+
+      formatValue(value, key) {
+        if (!value) return 'N/A';
+        // Kiểm tra nếu giá trị là chuỗi ngày ISO hoặc YYYY-MM-DD
+        if (typeof value === 'string' && (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z/.test(value) || /\d{4}-\d{2}-\d{2}/.test(value))) {
+          const date = new Date(value);
+          if (!isNaN(date)) {
+            // Định dạng thành DD/MM/YYYY
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+          }
+        }
+        return value; // Trả về giá trị gốc nếu không phải ngày
+      },
 
         isDateField(key, value) {
           return typeof value === 'string' && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z/.test(value);

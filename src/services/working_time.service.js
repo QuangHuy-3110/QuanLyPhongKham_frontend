@@ -33,8 +33,8 @@ class WorkingTimeService {
         return (await this.api.put(`/${id1}?ngaythangnam=${id2}&giobatdau=${id3}`, data)).data;
     }
 
-    async delete(id) {
-        return (await this.api.delete(`/${id}`)).data;
+    async delete(id1, id2, id3,) {
+        return (await this.api.delete(`/${id1}?ngaythangnam=${id2}&giobatdau=${id3}`)).data;
     }
 }
 export default new WorkingTimeService();

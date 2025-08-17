@@ -24,9 +24,16 @@
       </div>
     </div>
 
+    <!-- Biểu đồ tròn -->
+    <div v-if="pieChartData.labels.length > 0" class="chart-container mb-5 pie-chart-container">
+      <h4 class="text-left mb-1">Tổng Thu nhập và Chi tiêu</h4>
+      <canvas ref="pieChart"></canvas>
+    </div>
+    <div v-else class="text-center mb-5">Không có dữ liệu để hiển thị</div>
+
     <!-- Biểu đồ kết hợp -->
-    <div v-if="combinedChartData.labels.length > 0" class="chart-container mb-5">
-      <h4 class="text-center mb-3">Biểu đồ Thu nhập và Chi tiêu</h4>
+    <div v-if="combinedChartData.labels.length > 0" class="chart-container mt-5">
+      <h4 class="text-center">Biểu đồ Thu nhập và Chi tiêu</h4>
       <canvas ref="combinedChart"></canvas>
     </div>
     <div v-else class="text-center mb-5">Không có dữ liệu để hiển thị</div>
@@ -87,7 +94,19 @@ export default {
           },
         ],
       },
+      pieChartData: {
+        labels: ['Thu nhập (Lần khám)', 'Chi tiêu (Hóa đơn nhập)'],
+        datasets: [
+          {
+            data: [],
+            backgroundColor: ['rgba(54, 162, 235, 0.5)', 'rgba(255, 99, 132, 0.5)'],
+            borderColor: ['rgba(54, 162, 235, 1)', 'rgba(255, 99, 132, 1)'],
+            borderWidth: 1,
+          },
+        ],
+      },
       combinedChartInstance: null,
+      pieChartInstance: null,
     };
   },
   mounted() {
@@ -96,6 +115,9 @@ export default {
   beforeDestroy() {
     if (this.combinedChartInstance) {
       this.combinedChartInstance.destroy();
+    }
+    if (this.pieChartInstance) {
+      this.pieChartInstance.destroy();
     }
   },
   watch: {
@@ -121,6 +143,8 @@ export default {
       const labels = [];
       const revenueData = [];
       const expenseData = [];
+      let totalRevenue = 0;
+      let totalExpense = 0;
 
       if (this.filter.month) {
         // Lấy số ngày trong tháng
@@ -132,46 +156,43 @@ export default {
         // Khởi tạo mảng doanh thu và chi tiêu
         const revenueByDay = Array(daysInMonth).fill(0);
         lankhamData.forEach(item => {
-          // Kiểm tra dữ liệu hợp lệ
           if (!item.ngaythangnamkham || item.xoa === 1) return;
 
-          // Chuyển đổi chuỗi ngày ISO thành đối tượng Date
           const date = new Date(item.ngaythangnamkham);
-          if (isNaN(date)) return; // Bỏ qua nếu ngày không hợp lệ
-
-          // Lấy ngày, tháng, năm
-          const day = date.getDate() - 1; // getDate() trả về 1-31, trừ 1 để khớp với mảng
-          const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Chuẩn hóa thành "01", "02", ...
-          const year = date.getFullYear().toString();
-
-          // Chỉ thêm dữ liệu nếu khớp với bộ lọc và không bị xóa
-          if (month === this.filter.month && year === this.filter.year) {
-            revenueByDay[day] += parseFloat(item.tongtien) || 0;
-          }
-        });
-
-        const expenseByDay = Array(daysInMonth).fill(0);
-        hoadonnhapData.forEach(item => {
-          // Kiểm tra dữ liệu hợp lệ
-          if (!item.ngaynhap || item.xoa === 1) return;
-
-          // Chuyển đổi chuỗi ngày ISO thành đối tượng Date
-          const date = new Date(item.ngaynhap);
-          if (isNaN(date)) return; // Bỏ qua nếu ngày không hợp lệ
+          if (isNaN(date)) return;
 
           const day = date.getDate() - 1;
           const month = (date.getMonth() + 1).toString().padStart(2, '0');
           const year = date.getFullYear().toString();
 
           if (month === this.filter.month && year === this.filter.year) {
-            expenseByDay[day] += parseFloat(item.tongtien) || 0;
+            const amount = parseFloat(item.tongtien) || 0;
+            revenueByDay[day] += amount;
+            totalRevenue += amount;
+          }
+        });
+
+        const expenseByDay = Array(daysInMonth).fill(0);
+        hoadonnhapData.forEach(item => {
+          if (!item.ngaynhap || item.xoa === 1) return;
+
+          const date = new Date(item.ngaynhap);
+          if (isNaN(date)) return;
+
+          const day = date.getDate() - 1;
+          const month = (date.getMonth() + 1).toString().padStart(2, '0');
+          const year = date.getFullYear().toString();
+
+          if (month === this.filter.month && year === this.filter.year) {
+            const amount = parseFloat(item.tongtien) || 0;
+            expenseByDay[day] += amount;
+            totalExpense += amount;
           }
         });
 
         revenueData.push(...revenueByDay);
         expenseData.push(...expenseByDay);
       } else {
-        // Nếu không chọn tháng, hiển thị dữ liệu theo tháng trong năm
         labels.push(...this.months.map(m => m.label));
 
         const revenueByMonth = Array(12).fill(0);
@@ -181,11 +202,13 @@ export default {
           const date = new Date(item.ngaythangnamkham);
           if (isNaN(date)) return;
 
-          const month = date.getMonth(); // getMonth() trả về 0-11
+          const month = date.getMonth();
           const year = date.getFullYear().toString();
 
           if (year === this.filter.year) {
-            revenueByMonth[month] += parseFloat(item.tongtien) || 0;
+            const amount = parseFloat(item.tongtien) || 0;
+            revenueByMonth[month] += amount;
+            totalRevenue += amount;
           }
         });
 
@@ -200,7 +223,9 @@ export default {
           const year = date.getFullYear().toString();
 
           if (year === this.filter.year) {
-            expenseByMonth[month] += parseFloat(item.tongtien) || 0;
+            const amount = parseFloat(item.tongtien) || 0;
+            expenseByMonth[month] += amount;
+            totalExpense += amount;
           }
         });
 
@@ -208,10 +233,13 @@ export default {
         expenseData.push(...expenseByMonth);
       }
 
-      // Cập nhật dữ liệu biểu đồ
+      // Cập nhật dữ liệu biểu đồ cột
       this.combinedChartData.labels = labels;
       this.combinedChartData.datasets[0].data = revenueData;
       this.combinedChartData.datasets[1].data = expenseData;
+
+      // Cập nhật dữ liệu biểu đồ tròn
+      this.pieChartData.datasets[0].data = [totalRevenue, totalExpense];
 
       this.$nextTick(() => {
         this.renderCharts();
@@ -241,17 +269,78 @@ export default {
               x: {
                 title: {
                   display: true,
-                  text: this.filter.month ? 'Ngày trong tháng' : 'Tháng trong năm',
+                  // text: this.filter.month ? 'Ngày trong tháng' : 'Tháng trong năm',
                 },
               },
             },
             plugins: {
               legend: {
-                position: 'top',
+                display: true, // Tắt chú thích của biểu đồ cột
               },
               title: {
                 display: true,
-                text: `Biểu đồ Thu nhập và Chi tiêu ${this.filter.month ? `Tháng ${this.filter.month}/${this.filter.year}` : `Năm ${this.filter.year}`}`,
+                // text: `Biểu đồ Thu nhập và Chi tiêu ${this.filter.month ? `Tháng ${this.filter.month}/${this.filter.year}` : `Năm ${this.filter.year}`}`,
+              },
+            },
+          },
+        });
+      }
+
+      // Vẽ biểu đồ tròn
+      if (this.pieChartInstance) {
+        this.pieChartInstance.destroy();
+      }
+      const pieCanvas = this.$refs.pieChart;
+      if (pieCanvas) {
+        this.pieChartInstance = new Chart(pieCanvas.getContext('2d'), {
+          type: 'pie',
+          data: this.pieChartData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'top',
+                align: 'end', // Căn phải chú thích
+                labels: {
+                  font: {
+                    size: 14, // Tăng kích thước chữ của chú thích
+                  },
+                  boxWidth: 20, // Kích thước hộp màu trong chú thích
+                  padding: 20, // Khoảng cách giữa các mục trong chú thích
+                },
+              },
+              title: {
+                display: true,
+                // text: `Tổng Thu nhập và Chi tiêu ${this.filter.month ? `Tháng ${this.filter.month}/${this.filter.year}` : `Năm ${this.filter.year}`}`,
+                align: 'start',
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    let label = context.label || '';
+                    if (label) {
+                      label += ': ';
+                    }
+                    const value = context.parsed || 0;
+                    label += new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+                    return label;
+                  }
+                }
+              },
+              datalabels: {
+                display: true,
+                formatter: (value, context) => {
+                  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+                },
+                color: '#000',
+                font: {
+                  weight: 'bold',
+                  size: 12,
+                },
+                anchor: 'end',
+                align: 'end',
+                offset: 10,
               },
             },
           },
@@ -263,8 +352,19 @@ export default {
 </script>
 
 <style scoped>
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
 .chart-container {
   max-width: 800px;
+  margin: 0 auto;
+}
+
+.pie-chart-container {
+  max-width: 400px;
+  height: 300px;
   margin: 0 auto;
 }
 

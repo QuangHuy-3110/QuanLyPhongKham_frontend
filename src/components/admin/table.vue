@@ -193,7 +193,7 @@
                         v-model="editRow[col.key]"
                         type="date"
                         class="form-control"
-                        :disabled="col.key.startsWith('ma')"
+                        :disabled="col.key.startsWith('ma') && (col.key !== 'maNPP' || name === 'Danh sách thuốc')"
                       />
                       <input
                         v-else
@@ -202,7 +202,7 @@
                         type="text"
                         class="form-control"
                         :placeholder="col.header"
-                        :disabled="col.key.startsWith('ma')"
+                        :disabled="col.key.startsWith('ma') && (col.key !== 'maNPP' || name !== 'Danh sách thuốc')"
                       />
                     </template>
                     <template v-else>
