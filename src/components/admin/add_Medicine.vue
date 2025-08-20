@@ -102,6 +102,20 @@
               />
               <div class="invalid-feedback" v-if="errors.soluong_minThuoc">{{ errors.soluong_minThuoc }}</div>
             </div>
+
+            <div class="col-md-6">
+              <label for="dongiaThuoc" class="form-label fw-bold">Giá/đvt <span class="text-danger">*</span></label>
+              <input
+                type="number"
+                class="form-control"
+                id="dongiaThuoc"
+                v-model.number="form.giaThuoc"
+                min="0"
+                required
+                @input="validateSoluongMinThuoc"
+              />
+              <div class="invalid-feedback" v-if="errors.dongiaThuoc">{{ errors.dongiaThuoc }}</div>
+            </div>
           </div>
 
           <!-- Nút submit -->
@@ -132,7 +146,8 @@ export default {
         soluongThuoc: null,
         donvitinhThuoc: '',
         maNPP: '',
-        soluong_minThuoc: null
+        soluong_minThuoc: null,
+        giaThuoc: 0
       },
       errors: {
         maThuoc: '',
@@ -140,7 +155,8 @@ export default {
         soluongThuoc: '',
         donvitinhThuoc: '',
         noisanxuatThuoc: '',
-        soluong_minThuoc: ''
+        soluong_minThuoc: '',
+        dongiaThuoc: ''
       }
     };
   },

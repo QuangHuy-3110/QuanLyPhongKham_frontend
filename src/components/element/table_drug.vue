@@ -28,7 +28,7 @@
           <div class="modal-body">
             <h6>Thông tin bệnh nhân</h6>
             <p><strong>Họ và tên:</strong> {{ patient.hotenBN }}</p>
-            <p><strong>Ngày tháng năm sinh:</strong> {{ patient.ngaysinhBN }}</p>
+            <p><strong>Ngày tháng năm sinh:</strong> {{ formatValue(patient.ngaysinhBN) }}</p>
             <p><strong>Chẩn đoán:</strong> {{ selectedExamination.chuandoan }}</p>
             <h6 class="mt-4">Danh sách thuốc</h6>
             <table class="table table-bordered table-striped">
@@ -51,12 +51,12 @@
                   <td>{{ medicine.donvi }}</td>
                   <td>{{ medicine.lieuluong }}</td>
                   <td>{{ medicine.thoigianSD }}</td>
-                  <td>{{ medicine.thanhtien }}</td>
+                  <td>{{ formatValue(medicine.thanhtien, 'thanhtien') }}</td>
                 </tr>
               </tbody>
             </table>
             <h6>Chi phí khám bệnh: 60.000</h6>
-            <h5>Tổng tiền: {{ selectedExamination.tongtien }}</h5>
+            <h5>Tổng tiền: {{ formatValue(selectedExamination.tongtien, 'tongtien') }}</h5>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
@@ -88,6 +88,26 @@ export default {
   methods: {
     openPreviewModal() {
       this.previewModal.show();
+    },
+
+    formatValue(value, key) {
+      if (!value) return 'N/A';
+      if (
+        typeof value === 'string' &&
+        (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z/.test(value) || /\d{4}-\d{2}-\d{2}/.test(value))
+      ) {
+        const date = new Date(value);
+        if (!isNaN(date)) {
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = date.getFullYear();
+          return `${day}/${month}/${year}`;
+        }
+      }
+      if (key === 'tongtien' || key === 'thanhtien' || key === 'dongia') {
+        return Number(value).toLocaleString('vi-VN');
+      }
+      return value;
     },
   },
 };

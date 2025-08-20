@@ -12,8 +12,9 @@
 
     <Examination v-if="status === 'examination'"
     @close:examination = "close_examination"
-    :patient = "patient[0]"
-    :doctor="doctor"/>
+    :patient = "patient"
+    :doctor="doctor"
+    :role="'doctor'"/>
     
 </template>
 
@@ -58,7 +59,9 @@
 
             async get_patient(patient){
                 try{
+                    console.log("Lấy mã bệnh nhân:", patient)
                     this.patient = await patientService.get_cccd(patient.cccdBN)
+                    this.patient = this.patient[0]
                     console.log(this.patient)
                 }catch (error){
                     console.log("Lỗi ở create profile khi lấy mã bệnh nhân:", error)

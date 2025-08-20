@@ -56,13 +56,13 @@
                         <div class="card" style="width: 18rem;"
                              @click.prevent="selectDoctor(doctor)">
                           <div class="card-body">
-                              <h5 class="card-title">Bác sĩ {{ doctor.tenBS }}</h5>
-                              <h6 class="card-subtitle mb-2 text-body-secondary">CCHN: {{ doctor.soCCHN }}</h6>
+                              <h5 class="card-title mb-3">Bác sĩ {{ doctor.tenBS }}</h5>
+                              <h6 class="card-subtitle mb-3 text-body-secondary">CCHN: {{ doctor.soCCHN }}</h6>
                               <p class="card-text">Nơi cấp CCHN: {{ doctor.noicapCCHN }}</p>
                               <p class="card-text">Số điện thoại: {{ doctor.sdtBS }}</p>
-                              <a href="#" 
+                              <!-- <a href="#" 
                                  class="card-link"
-                                 >Chọn bác sĩ</a>
+                                 >Chọn bác sĩ</a> -->
                           </div>
                         </div>
                       </div>
@@ -76,12 +76,15 @@
                   <!-- Thông tin bác sĩ được chọn -->
                   <div class="container py-4" v-if="selectedDoctor">
                     <label class="form-label fw-bold">Bác sĩ đã chọn</label>
-                    <div class="card" style="width: 18rem;">
+                    <div class="card" style="width: 20rem;">
                       <div class="card-body">
-                        <h5 class="card-title">Bác sĩ {{ selectedDoctor.tenBS }}</h5>
+                        <h5 class="card-title mb-3">Bác sĩ {{ selectedDoctor.tenBS }}</h5>
+                        <h6 class="card-subtitle mb-3 text-body-secondary">Mã bác sĩ: {{ selectedDoctor.maBS }}</h6>
                         <h6 class="card-subtitle mb-2 text-body-secondary">CCHN: {{ selectedDoctor.soCCHN }}</h6>
                         <p class="card-text">Nơi cấp CCHN: {{ selectedDoctor.noicapCCHN }}</p>
+                        <p class="card-text">Ngày sinh: {{ formatValue(selectedDoctor.ngaysinhBS) }}</p>
                         <p class="card-text">Số điện thoại: {{ selectedDoctor.sdtBS }}</p>
+                        <p class="card-text">Email: {{ selectedDoctor.emailBS }}</p>
                       </div>
                     </div>
                   </div>
@@ -345,6 +348,26 @@ export default {
         const errorMessage = error.response?.data?.message || 'Thêm lịch hẹn thất bại!';
         alert(errorMessage);
       }
+    },
+
+    formatValue(value, key) {
+      if (!value) return 'N/A';
+      if (
+        typeof value === 'string' &&
+        (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z/.test(value) || /\d{4}-\d{2}-\d{2}/.test(value))
+      ) {
+        const date = new Date(value);
+        if (!isNaN(date)) {
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = date.getFullYear();
+          return `${day}/${month}/${year}`;
+        }
+      }
+      if (key === 'tongtien' || key === 'thanhtien' || key === 'dongia') {
+        return Number(value).toLocaleString('vi-VN');
+      }
+      return value;
     },
 
     // Hàm tính ngày hiện tại để làm giá trị min cho input date

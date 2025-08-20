@@ -519,6 +519,26 @@ export default {
       }
     },
 
+    formatValue(value, key) {
+      if (!value) return 'N/A';
+      if (
+        typeof value === 'string' &&
+        (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z/.test(value) || /\d{4}-\d{2}-\d{2}/.test(value))
+      ) {
+        const date = new Date(value);
+        if (!isNaN(date)) {
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = date.getFullYear();
+          return `${day}/${month}/${year}`;
+        }
+      }
+      if (key === 'tongtien' || key === 'thanhtien' || key === 'dongia') {
+        return Number(value).toLocaleString('vi-VN');
+      }
+      return value;
+    },
+
     async submit_editPatient() {
       try {
         await patientService.update(this.editForm.maBN, this.editForm);

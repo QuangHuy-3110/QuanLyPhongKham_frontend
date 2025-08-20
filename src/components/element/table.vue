@@ -39,7 +39,7 @@
           data-bs-target="#exampleModal"
         >
           <td v-for="col in columns" :key="col.key" class="px-4 py-4">
-            {{ col.key.includes('ngay') ? formatDate(row[col.key]) : row[col.key] || '' }}
+            {{ col.key.includes('trangthai') ? invertStatus(row[col.key]): row[col.key] && col.key.includes('ngay') ? formatDate(row[col.key]) : row[col.key] || '' }}
           </td>
         </tr>
         <tr v-if="!filteredList || filteredList.length === 0">
@@ -61,7 +61,7 @@
             <div v-if="filteredList[activeIndex]">
               <div v-for="col in columns_full" :key="col.key" class="mb-2">
                 <strong>{{ col.header }}:</strong>
-                {{ col.key.includes('ngay') ? formatDate(filteredList[activeIndex][col.key]) : filteredList[activeIndex][col.key] || 'Không có dữ liệu' }}
+                {{ (col.key.includes('trangthai') ? invertStatus(filteredList[activeIndex][col.key]):filteredList[activeIndex][col.key]) || (col.key.includes('ngay') ? formatDate(filteredList[activeIndex][col.key]) : filteredList[activeIndex][col.key]) || 'Không có dữ liệu' }}
               </div>
             </div>
             <div v-else>
@@ -70,7 +70,8 @@
           </div>
           <div class="modal-footer">
             <button v-if="role !== 'patient'" type="button" class="btn btn-primary" data-bs-dismiss="modal" @click="check_profile(filteredList[activeIndex], 'patient')">Xem hồ sơ bệnh nhân</button>
-            <button v-if="role !== 'patient' && filteredList[activeIndex] " type="button" class="btn btn-warning" data-bs-dismiss="modal" @click="check_profile(filteredList[activeIndex], 'doctor')">Khám bệnh</button>
+            <button v-if="role !== 'patient' && filteredList[activeIndex] && filteredList[activeIndex].trangthai !== 'Huy' && filteredList[activeIndex].trangthai !== 'DaKham'" 
+            type="button" class="btn btn-warning" data-bs-dismiss="modal" @click="check_profile(filteredList[activeIndex], 'doctor')">Khám bệnh</button>
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
           </div>
         </div>
@@ -151,6 +152,13 @@ export default {
     }
   },
   methods: {
+    invertStatus(status) {
+      if (status === 'DaKham') return 'Đã khám';
+      if (status === 'ChuaKham') return 'Chưa khám';
+      if (status === 'Huy') return 'Hủy';
+      return status;
+    },
+
     async check_profile(appointment, role) {
       if (role === 'doctor') {
         try{
@@ -158,7 +166,7 @@ export default {
           appointment = this.formatEditRow(appointment);
           appointment.trangthai = 'DaKham';
           await AppointmentService.update(appointment.mahen, appointment);
-          this.$emit('update:appointment')
+          this.$emit('update:appointment');  
 
           this.wsService.send({
             type: 'appointment_examined',

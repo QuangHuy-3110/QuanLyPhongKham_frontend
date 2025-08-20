@@ -622,18 +622,22 @@ export default {
 
     formatValue(value, key) {
       if (!value) return 'N/A';
-      // Kiểm tra nếu giá trị là chuỗi ngày ISO hoặc YYYY-MM-DD
-      if (typeof value === 'string' && (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z/.test(value) || /\d{4}-\d{2}-\d{2}/.test(value))) {
+      if (
+        typeof value === 'string' &&
+        (/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.*Z/.test(value) || /\d{4}-\d{2}-\d{2}/.test(value))
+      ) {
         const date = new Date(value);
         if (!isNaN(date)) {
-          // Định dạng thành DD/MM/YYYY
           const day = String(date.getDate()).padStart(2, '0');
           const month = String(date.getMonth() + 1).padStart(2, '0');
           const year = date.getFullYear();
           return `${day}/${month}/${year}`;
         }
       }
-      return value; // Trả về giá trị gốc nếu không phải ngày
+      if (key === 'tongtien' || key === 'thanhtien' || key === 'dongia' || key === 'giaThuoc') {
+        return Number(value).toLocaleString('vi-VN');
+      }
+      return value;
     },
 
     isDateField(key, value) {

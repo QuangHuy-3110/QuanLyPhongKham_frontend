@@ -225,6 +225,9 @@ export default {
           return `${day}/${month}/${year}`;
         }
       }
+      if (key === 'tongtien' || key === 'thanhtien' || key === 'dongia' || key === 'giaThuoc') {
+        return Number(value).toLocaleString('vi-VN');
+      }
       return value;
     },
 

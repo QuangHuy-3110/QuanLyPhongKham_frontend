@@ -491,7 +491,7 @@ export default {
           return `${day}/${month}/${year}`;
         }
       }
-      if (key === 'soluongThuoc' || key === 'soLuongCanNhap') {
+      if (key === 'soluongThuoc' || key === 'soLuongCanNhap' || key === 'giaThuoc') {
         return Number(value).toLocaleString('vi-VN');
       }
       return value;
