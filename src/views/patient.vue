@@ -45,7 +45,6 @@ export default {
                 tenDangNhap: '',
                 fullName: '',
             },
-            authStore: useAuthStore(),
         }
     },
 
@@ -70,7 +69,7 @@ export default {
                     return;
                 }
 
-                if (user.role === 'benhnhan') {
+                if (user.role === 'patient') {
                     this.role = 'patient';
                     const patient = await patientService.get(user.id);
                     this.patient = patient;

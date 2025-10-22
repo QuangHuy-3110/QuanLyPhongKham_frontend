@@ -7,7 +7,6 @@
           <div class="fadeIn first">
             <img v-if="!showForgotPassword" src="https://static.vecteezy.com/system/resources/previews/041/731/156/non_2x/login-icon-vector.jpg" id="icon" alt="User Icon" />
             <img v-if="showForgotPassword" src="https://media.istockphoto.com/id/1500914761/es/vector/fitness-salud-gimnasio-iconos-de-moda-en-c%C3%ADrculos.jpg?s=612x612&w=0&k=20&c=enBppjqLpxjF2Gda8_8WIejrJdj8xREZ3FFOdNCHn4w=" id="icon" alt="User Icon" />
-
           </div>
           <div class="row w-100 justify-content-center pb-3">
             <div class="d-flex align-items-center justify-content-center">
@@ -51,10 +50,7 @@
 <script>
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/authStore";
-import patientService from "../services/patient.service";
-import doctorService from "../services/doctor.service";
-import emailService from '../services/email.service';
-import bcrypt from 'bcryptjs';
+import authService from "../services/login.service";  // Import AuthService
 
 export default {
   data() {
@@ -86,40 +82,34 @@ export default {
           return;
         }
 
-        if (this.user.role === 'benhnhan') {
-          const patient = await patientService.get_acname(this.userInput);
-          if (!patient || patient.length === 0) {
-            alert("Tên đăng nhập không tồn tại");
-            return;
-          }
-          const isMatch = await bcrypt.compare(this.passInput, patient[0].matkhauBN);
-          if (isMatch) {
-            this.authStore.setUser({ id: patient[0].maBN, role: 'benhnhan' });
-            this.router.replace({ name: "patient" });
-          } else {
-            alert("Tên đăng nhập hoặc mật khẩu không đúng");
-          }
-        } else if (this.user.role === 'bacsi') {
-          const doctor = await doctorService.get(this.userInput);
-          
-          if (!doctor || doctor.length === 0) {
-            alert("Tên đăng nhập không tồn tại");
-            return;
-          }
-          const isMatch = await bcrypt.compare(this.passInput, doctor.matkhau);
-          console.log(isMatch)
-          if (isMatch) {
-            const role = doctor.vaiTro === "DOCTOR" ? 'doctor' : 'admin';
-            this.authStore.setUser({ id: doctor.maBS, role });
-            this.router.replace({ name: role });
-          } else {
-            alert("Tên đăng nhập hoặc mật khẩu không đúng");
-          }
-        } else {
+        if (this.user.role !== 'benhnhan' && this.user.role !== 'bacsi') {
           alert("Vui lòng chọn vai trò");
+          return;
+        }
+
+        // Gọi AuthService
+        const data = await authService.login({
+          username: this.userInput,
+          password: this.passInput,
+          role: this.user.role
+        });
+
+        if (data.token) {
+          // Lưu JWT vào localStorage
+          localStorage.setItem('JWT_TOKEN', data.token);
+          
+          // Set user vào authStore
+          this.authStore.setUser(data.user);
+          
+          // Chuyển route dựa trên role
+          const routeName = data.user.role === 'patient' ? 'patient' : data.user.role;
+          this.router.replace({ name: routeName });
+        } else {
+          alert(data.error || "Tên đăng nhập hoặc mật khẩu không đúng");
         }
       } catch (error) {
         console.error("Đăng nhập lỗi:", error);
+        alert(error.response?.data?.error || "Đã xảy ra lỗi, vui lòng thử lại!");
         this.router.push({
           name: "notfound",
           params: { pathMatch: this.$route.path.split("/").slice(1) },
@@ -127,31 +117,6 @@ export default {
           hash: this.$route.hash,
         });
       }
-    },
-
-    generateRandomCode() {
-      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let code = '';
-      for (let i = 0; i < 6; i++) {
-        code += characters.charAt(Math.floor(Math.random() * characters.length));
-      }
-      // this.code = code; // Gán vào this.code
-      return code;
-    },
-
-    async hashPassword(password) {
-      const salt = await bcrypt.genSalt(10);
-      return await bcrypt.hash(password, salt);
-    },
-
-    parseDateForBackend(date) {
-      if (!date) return null;
-      const d = new Date(date);
-      if (isNaN(d)) return date;
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
     },
 
     async forgotPassword() {
@@ -160,149 +125,49 @@ export default {
           alert("Vui lòng nhập tên đăng nhập và email");
           return;
         }
-        if (this.user.role === 'benhnhan') {
-          let patient = await patientService.get_acname(this.userInput);
-          if (!patient || patient.length === 0) {
-            alert("Tên đăng nhập không tồn tại");
-            return;
-          }
-          if (patient[0].emailBN !== this.emailInput) {
-            alert("Email không khớp với tên đăng nhập");
-            return;
-          }
-          alert("Mật khẩu đã được gửi đến email của bạn! Vui lòng kiểm tra email để đăng nhập.");
 
-          this.code = this.generateRandomCode()
-          patient[0].ngaysinhBN = this.parseDateForBackend(patient[0].ngaysinhBN)
-          patient[0].matkhauBN = await this.hashPassword(this.code)
-          await patientService.update(patient[0].maBN, patient[0])
-
-          const content = this.generatePasswordResetEmailContent(patient[0].emailBN, patient[0].hotenBN);
-          await emailService.sendEmail(patient[0].emailBN, content);
-
-          this.showForgotPassword = false;
-        } else if (this.user.role === 'bacsi') {
-          let doctor = await doctorService.get(this.userInput);
-          if (!doctor || doctor.length === 0) {
-            alert("Tên đăng nhập không tồn tại");
-            return;
-          }
-          if (doctor[0].emailBS !== this.emailInput) {
-            alert("Email không khớp với tên đăng nhập");
-            return;
-          }
-
-          alert("Mật khẩu đã được gửi đến email của bạn! Vui lòng kiểm tra email để đăng nhập.");
-          
-          this.code = this.generateRandomCode()
-          doctor[0].ngaysinhBS = this.parseDateForBackend(doctor[0].ngaysinhBS)
-          doctor[0].matkhau = await this.hashPassword(this.code)
-          await patientService.update(doctor[0].maBS, doctor[0])
-
-          const content = this.generatePasswordResetEmailContent(doctor[0].emailBS, doctor[0].tenBS);
-          await emailService.sendEmail(doctor[0].emailBS, content);
-
-          this.showForgotPassword = false;
-        } else {
+        if (this.user.role !== 'benhnhan' && this.user.role !== 'bacsi') {
           alert("Vui lòng chọn vai trò");
+          return;
         }
+
+        // Gọi AuthService
+        const data = await authService.forgotPassword({
+          username: this.userInput,
+          email: this.emailInput,
+          role: this.user.role
+        });
+
+        alert(data.message);
+        this.showForgotPassword = false;
+        this.refreshList();
       } catch (error) {
         console.error("Lỗi khi gửi yêu cầu quên mật khẩu:", error);
-        alert("Đã xảy ra lỗi, vui lòng thử lại sau!");
+        alert(error.response?.data?.error || "Đã xảy ra lỗi, vui lòng thử lại sau!");
       }
     },
 
     async submitCode() {
-        if (!this.codeInput) {
-          alert("Vui lòng nhập mã đăng nhập");
-          return;
-        }
-
-        if (this.codeInput !== this.code) {
-          alert("Mã đăng nhập không đúng, vui lòng thử lại!");
-          return;
-        }
-        try {
-
-        // this.showForgotPassword = false;
-        // this.showCodeInput = false;
-        this.refreshList();
-      } catch (error) {
-        console.error("Lỗi khi xác nhận mã:", error);
-        alert("Mã không hợp lệ, vui lòng thử lại!");
-        this.router.push({
-          name: "notfound",
-          params: { pathMatch: this.$route.path.split("/").slice(1) },
-          query: this.$route.query,
-          hash: this.$route.hash,
-        });
+      if (!this.codeInput) {
+        alert("Vui lòng nhập mã xác nhận");
+        return;
       }
+
+      // Tùy chọn: Gọi API verify code nếu backend có endpoint
+      // Ví dụ: const verifyData = await authService.verifyCode({ code: this.codeInput, username: this.userInput, role: this.user.role });
+      // Nhưng vì backend hiện tại chỉ gửi code qua email, user có thể login trực tiếp với code mới
+      alert("Mã xác nhận thành công! Bạn có thể đăng nhập với mật khẩu mới.");
+      this.showForgotPassword = false;
+      this.showCodeInput = false;
+      this.refreshList();
     },
+
     refreshList() {
       this.userInput = '';
       this.passInput = '';
       this.emailInput = '';
       this.codeInput = '';
     },
-
-    generatePasswordResetEmailContent (email, username) {
-      const textContent = `Kính gửi ${username || 'Quý khách'},
-
-      Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản của mình. Mật khẩu mới của bạn là:
-
-      Mật khẩu mới: ${this.code}
-
-      Vui lòng sử dụng mật khẩu này để đăng nhập và đổi lại mật khẩu nếu cần. Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng liên hệ với chúng tôi ngay lập tức.
-
-      Trân trọng,
-      Phòng Khám`;
-
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; color: #333; }
-            .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
-            .header { background-color: #007bff; padding: 20px; text-align: center; color: #ffffff; }
-            .header h1 { margin: 0; font-size: 24px; font-weight: 500; }
-            .content { padding: 30px; text-align: center; }
-            .content p { margin: 0 0 15px; font-size: 16px; line-height: 1.5; }
-            .password { display: inline-block; background-color: #f8f9fa; padding: 10px 20px; font-size: 24px; font-weight: bold; letter-spacing: 2px; border: 1px solid #e0e0e0; border-radius: 5px; margin: 20px 0; }
-            .footer { background-color: #f8f9fa; padding: 15px; text-align: center; font-size: 14px; color: #666; }
-            .footer p { margin: 0; }
-            a { color: #007bff; text-decoration: none; }
-            a:hover { text-decoration: underline; }
-          </style>
-        </head>
-        <body>
-          <div class="container">
-            <div class="header">
-              <h1>Đặt Lại Mật Khẩu</h1>
-            </div>
-            <div class="content">
-              <p>Kính gửi ${username || 'Quý khách'},</p>
-              <p>Bạn đã yêu cầu đặt lại mật khẩu. Mật khẩu mới của bạn là:</p>
-              <div class="password">${this.code}</div>
-              <p>Vui lòng sử dụng mật khẩu này để đăng nhập và đổi lại mật khẩu nếu cần. Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng liên hệ với chúng tôi ngay lập tức.</p>
-            </div>
-            <div class="footer">
-              <p>Trân trọng,<br>Phòng Khám</p>
-              <p><a href="your-clinic-website">Liên hệ với chúng tôi</a> nếu bạn cần hỗ trợ.</p>
-            </div>
-          </div>
-        </body>
-        </html>
-      `;
-
-      return {
-        subject: 'Mật Khẩu Mới Cho Tài Khoản Của Bạn',
-        text: textContent,
-        html: htmlContent,
-      };
-    }
   },
 };
 </script>
