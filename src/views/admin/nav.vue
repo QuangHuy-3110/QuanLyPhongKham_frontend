@@ -3,6 +3,17 @@
         <div id="sidebar" class="collapse collapse-horizontal show border-end bg-secondary-subtle">
             <div id="sidebar-nav" class="list-group border-0 rounded-0 text-sm-start min-vh-100">
                 <div class="accordion" id="accordionExample">
+                    <div class="accordion-item p-3">
+                        <h2 class="accordion-header">
+                            <!-- <button type="button"> -->
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                   @click="changeNav_value('dashboard')">
+                                    <i class="bi bi-person-plus me-2"></i> <span class="fs-6 text-dark">Tổng quan</span>
+                                </a>
+                            <!-- </button> -->
+                        </h2>
+                    </div>
+
                     <!-- Quản lý bác sĩ -->
                     <div class="accordion-item p-3">
                         <h2 class="accordion-header">

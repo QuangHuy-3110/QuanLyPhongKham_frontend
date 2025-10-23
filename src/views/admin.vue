@@ -10,6 +10,8 @@
                 <Navbar
                 @change:nav_value="changeNav_value"/>
 
+                <DashboardView style="max-width: 1100px;" v-if="nav_value === 'dashboard'"/>
+
                 <!-- Thêm bác sĩ -->
                 <Add_doctor style="max-width: 1100px;" v-if="nav_value === 'themBS'"
                 @formSubmitted="get_doctors"/>
@@ -229,6 +231,7 @@ import Table_invoice_detail from '../components/admin/table_invoice_detail.vue';
 import Order_drug from '../components/admin/order_drug.vue';
 import ChartComponent from '../components/admin/chart.vue'
 import examinationService from '../services/examination.sevice';
+import DashboardView from '../views/DashboardView.vue';
 
 import doctorService from '../services/doctor.service'
 import working_timeService from '../services/working_time.service';
@@ -264,7 +267,8 @@ export default {
         Add_invoce,
         Table_invoice_detail,
         Order_drug,
-        ChartComponent
+        ChartComponent,
+        DashboardView
     },
 
     data() {
