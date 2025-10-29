@@ -1,4 +1,3 @@
-```vue
 <template>
   <div class="container mt-6">
     <h3 class="mb-4 text-center fw-bold">{{ name }}</h3>
@@ -168,7 +167,8 @@
                   <div
                     v-for="col in columns_full"
                     :key="col.key"
-                    class="col-md-6 mb-2"
+                    class="mb-2"
+                    :class="col.key === 'mota' || col.key === 'gioithieu' ? 'col-md-12' : 'col-md-6'"
                   >
                     <strong>{{ col.header }}: </strong>
                     <template v-if="isEditing">
@@ -193,8 +193,17 @@
                         v-model="editRow[col.key]"
                         type="date"
                         class="form-control"
-                        :disabled="col.key.startsWith('ma') && (col.key !== 'maNPP' || name === 'Danh sách thuốc')"
+                        :disabled="col.key.startsWith('ma') && (col.key !== 'maNPP' || name !== 'Danh sách thuốc')"
                       />
+                      <textarea
+                        v-else-if="col.key === 'mota' || col.key === 'gioithieu'"
+                        :id="col.key"
+                        v-model="editRow[col.key]"
+                        class="form-control"
+                        :placeholder="col.header"
+                        :disabled="col.key.startsWith('ma') && (col.key !== 'maNPP' || name !== 'Danh sách thuốc')"
+                        rows="4"
+                      ></textarea>
                       <input
                         v-else
                         :id="col.key"
@@ -206,7 +215,8 @@
                       />
                     </template>
                     <template v-else>
-                      <span>{{ formatValue(selectedRow[col.key], col.key) }}</span>
+                      <br v-if="col.key === 'mota' || col.key === 'gioithieu'" />
+                      <span :class="{ 'd-block text-justify mt-2': col.key === 'mota' || col.key === 'gioithieu' }">{{ formatValue(selectedRow[col.key], col.key) }}</span>
                     </template>
                   </div>
                 </div>
@@ -695,4 +705,3 @@ export default {
 <style scoped>
 @import "@/assets/editform.css";
 </style>
-```

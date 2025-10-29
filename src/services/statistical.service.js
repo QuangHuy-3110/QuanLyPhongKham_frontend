@@ -31,9 +31,15 @@ class StatisticalService {
     }
 
     // 6️⃣ Lấy thống kê từng bác sĩ (số buổi làm, giờ làm, bệnh nhân theo tháng/năm)
-    async getBacSiStats() {
-        return (await this.api.get("/bacsi-stats")).data;
+    async getBacSiStats(thang, nam) {
+        // Auto default nếu không truyền
+        const currentThang = thang || new Date().getMonth() + 1;
+        const currentNam = nam || new Date().getFullYear();
+        
+        const { data } = await this.api.get(`/bacsi-stats?thang=${currentThang}&nam=${currentNam}`);
+        return data.data || [];  // ✅ CHỈ array! Không phải {success, data, filters}
     }
+
 }
 
 export default new StatisticalService();

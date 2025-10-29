@@ -38,6 +38,21 @@
                   Vui lòng nhập tên chuyên khoa (tối đa 100 ký tự).
                 </div>
               </div>
+              <!-- Mô tả chuyên khoa -->
+              <div class="col-12">
+                <label for="mota" class="form-label fw-bold">Mô Tả Chuyên Khoa</label>
+                <textarea
+                  class="form-control"
+                  id="mota"
+                  v-model="form.mota"
+                  rows="4"
+                  maxlength="500"
+                  placeholder="Nhập mô tả chuyên khoa (tối đa 500 ký tự)"
+                ></textarea>
+                <div class="invalid-feedback">
+                  Mô tả chuyên khoa không được vượt quá 500 ký tự.
+                </div>
+              </div> 
             </div>
             <div class="text-center mt-4">
               <button type="submit" class="btn btn-primary">Thêm Chuyên Khoa</button>
@@ -55,7 +70,8 @@
       return {
         form: {
           maCK: '',
-          tenCK: ''
+          tenCK: '',
+          mota: ''
         }
       };
     },
@@ -74,7 +90,8 @@
             // Reset form
             this.form = {
               maCK: '',
-              tenCK: ''
+              tenCK: '',
+              mota: ''
             };
             form.classList.remove('was-validated');
             this.$emit('formSubmitted'); // Emit sự kiện formSubmitted sau khi thêm thành công

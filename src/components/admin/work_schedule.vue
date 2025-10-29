@@ -98,6 +98,12 @@
       </div>
     </div>
 
+    <DoctorStats 
+      :month="selectedMonth" 
+      :year="selectedYear" 
+      v-if="form.month" 
+    />
+
     <!-- Modal hiển thị danh sách bác sĩ -->
     <div class="modal fade" id="doctorModal" tabindex="-1" aria-labelledby="doctorModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
@@ -152,8 +158,13 @@
 <script>
 import { Modal } from 'bootstrap';
 import working_timeService from '../../services/working_time.service';
+import DoctorStats from './dash_day_working.vue';
 
 export default {
+  components: {
+    DoctorStats,
+  },
+
   props: {
     doctors: { type: Array, required: true },
     specialties: { type: Array, required: true },
@@ -194,7 +205,13 @@ export default {
         currentDay.setDate(currentDay.getDate() + 1);
       }
       return days;
-    }
+    },
+    selectedYear() {
+      return this.form.month ? parseInt(this.form.month.split('-')[0]) : 0;
+    },
+    selectedMonth() {
+      return this.form.month ? parseInt(this.form.month.split('-')[1]) : 0;
+    },
   },
   watch: {
     'schedules': {
@@ -440,7 +457,15 @@ export default {
 
       const modal = new Modal(document.getElementById('doctorModal'));
       modal.show();
-    }
+    },
+
+    validateMonth() {
+        if (!this.form.month) {
+            this.monthError = "Vui lòng chọn tháng.";
+        } else {
+            this.monthError = "";
+        }
+    },
   }
 };
 </script>

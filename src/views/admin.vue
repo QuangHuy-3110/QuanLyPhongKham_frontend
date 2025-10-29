@@ -232,6 +232,7 @@ import Order_drug from '../components/admin/order_drug.vue';
 import ChartComponent from '../components/admin/chart.vue'
 import examinationService from '../services/examination.sevice';
 import DashboardView from '../views/DashboardView.vue';
+import DashDayWorking from '../components/admin/dash_day_working.vue';
 
 import doctorService from '../services/doctor.service'
 import working_timeService from '../services/working_time.service';
@@ -268,7 +269,8 @@ export default {
         Table_invoice_detail,
         Order_drug,
         ChartComponent,
-        DashboardView
+        DashboardView,
+        DashDayWorking
     },
 
     data() {
@@ -279,7 +281,7 @@ export default {
             patients_del: [],
             doctors_del: [],
             wsMessages: [],
-            nav_value: '',
+            nav_value: 'dashboard',
             name: '',
             admin: null,
             userInfo: {
@@ -310,6 +312,7 @@ export default {
                 { key: 'noicapCCHN', header: 'Nơi cấp chứng chỉ hành nghề' },
                 { key: 'diachiBS', header: 'Địa chỉ' },
                 { key: 'maCK', header: 'Mã chuyên khoa' },
+                { key: 'gioithieu', header: 'Giới thiệu' },
             ],
 
             patients: [],
@@ -342,6 +345,7 @@ export default {
             specialtiesColumns_full: [
                 { key: 'maCK', header: 'Mã chuyên khoa' },
                 { key: 'tenCK', header: 'Tên chuyên khoa' },
+                { key: 'mota', header: 'Mô tả' }
             ],
 
             medicines: [],

@@ -67,7 +67,7 @@
 
 
       <!-- Thống kê Bác sĩ (có thể làm dạng bảng hoặc biểu đồ nhỏ) -->
-      <div class="col-lg-5 mb-4">
+      <div class="col-lg-6 mb-4">
         <div class="card shadow-sm">
           <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Thống kê Bác Sĩ</h6>
@@ -82,11 +82,11 @@
               >
                 {{ bs.tenBS }}
                 <span class="badge bg-primary rounded-pill">
-                  {{ bs.so_buoi_lam_thang }} buổi / tháng
+                  {{ bs.so_buoi_lam_thuc_te_thang }} / {{ bs.so_buoi_lich_thang }} ngày
                 </span>
 
                 <span class="badge bg-warning rounded-pill">
-                  {{ bs.so_benhnhan_thang }} bệnh nhân / tháng
+                  {{ bs.so_benh_nhan_kham_thang }} bệnh nhân / tháng {{currentMonth}}
                 </span>
 
                 
@@ -183,6 +183,7 @@ export default {
 
         // 6. Thống kê từng bác sĩ
         const bacSiStatsRes = await statisticalService.getBacSiStats();
+        console.log(bacSiStatsRes)
         this.bacSiStats = bacSiStatsRes || [];
 
       } catch (error) {

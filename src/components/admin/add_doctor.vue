@@ -152,7 +152,7 @@
               />
             </div>
 
-            <!-- Nhóm 6: Vai Trò -->
+            <!-- Nhóm 6: Vai Trò và giới thiệu-->
             <div class="col-md-6">
               <label for="vaiTro" class="form-label fw-bold">Vai Trò <span class="text-danger">*</span></label>
               <select
@@ -167,6 +167,18 @@
               </select>
               <div class="invalid-feedback">Vui lòng chọn vai trò.</div>
             </div>
+
+            <div class="col-12">
+              <label for="gioithieu" class="form-label fw-bold">Giới Thiệu Bác Sĩ</label>
+              <textarea
+                class="form-control"
+                id="gioithieu"
+                name="gioithieu"
+                v-model="form.gioithieu"
+                rows="3"
+                placeholder="Nhập giới thiệu về bác sĩ"
+              ></textarea>
+            </div>  
           </div>
   
           <div class="d-flex justify-content-center gap-3 mt-4">
@@ -202,7 +214,8 @@ export default {
         maCK: '',
         tenCK: '',
         matkhau: '',
-        vaiTro: ''
+        vaiTro: '',
+        gioithieu: ''
       },
       chuyenkhoa: {
         maCK: '',
@@ -333,7 +346,8 @@ export default {
         maCK: '',
         tenCK: '',
         matkhau: '',
-        vaiTro: ''
+        vaiTro: '',
+        gioithieu: ''
       };
       this.chuyenkhoa = {
         maBS: '',
@@ -363,6 +377,7 @@ export default {
       - Tên chuyên khoa: ${doctor.tenCK}
       - Vai trò: ${doctor.vaiTro}
       - Tên đăng nhập: ${doctor.maBS}
+      - Giới thiệu: ${doctor.gioithieu}
       - Mật khẩu mặc định: 1
 
       Vui lòng đăng nhập và thay đổi mật khẩu ngay sau khi đăng nhập lần đầu tiên.
@@ -413,6 +428,7 @@ export default {
                 <tr><td class="label">Nơi cấp CCHN:</td><td>${doctor.noicapCCHN}</td></tr>
                 <tr><td class="label">Vai trò:</td><td>${doctor.vaiTro}</td></tr>
                 <tr><td class="label">Tên đăng nhập:</td><td>${doctor.maBS}</td></tr>
+                <tr><td class="label">Giới thiệu:</td><td>${doctor.gioithieu}</td></tr>
                 <tr><td class="label">Mật khẩu mặc định:</td><td class="highlight">1</td></tr>
               </table>
               <p>Vui lòng đăng nhập và <span class="highlight">thay đổi mật khẩu</span> ngay sau khi đăng nhập lần đầu tiên.</p>
