@@ -12,6 +12,8 @@
 
                 <DashboardView style="max-width: 1100px;" v-if="nav_value === 'dashboard'"/>
 
+                <AdminSupportChat style="max-width: 1100px;" v-show="nav_value === 'support'"/>
+
                 <!-- Thêm bác sĩ -->
                 <Add_doctor style="max-width: 1100px;" v-if="nav_value === 'themBS'"
                 @formSubmitted="get_doctors"/>
@@ -186,6 +188,14 @@
                 @update:array="get_records"
                 @update:prescriptions="get_prescriptions"/>
 
+                <Add_book_appointment style="max-width: 1100px;" v-if="nav_value === 'themLH'"
+                :allSpecialties="specialties"
+                :allPatients="patients"
+                :allDoctors="doctors"
+                :allDoctorRoles="doctor_role"
+                :allWorkingTimes="schedules"
+                @book-appointment="action_book_appointment"/>
+
                 <!-- Xử lý lịch hẹn -->
                 <See_Table style="max-width: 1100px;" v-if="nav_value === 'xulyLH'"
                 :name="'Danh sách lịch hẹn'"
@@ -248,6 +258,8 @@ import invoiceService from '../services/invoice.service'
 import invoice_detailService from '../services/invoice_details.service'
 import logService from '../services/log.service';
 import log_detailsService from '../services/log_details.service';
+import AdminSupportChat from '../components/admin/AdminSupportChat.vue';
+import Add_book_appointment from '../components/admin/add_book_appointment.vue';
 
 import WebSocketService from '@/services/ws.service';
 import { useAuthStore } from "@/stores/authStore";
@@ -270,7 +282,9 @@ export default {
         Order_drug,
         ChartComponent,
         DashboardView,
-        DashDayWorking
+        DashDayWorking,
+        AdminSupportChat,
+        Add_book_appointment
     },
 
     data() {
@@ -492,6 +506,23 @@ export default {
 
 
     methods: {
+        async action_book_appointment (appointmentData){
+            try {
+                await appointmentService.create(appointmentData);
+                // Gửi lịch hẹn qua WebSocket
+                this.wsService.send({
+                type: 'new_appointment',
+                data: appointmentData,
+                });
+                this.$emit('appointmentBooked', appointmentData); // Phát sự kiện để thông báo đặt lịch thành công
+                this.message = 'Lịch hẹn đã được gửi!';        
+                alert("Đặt lịch thành công!");
+            } catch (error) {
+                const errorMessage = error.response?.data?.message || 'Thêm lịch hẹn thất bại!';
+                alert(errorMessage);
+            }
+        },
+
         async get_exam(){
             try{
                 this.examinations = await examinationService.getAll()

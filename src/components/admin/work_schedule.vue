@@ -87,7 +87,14 @@
                   {{ schedule.giobatdau }} - {{ schedule.gioketthuc }} - {{ schedule.trangthai || 'Chưa chấm công' }}
                 </div>
                 <div v-else v-for="doctor in day.schedules" :key="doctor.maBS">
-                  {{ doctor.maBS }} - {{ doctor.tenBS }} - {{ doctor.trangthai || 'Chưa chấm công' }}
+                  <span>{{ doctor.maBS }} - {{ doctor.tenBS }} - </span>
+                  
+                  <span v-if="areAllSchedulesMarked(doctor.schedules)" class="text-success fw-bold" style="font-size: 0.9em;">
+                    Đã chấm công
+                  </span>
+                  <span v-else class="text-warning" style="font-size: 0.9em;">
+                    Chưa chấm công
+                  </span>
                 </div>
               </div>
             </div>
@@ -132,12 +139,22 @@
                 <ul class="list-group">
                   <li v-for="doctor in doctorsOnSelectedDate" :key="doctor.maBS" class="list-group-item">
                     <strong>{{ doctor.maBS }} - {{ doctor.tenBS }}</strong>
-                    <ul class="mt-2">
-                      <li v-for="schedule in doctor.schedules" :key="schedule.giobatdau" class="ms-3 mb-2">
-                        {{ schedule.giobatdau }} - {{ schedule.gioketthuc }} - {{ schedule.trangthai || 'Chưa chấm công' }}
-                        <button v-if="!schedule.trangthai" class="btn btn-warning btn-sm me-2" @click="update_status('Nghỉ', doctor, schedule)">Nghỉ</button>
-                        <button v-if="!schedule.trangthai" class="btn btn-success btn-sm me-2" @click="update_status('Hoàn thành', doctor, schedule)">Hoàn thành</button>
-                        <button v-if="!schedule.trangthai" class="btn btn-danger btn-sm" @click="delete_schedule(doctor)">Xóa</button>
+                    
+                    <div v-if="areAllSchedulesMarked(doctor.schedules)" class="mt-2 ms-3 text-success fw-bold">
+                      Đã chấm công
+                    </div>
+
+                    <ul v-else class="mt-2">
+                      <li v-for="schedule in doctor.schedules" :key="schedule.giobatdau" class="ms-3 mb-2 d-flex justify-content-between align-items-center">
+                        <span>
+                          {{ schedule.giobatdau }} - {{ schedule.gioketthuc }} - {{ schedule.trangthai || 'Chưa chấm công' }}
+                        </span>
+                        
+                        <span v-if="!schedule.trangthai">
+                          <button class="btn btn-warning btn-sm me-2" @click="update_status('Nghỉ', doctor, schedule)">Nghỉ</button>
+                          <button class="btn btn-success btn-sm me-2" @click="update_status('Hoàn thành', doctor, schedule)">Hoàn thành</button>
+                          <button class="btn btn-danger btn-sm" @click="delete_schedule(doctor, schedule)">Xóa</button>
+                        </span>
                       </li>
                     </ul>
                   </li>
@@ -227,6 +244,14 @@ export default {
     },
   },
   methods: {
+    areAllSchedulesMarked(schedules) {
+      if (!schedules || schedules.length === 0) {
+        return false; // Không có lịch thì không tính là đã chấm công
+      }
+      // Kiểm tra xem MỌI ca làm (every) có trạng thái là 'Hoàn thành' hoặc 'Nghỉ' không
+      return schedules.every(s => s.trangthai === 'Hoàn thành' || s.trangthai === 'Nghỉ');
+    },
+
     async update_status(status, doctor, schedule = null) {
       try {
         const dateStr = this.toLocalDateString(this.selectedDate);
@@ -302,43 +327,61 @@ export default {
       }
     },
     
-    delete_schedule(doctor) {
-      const dateStr = this.toLocalDateString(this.selectedDate);
-      let targetSchedule;
+    async delete_schedule(doctor, schedule = null) { // Thêm 'schedule = null'
+      try {
+        const dateStr = this.toLocalDateString(this.selectedDate);
+        let targetSchedule;
 
-      if (this.viewMode === 'doctor') {
-        targetSchedule = this.schedules.find(s => 
-          s.maBS === doctor.maBS && 
-          new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr &&
-          s.giobatdau === doctor.giobatdau &&
-          s.gioketthuc === doctor.gioketthuc
-        );
-      } else {
-        targetSchedule = this.schedules.find(s => 
-          s.maBS === doctor.maBS && 
-          new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr &&
-          s.giobatdau === doctor.schedules[0].giobatdau &&
-          s.gioketthuc === doctor.schedules[0].gioketthuc
-        );
-      }
-
-      if (!targetSchedule) {
-        console.error('Không tìm thấy lịch làm việc phù hợp');
-        return;
-      }
-
-      working_timeService.delete(doctor.maBS, dateStr, targetSchedule.giobatdau)
-        .then(() => {
-          alert("Xóa lịch làm việc thành công!");
-          this.doctorsOnSelectedDate = this.doctorsOnSelectedDate.filter(d =>
-            !(d.maBS === doctor.maBS && d.giobatdau === doctor.giobatdau && d.gioketthuc === doctor.gioketthuc)
+        if (this.viewMode === 'doctor') {
+          // 'doctor' ở view này thực chất là 1 schedule
+          targetSchedule = this.schedules.find(s => 
+            s.maBS === doctor.maBS && 
+            new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr &&
+            s.giobatdau === doctor.giobatdau &&
+            s.gioketthuc === doctor.gioketthuc
           );
-          this.$emit('update:schedules');
-        })
-        .catch(error => {
-          const errorMessage = error.response?.data?.message || 'Lỗi khi xóa lịch làm việc!';
-          alert(errorMessage);
-        });
+        } else {
+          // SỬA LỖI LOGIC: Dùng 'schedule' được truyền vào
+          targetSchedule = this.schedules.find(s => 
+            s.maBS === doctor.maBS && 
+            new Date(s.ngaythangnam).toLocaleDateString('en-CA') === dateStr &&
+            s.giobatdau === schedule.giobatdau &&
+            s.gioketthuc === schedule.gioketthuc
+          );
+        }
+
+        if (!targetSchedule) {
+          console.error('Không tìm thấy lịch làm việc phù hợp');
+          return;
+        }
+
+        await working_timeService.delete(doctor.maBS, dateStr, targetSchedule.giobatdau);
+        
+        alert("Xóa lịch làm việc thành công!");
+
+        // Cập nhật lại UI trong modal
+        if (this.viewMode === 'doctor') {
+          this.doctorsOnSelectedDate = this.doctorsOnSelectedDate.filter(d =>
+            !(d.maBS === doctor.maBS && d.giobatdau === doctor.giobatdau)
+          );
+        } else {
+          this.doctorsOnSelectedDate = this.doctorsOnSelectedDate.map(d => {
+            if (d.maBS === doctor.maBS) {
+              d.schedules = d.schedules.filter(s => 
+                !(s.giobatdau === schedule.giobatdau && s.gioketthuc === schedule.gioketthuc)
+              );
+            }
+            return d;
+            // Lọc luôn bác sĩ nếu họ không còn ca nào
+          }).filter(d => d.schedules && d.schedules.length > 0); 
+        }
+        
+        this.$emit('update:schedules');
+        
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || 'Lỗi khi xóa lịch làm việc!';
+        alert(errorMessage);
+      }
     },
 
     getSchedulesForDate(date) {

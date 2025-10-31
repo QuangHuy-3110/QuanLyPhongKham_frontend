@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-container p-4">
-    <h2 class="mb-4 text-center text-primary">Tổng Quan Hệ Thống</h2>
-
+    <h2 class="mb-4 text-center fw-bold">Tổng Quan Hệ Thống</h2>
+    <hr>
     <div class="row">
       <!-- Widget Tổng số bệnh nhân và kích hoạt -->
       <div class="col-xl-3 col-md-6 mb-4">

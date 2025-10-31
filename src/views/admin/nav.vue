@@ -14,6 +14,17 @@
                         </h2>
                     </div>
 
+                    <div class="accordion-item p-3">
+                        <h2 class="accordion-header">
+                            <!-- <button type="button"> -->
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                   @click="changeNav_value('support')">
+                                    <i class="bi bi-person-plus me-2"></i> <span class="fs-6 text-dark">Hỗ trợ khách hàng</span>
+                                </a>
+                            <!-- </button> -->
+                        </h2>
+                    </div>
+
                     <!-- Quản lý bác sĩ -->
                     <div class="accordion-item p-3">
                         <h2 class="accordion-header">
@@ -228,6 +239,10 @@
                                 <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
                                    @click="changeNav_value('xemLH')">
                                     <i class="bi bi-list-ul me-2"></i> <span class="fs-6 text-dark">Xem danh sách cuộc hẹn</span>
+                                </a>
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                   @click="changeNav_value('themLH')">
+                                    <i class="bi bi-list-ul me-2"></i> <span class="fs-6 text-dark">Tạo lịch hẹn</span>
                                 </a>
                             </div>
                         </div>
