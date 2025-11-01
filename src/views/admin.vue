@@ -12,7 +12,12 @@
 
                 <DashboardView style="max-width: 1100px;" v-if="nav_value === 'dashboard'"/>
 
-                <AdminSupportChat style="max-width: 1100px;" v-show="nav_value === 'support'"/>
+                <keep-alive>
+                    <AdminSupportChat 
+                    style="max-width: 1100px;" 
+                    v-if="nav_value === 'support'"
+                    />
+                </keep-alive>
 
                 <!-- Thêm bác sĩ -->
                 <Add_doctor style="max-width: 1100px;" v-if="nav_value === 'themBS'"

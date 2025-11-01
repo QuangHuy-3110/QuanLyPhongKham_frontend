@@ -8,7 +8,7 @@
                             <!-- <button type="button"> -->
                                 <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
                                    @click="changeNav_value('dashboard')">
-                                    <i class="bi bi-person-plus me-2"></i> <span class="fs-6 text-dark">Tổng quan</span>
+                                    <i class="bi bi-house-door-fill"></i> <span class="fw-semibold" style="font-size: 1.125rem;">Tổng quan</span>
                                 </a>
                             <!-- </button> -->
                         </h2>
@@ -19,7 +19,7 @@
                             <!-- <button type="button"> -->
                                 <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
                                    @click="changeNav_value('support')">
-                                    <i class="bi bi-person-plus me-2"></i> <span class="fs-6 text-dark">Hỗ trợ khách hàng</span>
+                                    <i class="bi bi-headset"></i> <span class="fw-semibold" style="font-size: 1.125rem;">Hỗ trợ khách hàng</span>
                                 </a>
                             <!-- </button> -->
                         </h2>
