@@ -96,8 +96,11 @@
                  <small class="text-muted">Chi tiết hơn có thể xem ở trang Quản lý Bác sĩ.</small>
             </div>
           </div>
+          
         </div>
+       
       </div>
+       <!-- <AdminLeads/> -->
     </div>
   </div>
 </template>
@@ -106,12 +109,14 @@
 import DashboardWidget from '../components/DashboardWidget.vue';
 import ThuChiChart from '../components/ThuChiChart.vue';
 import statisticalService from '../services/statistical.service'; // Import service của bạn
+import AdminLeads from '../components/admin/AdminLeads.vue';
 
 export default {
   name: 'DashboardView',
   components: {
     DashboardWidget,
     ThuChiChart,
+    AdminLeads,
   },
   data() {
     return {

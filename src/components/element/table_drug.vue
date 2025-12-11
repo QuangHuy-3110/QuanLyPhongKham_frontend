@@ -46,7 +46,8 @@
               <tbody>
                 <tr v-for="(medicine, index) in list_prescription" :key="index">
                   <th scope="row">{{ index + 1 }}</th>
-                  <td>{{ medicine.maThuoc }}</td>
+                  <!-- <td>{{ medicine.maThuoc }}</td> -->
+                  <td>{{ getDrugName(medicine.maThuoc) }}</td>
                   <td>{{ medicine.soluong }}</td>
                   <td>{{ medicine.donvi }}</td>
                   <td>{{ medicine.lieuluong }}</td>
@@ -69,23 +70,42 @@
 
 <script>
 import { Modal } from 'bootstrap';
+import DrugService from "../../services/drug.service"; // [Cite: drug.service.js] Import file service của bạn
 
 export default {
   props: {
     selectedExamination: {type: Object, required: true},
-    patient:{type: Object, required: true},
+    patient: {type: Object, required: true},
     list_prescription: {type: Array}
   },
 
   data() {
     return {
       previewModal: null,
+      drugs: [], // Biến để lưu danh sách tất cả thuốc lấy từ DB
     };
   },
-  mounted() {
-    this.previewModal = new Modal(document.getElementById('previewModal'));
-  },
+  
   methods: {
+    // 1. Hàm lấy danh sách tất cả thuốc
+    async retrieveDrugs() {
+      try {
+        // Gọi hàm getAll từ DrugService bạn đã cung cấp
+        this.drugs = await DrugService.getAll(); 
+      } catch (error) {
+        console.log("Lỗi khi tải danh sách thuốc: ", error);
+      }
+    },
+
+    // 2. Hàm tìm Tên thuốc dựa vào Mã thuốc
+    getDrugName(maThuoc) {
+        // Tìm thuốc trong danh sách drugs có _id hoặc maThuoc trùng khớp
+        const drug = this.drugs.find(d => d._id === maThuoc || d.maThuoc === maThuoc);
+        
+        // Nếu tìm thấy thì trả về tên, nếu không thì trả về mã gốc
+        return drug ? drug.tenThuoc : maThuoc;
+    },
+
     openPreviewModal() {
       this.previewModal.show();
     },
@@ -109,6 +129,13 @@ export default {
       }
       return value;
     },
+  },
+  
+  mounted() {
+    this.previewModal = new Modal(document.getElementById('previewModal'));
+    
+    // Gọi hàm lấy dữ liệu thuốc ngay khi component được tải
+    this.retrieveDrugs();
   },
 };
 </script>

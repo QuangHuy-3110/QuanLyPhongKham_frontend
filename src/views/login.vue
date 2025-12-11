@@ -157,85 +157,82 @@ export default {
   methods: {
 
     async login() {
-      if (this.isLoggingIn) return; 
-      
-      try {
-        if (!this.userInput || !this.passInput) {
-          alert("Vui lòng nhập tên đăng nhập và mật khẩu");
-          return;
-        }
+      if (this.isLoggingIn) return;
+      
+      // 1. Validate cơ bản phía client
+      if (!this.userInput || !this.passInput) {
+        alert("Vui lòng nhập tên đăng nhập và mật khẩu");
+        return;
+      }
 
-        if (this.user.role !== 'benhnhan' && this.user.role !== 'bacsi') {
-          alert("Vui lòng chọn vai trò");
-          return;
-        }
+      if (this.user.role !== 'benhnhan' && this.user.role !== 'bacsi') {
+        alert("Vui lòng chọn vai trò");
+        return;
+      }
 
-        this.isLoggingIn = true;
+      this.isLoggingIn = true;
 
-        const data = await authService.login({
-          username: this.userInput,
-          password: this.passInput,
-          role: this.user.role
-        });
+      try {
+        const data = await authService.login({
+          username: this.userInput,
+          password: this.passInput,
+          role: this.user.role
+        });
 
-        if (data.token) {
-          // ⚠️ FIX: Validate token trước khi lưu (Giữ nguyên)
-          try {
-            const testDecode = jwtDecode(data.token);
-            console.log('✅ Token decoded successfully:', testDecode);
-          } catch (err) {
-            console.error('❌ Invalid token received:', err);
-            alert('Token không hợp lệ, vui lòng thử lại');
-            this.isLoggingIn = false;
-            return;
-          }
-          
-          // Lưu JWT vào localStorage (Giữ nguyên)
-          localStorage.setItem('JWT_TOKEN', data.token);
-          
-          // Set user vào authStore (Giữ nguyên)
-          this.authStore.setUser(data.user, data.token);
-          
-          // ⚠️ XÓA BỎ DÒNG NÀY:
-          // await this.syncLoginStatusAfterLogin(data.user, data.token);
-          
-          // ⚠️ SỬA LOGIC ĐIỀU HƯỚNG TẠI ĐÂY
-          const routeName = data.user.role === 'patient' ? 'patient' : data.user.role;
-          
-          if (routeName === 'patient') {
-            // 1. Dùng router để "resolve" (giải quyết)
-            //    tên route ('patient') thành một đối tượng route hoàn chỉnh
-            const resolvedRoute = this.router.resolve({ name: 'patient' });
+        // 2. Xử lý khi đăng nhập thành công (Có token)
+        if (data.token) {
+          try {
+            const testDecode = jwtDecode(data.token);
+            console.log('✅ Token decoded:', testDecode);
+          } catch (err) {
+            console.error('❌ Token lỗi:', err);
+            alert('Token không hợp lệ, vui lòng thử lại');
+            this.isLoggingIn = false;
+            return;
+          }
+          
+          localStorage.setItem('JWT_TOKEN', data.token);
+          this.authStore.setUser(data.user, data.token);
+          
+          // Điều hướng
+          const routeName = data.user.role === 'patient' ? 'patient' : data.user.role;
+          
+          if (routeName === 'patient') {
+            const resolvedRoute = this.router.resolve({ name: 'patient' });
+            window.location.href = resolvedRoute.href; 
+          } else {
+            this.router.replace({ name: routeName });
+          }
 
-            // 2. Lấy đường dẫn (href) từ route đã được giải quyết.
-            //    Đây sẽ là đường dẫn chính xác (ví dụ: '/benh-nhan' hoặc '/patient-dashboard', v.v.)
-            const targetPath = resolvedRoute.href;
+        } else {
+          // 3. Trường hợp API trả về 200 nhưng có lỗi logic (ví dụ trả về { error: "..." })
+          // Hiển thị thông báo và KHÔNG chuyển trang
+          alert(data.error || "Tên đăng nhập hoặc mật khẩu không đúng");
+          this.isLoggingIn = false;
+        }
 
-            // 3. Gán đường dẫn chính xác này cho window.location.href
-            //    để ép trình duyệt tải lại trang tại đúng URL.
-            window.location.href = targetPath; 
-          } else {
-            // Các role khác (bác sĩ, admin) vẫn chuyển trang mượt
-            this.router.replace({ name: routeName });
-          }
+      } catch (error) {
+        // 4. Xử lý lỗi từ Server (400, 401, 404, 500...)
+        console.error("Đăng nhập lỗi:", error);
+        this.isLoggingIn = false;
 
-        } else {
-          alert(data.error || "Tên đăng nhập hoặc mật khẩu không đúng");
-          this.isLoggingIn = false;
-        }
-      } catch (error) {
-        console.error("Đăng nhập lỗi:", error);
-        alert(error.response?.data?.error || "Đã xảy ra lỗi, vui lòng thử lại!");
-        this.isLoggingIn = false;
-        // (Giữ nguyên phần xử lý lỗi notfound)
-        this.router.push({
-          name: "notfound",
-          params: { pathMatch: this.$route.path.split("/").slice(1) },
-          query: this.$route.query,
-          hash: this.$route.hash,
-        });
-      }
-    },
+        // Lấy thông báo lỗi cụ thể từ Backend
+        let message = "Đã xảy ra lỗi, vui lòng thử lại!";
+        
+        if (error.response && error.response.data) {
+          // Ưu tiên lấy message từ response.data.error hoặc response.data.message
+          message = error.response.data.error || error.response.data.message || message;
+        } else if (error.message) {
+          message = error.message;
+        }
+
+        // Hiển thị thông báo lỗi
+        alert(message);
+
+        // ⚠️ QUAN TRỌNG: Đã xóa đoạn code router.push({ name: "notfound" }) ở đây
+        // Việc này đảm bảo người dùng vẫn ở lại trang đăng nhập để sửa lại thông tin
+      }
+    },
 
 
 

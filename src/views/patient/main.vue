@@ -151,8 +151,8 @@
     position: fixed;
     bottom: 80px;
     right: 20px;
-    width: 400px;
-    height: 500px;
+    width: 600px;
+    height: 600px;
     background: white;
     border: 1px solid #ddd;
     border-radius: 10px;

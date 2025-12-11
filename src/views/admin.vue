@@ -54,6 +54,14 @@
                 />
 
                 <!-- Xem danh sách bệnh nhân -->
+                <AddPatientUser style="max-width: 1100px;" v-if="nav_value === 'themBN'"
+                :name="'Thêm bệnh nhân'"
+                :array="{list: patients}"
+                :columns="patientColumns"
+                :columns_full="patientColumns_full"
+                @update:array="get_patients"/>
+
+
                 <See_Table style="max-width: 1100px;" v-if="nav_value === 'xemBN'"
                 :name="'Danh sách bệnh nhân'"
                 :array="{list: patients}"
@@ -248,6 +256,7 @@ import ChartComponent from '../components/admin/chart.vue'
 import examinationService from '../services/examination.sevice';
 import DashboardView from '../views/DashboardView.vue';
 import DashDayWorking from '../components/admin/dash_day_working.vue';
+import AddPatientUser from '../components/admin/AddPatientUser.vue';
 
 import doctorService from '../services/doctor.service'
 import working_timeService from '../services/working_time.service';
@@ -289,7 +298,8 @@ export default {
         DashboardView,
         DashDayWorking,
         AdminSupportChat,
-        Add_book_appointment
+        Add_book_appointment,
+        AddPatientUser,
     },
 
     data() {

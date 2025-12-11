@@ -73,6 +73,10 @@
                             data-bs-parent="#accordionExample">
                             <div class="accordion-body">
                                 <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
+                                   @click="changeNav_value('themBN')">
+                                    <i class="bi bi-person-plus me-2"></i> <span class="fs-6 text-dark">Thêm bệnh nhân</span>
+                                </a>
+                                <a href="#" class="list-group-item rounded-3 mt-2 bg-white"
                                    @click="changeNav_value('xemBN')">
                                     <i class="bi bi-list-ul me-2"></i> <span class="fs-6 text-dark">Xem danh sách bệnh nhân</span>
                                 </a>

@@ -110,32 +110,36 @@
               <input type="text" class="form-control" id="maBacSi" name="maBacSi" v-model="form.maBacSi" disabled>
             </div>
             <div class="col-md-2">
-              <label for="soThuTu" class="form-label">Số thứ tự lần khám</label>
-              <input type="number" class="form-control" id="soThuTu" name="soThuTu" v-model.number="form.soThuTu" min="1" placeholder="Nhập số thứ tự">
+              <label for="soThuTu" class="form-label">Số thứ tự lần khám <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="soThuTu" name="soThuTu" v-model.number="form.soThuTu" min="1" placeholder="Nhập số thứ tự" required>
             </div>
             <div class="col-md-3">
               <label for="ngayKham" class="form-label">Ngày khám</label>
               <input type="date" class="form-control" id="ngayKham" name="ngayKham" v-model="form.ngayKham" readonly>
             </div>
             <div class="col-md-12">
-              <label for="trieuChung" class="form-label">Triệu chứng</label>
-              <textarea class="form-control" id="trieuChung" name="trieuChung" v-model="form.trieuChung" rows="4" placeholder="Nhập triệu chứng..."></textarea>
+              <label for="trieuChung" class="form-label">Triệu chứng <span class="text-danger">*</span></label>
+              <textarea class="form-control" id="trieuChung" name="trieuChung" v-model="form.trieuChung" rows="4" placeholder="Nhập triệu chứng..." required></textarea>
             </div>
+
             <div class="col-md-12">
-              <label for="thuTucKham" class="form-label">Thủ tục khám</label>
-              <textarea class="form-control" id="thuTucKham" name="thuTucKham" v-model="form.thuTucKham" rows="4" placeholder="Nhập thủ tục khám..."></textarea>
+              <label for="thuTucKham" class="form-label">Thủ tục khám <span class="text-danger">*</span></label>
+              <textarea class="form-control" id="thuTucKham" name="thuTucKham" v-model="form.thuTucKham" rows="4" placeholder="Nhập thủ tục khám..." required></textarea>
             </div>
+
             <div class="col-md-12">
-              <label for="chuanDoan" class="form-label">Chuẩn đoán</label>
-              <textarea class="form-control" id="chuanDoan" name="chuanDoan" v-model="form.chuanDoan" rows="4" placeholder="Nhập liệu chuẩn đoán..."></textarea>
+              <label for="chuanDoan" class="form-label">Chuẩn đoán <span class="text-danger">*</span></label>
+              <textarea class="form-control" id="chuanDoan" name="chuanDoan" v-model="form.chuanDoan" rows="4" placeholder="Nhập liệu chuẩn đoán..." required></textarea>
             </div>
+
             <div class="col-md-12">
-              <label for="lieutrinh" class="form-label">Liệu trình điều trị</label>
-              <textarea class="form-control" id="lieutrinh" name="lieutrinh" v-model="form.lieutrinh" rows="4" placeholder="Nhập liệu trình điều trị..."></textarea>
+              <label for="lieutrinh" class="form-label">Liệu trình điều trị <span class="text-danger">*</span></label>
+              <textarea class="form-control" id="lieutrinh" name="lieutrinh" v-model="form.lieutrinh" rows="4" placeholder="Nhập liệu trình điều trị..." required></textarea>
             </div>
+
             <div class="col-md-3">
-              <label for="ngayTaiKham" class="form-label">Ngày tái khám</label>
-              <input type="date" class="form-control" id="ngayTaiKham" name="ngayTaiKham" v-model="form.ngayTaiKham">
+              <label for="ngayTaiKham" class="form-label">Ngày tái khám <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" id="ngayTaiKham" name="ngayTaiKham" v-model="form.ngayTaiKham" required>
             </div>
             <div class="col-12">
               <button type="submit" class="btn btn-primary">Lưu lần khám</button>
@@ -489,6 +493,33 @@ export default {
     },
 
     async submit_examform() {
+      // --- BẮT ĐẦU: ĐOẠN CODE THÊM MỚI ---
+      
+      // 1. Kiểm tra rỗng (Validation)
+      if (
+        !this.form.soThuTu || 
+        !this.form.trieuChung || 
+        !this.form.thuTucKham || 
+        !this.form.chuanDoan || 
+        !this.form.lieutrinh || 
+        !this.form.ngayTaiKham
+      ) {
+        alert("Vui lòng nhập đầy đủ thông tin vào tất cả các ô!");
+        return; // Dừng hàm lại, không gửi dữ liệu đi
+      }
+
+      // 2. Kiểm tra ngày tái khám phải lớn hơn ngày khám
+      const ngayKhamDate = new Date(this.form.ngayKham);
+      const ngayTaiKhamDate = new Date(this.form.ngayTaiKham);
+
+      // So sánh: Nếu ngày tái khám <= ngày khám thì báo lỗi
+      if (ngayTaiKhamDate <= ngayKhamDate) {
+        alert("Ngày tái khám phải sau ngày khám bệnh hiện tại!");
+        return; // Dừng hàm lại
+      }
+      
+      // --- KẾT THÚC: ĐOẠN CODE THÊM MỚI ---
+
       try {
         const examData = {
           maHS: this.form.maHoSo,
@@ -512,8 +543,6 @@ export default {
         });
         document.querySelector('#exam_form .btn-close').click();
       } catch (error) {
-        // alert('Thêm lần khám không thành công!');
-        // console.log('Lỗi khi thêm lần khám:', error);
         const errorMessage = error.response?.data?.message || 'Lỗi khi thêm lần khám!';
         alert(errorMessage);
       }

@@ -182,7 +182,8 @@ export default {
         tendangnhapBN: '',
         emailBN: '',
         matkhauBN: '',
-        soBHYT: ''
+        soBHYT: '',
+        xoa: 0
       },
       errors: {
         hotenBN: '',
@@ -197,7 +198,8 @@ export default {
         emailBN: '',
         matkhauBN: '',
         confirmMatkhauBN: '',
-        soBHYT: ''
+        soBHYT: '',
+        xoa: 0
       }
     };
   },
@@ -381,7 +383,8 @@ export default {
             tendangnhapBN: this.user.tendangnhapBN,
             emailBN: this.user.emailBN,
             matkhauBN: await this.hashPassword(this.user.matkhauBN),
-            soBHYT: this.user.soBHYT
+            soBHYT: check.soBHYT || this.user.soBHYT,
+            xoa: 0
           };
           await patientService.update(check.maBN, temp);
           alert(`Tài khoản được tạo thành công!`);
@@ -425,7 +428,8 @@ export default {
         emailBN: '',
         matkhauBN: '',
         confirmMatkhauBN: '',
-        soBHYT: ''
+        soBHYT: '',
+        xoa: 0
       };
     },
 

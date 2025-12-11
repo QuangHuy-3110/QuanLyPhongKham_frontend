@@ -294,6 +294,7 @@ export default {
         }
         // Kiểm tra mật khẩu mới không trùng mật khẩu hiện tại
         let doctor = { ...this.doctor };
+        doctor.ngaysinhBS = this.parseDateForBackend(doctor.ngaysinhBS);
         const isNewMatch = await bcrypt.compare(this.newPassword, this.doctor.matkhau);
         if (isNewMatch) {
           this.errorMessage = 'Mật khẩu mới không được trùng với mật khẩu hiện tại!';
