@@ -1,29 +1,30 @@
-#  frontend
+# Quản Lý Phòng Khám - Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Dự án frontend cho hệ thống Quản Lý Phòng Khám.
 
-## Recommended IDE Setup
+## Cài đặt và Chạy
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+1. Cài đặt các thư viện phụ thuộc:
+    ```bash
+    npm install
+    # hoặc
+    yarn install
+    ```
 
-## Customize configuration
+2. Chạy ứng dụng trên môi trường phát triển:
+    ```bash
+    npm run dev
+    # hoặc
+    yarn dev
+    ```
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+3. Build cho môi trường production:
+    ```bash
+    npm run build
+    # hoặc
+    yarn build
+    ```
 
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
+## Công nghệ sử dụng
+- React / Next / Vite (tùy thuộc vào cấu hình)
+- ...
